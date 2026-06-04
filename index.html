@@ -130,7 +130,8 @@
 <body>
 
 <div class="header-box">
-    <input type="text" id="myInput" onkeyup="doSearchDebounced()" placeholder="🔍 نام کالا را جستجو کنید... ">
+    <!-- جستجوی آنی بدون تاخیر -->
+    <input type="text" id="myInput" onkeyup="doSearch()" placeholder="🔍 نام کالا را جستجو کنید... ">
 </div>
 
 <div class="content">
@@ -4638,7 +4639,6 @@
 530,000	یدک لاک نواری سی کلاس
 165,000	یدک ماژیک شارژی یونی وان
 195,000	یدک مغزی مدادفشنگی
-
 </textarea>
 
 <script>
@@ -4720,12 +4720,7 @@
         }
     }
 
-    var searchTimeout;
-    function doSearchDebounced() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(doSearch, 150);
-    }
-
+    // تابع جستجوی مستقیم
     function doSearch() {
         var val = normalize(document.getElementById("myInput").value).trim();
         if (!val) { showItems(allItems); return; }
