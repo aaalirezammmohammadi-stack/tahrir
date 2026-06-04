@@ -10,14 +10,13 @@
     <meta http-equiv="Expires" content="0">
 
     <style>
-        /* اضافه شدن فونت مدرن وزیرمتن برای ظاهری حرفه‌ای‌تر */
+        /* فونت مدرن وزیرمتن */
         @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 
         :root { 
             --primary-color: #0056b3; 
             --success-color: #28a745; 
             --danger-color: #dc3545;
-            --excel-color: #27ae60;
             --bg-color: #f8f9fa; 
             --text-color: #333;
             --box-bg: white;
@@ -36,7 +35,6 @@
             }
         }
 
-        /* اعمال فونت وزیرمتن روی تمام بخش‌ها */
         body, input, button, textarea { font-family: 'Vazirmatn', Tahoma, sans-serif !important; }
         
         body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.3s; }
@@ -68,19 +66,6 @@
         }
         
         #status { text-align: center; padding: 15px; font-size: 0.85rem; color: #888; }
-
-        /* دکمه‌های شناور ارتباط با پشتیبانی */
-        .contact-banner-container {
-            position: fixed; bottom: 15px; left: 85px; right: 15px; z-index: 90;
-            display: flex; gap: 10px; pointer-events: none;
-        }
-
-        .contact-banner {
-            flex: 1; display: inline-flex; align-items: center; justify-content: center;
-            color: white !important; padding: 12px 5px; border-radius: 12px;
-            font-weight: bold; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            font-size: 0.85rem; pointer-events: auto; white-space: nowrap;
-        }
 
         /* دکمه شناور سبد خرید */
         .cart-fab {
@@ -126,10 +111,7 @@
         .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
         .btn-modal { padding: 14px; border-radius: 12px; border: none; font-weight: bold; color: white; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; text-decoration: none;}
         .btn-primary { background: var(--primary-color); }
-        .btn-excel { background: var(--excel-color); }
         .btn-cancel { background: transparent; color: #888; border: 1px solid var(--border-color); }
-        .btn-telegram { background-color: #2AABEE; }
-        .btn-eitaa { background-color: #E67E22; }
 
         .cart-list-container { overflow-y: auto; max-height: 40vh; margin-bottom: 15px; padding-right: 5px; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; text-align: right; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
@@ -143,8 +125,6 @@
         .cart-qty-mini button { background: var(--box-bg); border: none; color: var(--text-color); width: 28px; height: 28px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
         .cart-qty-mini button:active { background: var(--border-color); }
         .cart-qty-mini span { font-size: 0.95rem; font-weight: bold; min-width: 25px; text-align: center; color: var(--text-color); }
-
-        .btn-icon { width: 18px; height: 18px; fill: white; margin-left: 8px; }
     </style>
 </head>
 <body>
@@ -158,17 +138,6 @@
         <tbody id="tableBody"></tbody>
     </table>
     <div id="status">در حال بارگذاری...</div>
-</div>
-
-<div class="contact-banner-container">
-    <a href="https://t.me/tahrir_ir_f" target="_blank" class="contact-banner btn-telegram">
-        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        تلگرام
-    </a>
-    <a href="https://eitaa.com/Tahrir_ir_f" target="_blank" class="contact-banner btn-eitaa">
-        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        ایتا
-    </a>
 </div>
 
 <div class="cart-fab" id="cartFab" onclick="openCartModal()">
@@ -205,25 +174,23 @@
         <div id="cartSumTotal" class="modal-total" style="font-size: 1.1rem; color: var(--primary-color);">جمع کل: 0 تومان</div>
         
         <div class="modal-actions">
-            <button onclick="exportToCSV()" class="btn-modal btn-excel">📥 دانلود فایل اکسل (مخصوص حسابداری)</button>
-            <button onclick="sendFinalOrder('telegram')" class="btn-modal btn-telegram">ارسال سفارش به تلگرام 🚀</button>
-            <button onclick="sendFinalOrder('eitaa')" class="btn-modal btn-eitaa">ارسال سفارش به ایتا 🚀</button>
+            <button onclick="copyOrder()" class="btn-modal btn-primary">📋 کپی کردن فاکتور سفارش</button>
             <button onclick="clearCart()" class="btn-modal btn-cancel" style="color: var(--danger-color); border-color: var(--danger-color);">🗑 حذف تمام سفارشات</button>
             <button onclick="closeModal('cartModal')" class="btn-modal btn-cancel">بستن سبد / ادامه خرید</button>
         </div>
     </div>
 </div>
 
-<div id="eitaaModal" class="modal-overlay" onclick="closeModalOnBG(event, 'eitaaModal')">
+<div id="successModal" class="modal-overlay" onclick="closeModalOnBG(event, 'successModal')">
     <div class="modal-content" style="max-width: 320px;">
-        <div class="modal-title" style="color: var(--success-color); font-size: 1.2rem; margin-bottom: 15px;">فاکتور شما کپی شد ✅</div>
+        <div class="modal-title" style="color: var(--success-color); font-size: 1.2rem; margin-bottom: 15px;">فاکتور کپی شد ✅</div>
         <p style="font-size: 0.95rem; line-height: 1.8; margin-bottom: 25px; color: var(--text-color);">
-            چون ایتا اجازه تایپ خودکار را نمی‌دهد، فاکتور در گوشی شما کپی شد.<br><br>
-            لطفاً پس از ورود به صفحه چت، در کادر پیام دست خود را نگه دارید و <b>Paste (جایگذاری)</b> را بزنید.
+            سفارش شما با موفقیت کپی شد.<br><br>
+            لطفاً برای ثبت نهایی، آن را برای واحد فروش در پیام‌رسان <b>ایتا</b> یا <b>تلگرام</b> به آیدی زیر ارسال کنید:<br><br>
+            <strong style="font-size: 1.2rem; color: var(--primary-color);">tahrir_ir_f@</strong>
         </p>
         <div class="modal-actions">
-            <a href="https://eitaa.com/Tahrir_ir_f" target="_blank" onclick="closeModal('eitaaModal')" class="btn-modal btn-eitaa">باز کردن چت ایتا</a>
-            <button onclick="closeModal('eitaaModal')" class="btn-modal btn-cancel">بستن</button>
+            <button onclick="closeModal('successModal')" class="btn-modal btn-primary">متوجه شدم</button>
         </div>
     </div>
 </div>
@@ -4660,6 +4627,10 @@
 530,000	یدک لاک نواری سی کلاس
 165,000	یدک ماژیک شارژی یونی وان
 195,000	یدک مغزی مدادفشنگی
+
+!!! توجه: بقیه محصولاتت رو دقیقاً در همین قسمت پیست کن !!!
+
+195,000	یدک مغزی مدادفشنگی
 </textarea>
 
 <script>
@@ -4681,10 +4652,10 @@
     window.onload = function() {
         var text = document.getElementById("myData").value;
         var lines = text.split("\n");
-        var originalIndex = 0; // اضافه شدن آیدی برای امنیت کلیک‌ها
+        var originalIndex = 0;
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i].trim();
-            if (!line) continue;
+            if (!line || line.startsWith("!!!")) continue; // نادیده گرفتن خطوط خالی یا توضیحات
             var parts = line.split("\t");
             if (parts.length >= 2) {
                 var p = parseInt(parts[0].replace(/,/g, '').replace(/"/g, '').trim()); 
@@ -4721,12 +4692,10 @@
         }
     });
 
-    /* ---------------- تابع نمایش و امنیت کلیک (XSS Fix) ---------------- */
     function showItems(items) {
         var html = "";
         var limit = Math.min(items.length, 150); 
         for (var i = 0; i < limit; i++) {
-            // به جای پاس دادن رشته متن، فقط آیدی پاس داده می‌شود تا HTML نشکند
             html += "<tr onclick='openOrderModalByIndex(" + items[i].id + ")'>" +
                     "<td>" + items[i].n + "</td>" +
                     "<td class='price-cell'>" + formatToToman(items[i].p) + "</td>" +
@@ -4743,7 +4712,6 @@
         }
     }
 
-    /* ---------------- تابع جستجو با تاخیر (Debounce) ---------------- */
     var searchTimeout;
     function doSearchDebounced() {
         clearTimeout(searchTimeout);
@@ -4767,7 +4735,6 @@
         return toman.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " تومان";
     }
 
-    /* ---------------- توابع مدال و محاسبه ---------------- */
     function openOrderModal(name, price) {
         currentItemName = name;
         currentItemPrice = parseInt(price);
@@ -4794,7 +4761,6 @@
         document.getElementById("modalTotal").innerText = "جمع کل: " + formatToToman(total);
     }
 
-    /* ---------------- توابع مدیریت سبد خرید و حافظه ---------------- */
     function saveCart() {
         localStorage.setItem('userCart', JSON.stringify(cart));
     }
@@ -4828,7 +4794,6 @@
         if(cart.length === 0) closeModal('cartModal');
     }
 
-    /* ---------------- تابع جدید ویرایش تعداد داخل سبد خرید ---------------- */
     function updateCartQty(index, change) {
         cart[index].qty += change;
         if (cart[index].qty <= 0) {
@@ -4857,7 +4822,6 @@
         document.getElementById("cartModal").style.display = "flex";
     }
 
-    /* ---------------- رندر سبد خرید با دکمه‌های کنترل تعداد ---------------- */
     function renderCartList() {
         var listContainer = document.getElementById("cartItemsList");
         var sumTotalEl = document.getElementById("cartSumTotal");
@@ -4886,40 +4850,22 @@
         sumTotalEl.innerText = "جمع کل پیش‌فاکتور: " + formatToToman(finalSum);
     }
 
-    /* ---------------- توابع خروجی اکسل و ارسال نهایی ---------------- */
-    function exportToCSV() {
-        if(cart.length === 0) return;
-        var csvContent = "\uFEFF"; 
-        /* جداکننده از کاما به نقطه ویرگول (;) تغییر کرد تا در اکسل فارسی دچار مشکل نشود */
-        csvContent += "ردیف;نام کالا;تعداد;قیمت واحد (تومان);جمع کل (تومان)\n";
-        for (var i = 0; i < cart.length; i++) {
-            var item = cart[i];
-            var total = item.price * item.qty;
-            var safeName = '"' + item.name.replace(/"/g, '""') + '"';
-            csvContent += (i + 1) + ";" + safeName + ";" + item.qty + ";" + item.price + ";" + total + "\n";
-        }
-        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        var url = URL.createObjectURL(blob);
-        var link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "Sefaresh-Omdeh.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
+    // تابع کپی کردن پیشرفته برای جلوگیری از اسکرول شدن صفحه
     function copyToClipboard(text) {
         var tempInput = document.createElement("textarea");
         tempInput.value = text;
+        tempInput.style.position = "fixed";  // جلوگیری از پرش صفحه به پایین
+        tempInput.style.opacity = "0";
         document.body.appendChild(tempInput);
         tempInput.select();
         document.execCommand("copy");
         document.body.removeChild(tempInput);
     }
 
-    function sendFinalOrder(platform) {
+    // تابع نهایی و جدید برای کپی فاکتور
+    function copyOrder() {
         if(cart.length === 0) return;
-        var message = "📋 سلام، پیش‌فاکتور سفارش جدید:\n\n";
+        var message = "📋 سلام، درخواست سفارش جدید:\n\n";
         var finalSum = 0;
         for (var i = 0; i < cart.length; i++) {
             var item = cart[i];
@@ -4927,17 +4873,13 @@
             message += "🔸 " + (i+1) + ". " + item.name + "\n   تعداد: " + item.qty + " عدد | فی: " + formatToToman(item.price) + "\n";
         }
         message += "\n💰 جمع کل سفارش: " + formatToToman(finalSum);
-        var encodedMessage = encodeURIComponent(message);
         
-        if (platform === 'telegram') {
-            var url = "https://t.me/tahrir_ir_f?text=" + encodedMessage;
-            window.open(url, '_blank');
-            closeModal('cartModal');
-        } else if (platform === 'eitaa') {
-            copyToClipboard(message);
-            closeModal('cartModal'); 
-            document.getElementById("eitaaModal").style.display = "flex"; 
-        }
+        // فراخوانی تابع کپی
+        copyToClipboard(message);
+        
+        // بستن سبد خرید و نمایش پیام موفقیت
+        closeModal('cartModal'); 
+        document.getElementById("successModal").style.display = "flex"; 
     }
 </script>
 </body>
