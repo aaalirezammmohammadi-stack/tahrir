@@ -152,7 +152,7 @@
         
         <div class="qty-control">
             <button class="qty-btn" onclick="changeQty(1)">+</button>
-            <input type="number" inputmode="numeric" id="modalQty" class="qty-input" value="1" min="1" onchange="calcTotal()" onkeyup="calcTotal()">
+            <input type="number" inputmode="numeric" id="modalQty" class="qty-input" value="1" min="1" onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="calcTotal()">
             <button class="qty-btn" onclick="changeQty(-1)">-</button>
         </div>
         
@@ -175,8 +175,19 @@
         
         <div class="modal-actions">
             <button onclick="copyOrder()" class="btn-modal btn-primary">📋 کپی کردن فاکتور سفارش</button>
-            <button onclick="clearCart()" class="btn-modal btn-cancel" style="color: var(--danger-color); border-color: var(--danger-color);">🗑 حذف تمام سفارشات</button>
+            <button onclick="openConfirmClearModal()" class="btn-modal btn-cancel" style="color: var(--danger-color); border-color: var(--danger-color);">🗑 حذف تمام سفارشات</button>
             <button onclick="closeModal('cartModal')" class="btn-modal btn-cancel">بستن سبد / ادامه خرید</button>
+        </div>
+    </div>
+</div>
+
+<!-- مودال جدید اختصاصی برای تایید حذف سبد خرید بدون نمایش لینک مرورگر -->
+<div id="confirmClearModal" class="modal-overlay" onclick="closeModalOnBG(event, 'confirmClearModal')">
+    <div class="modal-content" style="max-width: 320px;">
+        <div class="modal-title" style="margin-bottom: 20px;">آیا از حذف تمام کالاهای سبد خرید مطمئن هستید؟</div>
+        <div class="modal-actions">
+            <button onclick="confirmClearCart()" class="btn-modal btn-primary" style="background: var(--danger-color);">بله، حذف کن</button>
+            <button onclick="closeModal('confirmClearModal')" class="btn-modal btn-cancel">انصراف</button>
         </div>
     </div>
 </div>
@@ -4628,9 +4639,6 @@
 165,000	یدک ماژیک شارژی یونی وان
 195,000	یدک مغزی مدادفشنگی
 
-!!! توجه: بقیه محصولاتت رو دقیقاً در همین قسمت پیست کن !!!
-
-195,000	یدک مغزی مدادفشنگی
 </textarea>
 
 <script>
@@ -4655,7 +4663,7 @@
         var originalIndex = 0;
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i].trim();
-            if (!line || line.startsWith("!!!")) continue; // نادیده گرفتن خطوط خالی یا توضیحات
+            if (!line || line.startsWith("!!!")) continue; 
             var parts = line.split("\t");
             if (parts.length >= 2) {
                 var p = parseInt(parts[0].replace(/,/g, '').replace(/"/g, '').trim()); 
@@ -4748,6 +4756,20 @@
     function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
     function closeModalOnBG(event, modalId) { if(event.target.id === modalId) { closeModal(modalId); } }
 
+    /* توابع جدید مربوط به پاک شدن عدد ۱ هنگام کلیک روی اینپوت تعداد */
+    function clearInputOnFocus(input) {
+        if (input.value == "1") {
+            input.value = "";
+        }
+    }
+
+    function restoreInputOnBlur(input) {
+        if (input.value.trim() === "" || parseInt(input.value) <= 0) {
+            input.value = "1";
+            calcTotal();
+        }
+    }
+
     function changeQty(amount) {
         var input = document.getElementById("modalQty");
         var current = parseInt(input.value) || 0;
@@ -4756,7 +4778,8 @@
     }
 
     function calcTotal() {
-        var qty = parseInt(document.getElementById("modalQty").value) || 1;
+        var qtyInput = document.getElementById("modalQty").value;
+        var qty = parseInt(qtyInput) || 0; // اگر خالی بود موقتاً 0 در نظر گرفته میشه تا جمع کل درست نشون داده بشه
         var total = currentItemPrice * qty;
         document.getElementById("modalTotal").innerText = "جمع کل: " + formatToToman(total);
     }
@@ -4765,18 +4788,23 @@
         localStorage.setItem('userCart', JSON.stringify(cart));
     }
 
-    function clearCart() {
-        var confirmClear = confirm("آیا از حذف تمام کالاهای سبد خرید مطمئن هستید؟");
-        if(confirmClear) {
-            cart = [];
-            saveCart();
-            updateCartUI();
-            closeModal('cartModal');
-        }
+    /* باز کردن مودال تایید حذف سفارشی */
+    function openConfirmClearModal() {
+        document.getElementById("confirmClearModal").style.display = "flex";
+    }
+
+    /* اجرای عملیات نهایی حذف پس از تایید کاربر در مودال اختصاصی */
+    function confirmClearCart() {
+        cart = [];
+        saveCart();
+        updateCartUI();
+        closeModal('confirmClearModal');
+        closeModal('cartModal');
     }
 
     function addToCart() {
-        var qty = parseInt(document.getElementById("modalQty").value) || 1;
+        var qtyInput = document.getElementById("modalQty").value;
+        var qty = parseInt(qtyInput) || 1; // اگر کاربر خالی رها کرده بود، تعداد 1 اضافه میشه
         var existingItemIndex = cart.findIndex(function(item) { return item.name === currentItemName; });
         if(existingItemIndex !== -1) { cart[existingItemIndex].qty += qty; } 
         else { cart.push({ name: currentItemName, price: currentItemPrice, qty: qty }); }
@@ -4850,11 +4878,10 @@
         sumTotalEl.innerText = "جمع کل پیش‌فاکتور: " + formatToToman(finalSum);
     }
 
-    // تابع کپی کردن پیشرفته برای جلوگیری از اسکرول شدن صفحه
     function copyToClipboard(text) {
         var tempInput = document.createElement("textarea");
         tempInput.value = text;
-        tempInput.style.position = "fixed";  // جلوگیری از پرش صفحه به پایین
+        tempInput.style.position = "fixed";  
         tempInput.style.opacity = "0";
         document.body.appendChild(tempInput);
         tempInput.select();
@@ -4862,7 +4889,6 @@
         document.body.removeChild(tempInput);
     }
 
-    // تابع نهایی و جدید برای کپی فاکتور
     function copyOrder() {
         if(cart.length === 0) return;
         var message = "📋 سلام، درخواست سفارش جدید:\n\n";
@@ -4874,10 +4900,8 @@
         }
         message += "\n💰 جمع کل سفارش: " + formatToToman(finalSum);
         
-        // فراخوانی تابع کپی
         copyToClipboard(message);
         
-        // بستن سبد خرید و نمایش پیام موفقیت
         closeModal('cartModal'); 
         document.getElementById("successModal").style.display = "flex"; 
     }
