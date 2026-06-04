@@ -150,7 +150,7 @@
 <body>
 
 <div class="header-box">
-    <input type="text" id="myInput" onkeyup="doSearchDebounced()" placeholder="🔍 نام کالا را جستجو کنید... ">
+    <input type="text" id="myInput" onkeyup="doSearchDebounced()" placeholder="🔍 نام کالا را جستجو کنید... (برای سفارش کلیک کنید)">
 </div>
 
 <div class="content">
@@ -161,14 +161,14 @@
 </div>
 
 <div class="contact-banner-container">
-    <a href="https://t.me/tahrir_ir_f" target="_blank" class="contact-banner btn-telegram">
+    <div onclick="goToApp('https://t.me/tahrir_ir_f')" class="contact-banner btn-telegram" style="cursor: pointer;">
         <svg class="btn-icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         تلگرام
-    </a>
-    <a href="https://eitaa.com/Tahrir_ir_f" target="_blank" class="contact-banner btn-eitaa">
+    </div>
+    <div onclick="goToApp('https://eitaa.com/Tahrir_ir_f')" class="contact-banner btn-eitaa" style="cursor: pointer;">
         <svg class="btn-icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         ایتا
-    </a>
+    </div>
 </div>
 
 <div class="cart-fab" id="cartFab" onclick="openCartModal()">
@@ -222,7 +222,7 @@
             لطفاً پس از ورود به صفحه چت، در کادر پیام دست خود را نگه دارید و <b>Paste (جایگذاری)</b> را بزنید.
         </p>
         <div class="modal-actions">
-            <a href="https://eitaa.com/Tahrir_ir_f" target="_blank" onclick="closeModal('eitaaModal')" class="btn-modal btn-eitaa">باز کردن چت ایتا</a>
+            <button onclick="closeModal('eitaaModal'); goToApp('https://eitaa.com/Tahrir_ir_f')" class="btn-modal btn-eitaa">باز کردن چت ایتا</button>
             <button onclick="closeModal('eitaaModal')" class="btn-modal btn-cancel">بستن</button>
         </div>
     </div>
@@ -4681,7 +4681,7 @@
     window.onload = function() {
         var text = document.getElementById("myData").value;
         var lines = text.split("\n");
-        var originalIndex = 0; // اضافه شدن آیدی برای امنیت کلیک‌ها
+        var originalIndex = 0;
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i].trim();
             if (!line) continue;
@@ -4721,12 +4721,10 @@
         }
     });
 
-    /* ---------------- تابع نمایش و امنیت کلیک (XSS Fix) ---------------- */
     function showItems(items) {
         var html = "";
         var limit = Math.min(items.length, 150); 
         for (var i = 0; i < limit; i++) {
-            // به جای پاس دادن رشته متن، فقط آیدی پاس داده می‌شود تا HTML نشکند
             html += "<tr onclick='openOrderModalByIndex(" + items[i].id + ")'>" +
                     "<td>" + items[i].n + "</td>" +
                     "<td class='price-cell'>" + formatToToman(items[i].p) + "</td>" +
@@ -4743,7 +4741,6 @@
         }
     }
 
-    /* ---------------- تابع جستجو با تاخیر (Debounce) ---------------- */
     var searchTimeout;
     function doSearchDebounced() {
         clearTimeout(searchTimeout);
@@ -4767,7 +4764,6 @@
         return toman.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " تومان";
     }
 
-    /* ---------------- توابع مدال و محاسبه ---------------- */
     function openOrderModal(name, price) {
         currentItemName = name;
         currentItemPrice = parseInt(price);
@@ -4794,7 +4790,6 @@
         document.getElementById("modalTotal").innerText = "جمع کل: " + formatToToman(total);
     }
 
-    /* ---------------- توابع مدیریت سبد خرید و حافظه ---------------- */
     function saveCart() {
         localStorage.setItem('userCart', JSON.stringify(cart));
     }
@@ -4828,7 +4823,6 @@
         if(cart.length === 0) closeModal('cartModal');
     }
 
-    /* ---------------- تابع جدید ویرایش تعداد داخل سبد خرید ---------------- */
     function updateCartQty(index, change) {
         cart[index].qty += change;
         if (cart[index].qty <= 0) {
@@ -4857,7 +4851,6 @@
         document.getElementById("cartModal").style.display = "flex";
     }
 
-    /* ---------------- رندر سبد خرید با دکمه‌های کنترل تعداد ---------------- */
     function renderCartList() {
         var listContainer = document.getElementById("cartItemsList");
         var sumTotalEl = document.getElementById("cartSumTotal");
@@ -4886,11 +4879,9 @@
         sumTotalEl.innerText = "جمع کل پیش‌فاکتور: " + formatToToman(finalSum);
     }
 
-    /* ---------------- توابع خروجی اکسل و ارسال نهایی ---------------- */
     function exportToCSV() {
         if(cart.length === 0) return;
         var csvContent = "\uFEFF"; 
-        /* جداکننده از کاما به نقطه ویرگول (;) تغییر کرد تا در اکسل فارسی دچار مشکل نشود */
         csvContent += "ردیف;نام کالا;تعداد;قیمت واحد (تومان);جمع کل (تومان)\n";
         for (var i = 0; i < cart.length; i++) {
             var item = cart[i];
@@ -4917,6 +4908,11 @@
         document.body.removeChild(tempInput);
     }
 
+    /* ---------------- تابع جدید برای هدایت امن در تمام مرورگرها ---------------- */
+    function goToApp(url) {
+        window.location.href = url;
+    }
+
     function sendFinalOrder(platform) {
         if(cart.length === 0) return;
         var message = "📋 سلام، پیش‌فاکتور سفارش جدید:\n\n";
@@ -4931,7 +4927,8 @@
         
         if (platform === 'telegram') {
             var url = "https://t.me/tahrir_ir_f?text=" + encodedMessage;
-            window.open(url, '_blank');
+            // استفاده از goToApp برای جلوگیری از مسدود شدن حتی در تلگرام
+            goToApp(url); 
             closeModal('cartModal');
         } else if (platform === 'eitaa') {
             copyToClipboard(message);
