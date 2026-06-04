@@ -3,29 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>لیست قیمت</title>
+    <title>لیست قیمت و سفارش عمده</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <style>
+        /* اضافه شدن فونت مدرن وزیرمتن برای ظاهری حرفه‌ای‌تر */
+        @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
         :root { 
             --primary-color: #0056b3; 
             --success-color: #28a745; 
+            --danger-color: #dc3545;
+            --excel-color: #27ae60;
             --bg-color: #f8f9fa; 
             --text-color: #333;
             --box-bg: white;
             --border-color: #eee;
         }
 
-        /* بخش جادویی تشخیص خودکار تم گوشی */
+        /* تم تاریک خودکار */
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #121212; /* مشکی تیره برای پس‌زمینه */
-                --text-color: #e0e0e0; /* متن خاکستری روشن */
-                --box-bg: #1e1e1e; /* خاکستری تیره برای باکس‌ها */
-                --border-color: #333; /* حاشیه تیره */
-                --success-color: #4cd137; /* سبز روشن‌تر برای قیمت در حالت تاریک */
+                --bg-color: #121212;
+                --text-color: #e0e0e0;
+                --box-bg: #1e1e1e;
+                --border-color: #333;
+                --success-color: #4cd137;
+                --danger-color: #ff4757;
             }
         }
 
-        body { font-family: Tahoma, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.3s; }
+        /* اعمال فونت وزیرمتن روی تمام بخش‌ها */
+        body, input, button, textarea { font-family: 'Vazirmatn', Tahoma, sans-serif !important; }
+        
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.3s; }
         
         .header-box { position: sticky; top: 0; background: var(--box-bg); padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 100; }
         
@@ -33,31 +47,110 @@
             width: 100%; padding: 14px; font-size: 16px; 
             border: 2px solid var(--border-color); border-radius: 12px; 
             box-sizing: border-box; text-align: center; outline: none;
-            background-color: var(--box-bg); color: var(--text-color);
+            background-color: var(--bg-color); color: var(--text-color);
         }
         input:focus { border-color: var(--primary-color); }
         
-        .content { padding: 10px; }
+        .content { padding: 10px; padding-bottom: 90px; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--box-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
         td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; line-height: 1.4; color: var(--text-color); }
         tr:last-child td { border-bottom: none; }
         
+        tr { cursor: pointer; transition: background-color 0.1s; }
+        tr:active { background-color: var(--border-color) !important; }
+
         .price-cell { color: var(--success-color); font-weight: bold; white-space: nowrap; text-align: left; width: 120px; direction: rtl; }
         
-        /* استایل ردیف‌های یکی در میان */
         tr:nth-child(even) { background-color: rgba(0,0,0,0.02); }
         @media (prefers-color-scheme: dark) {
             tr:nth-child(even) { background-color: rgba(255,255,255,0.03); }
         }
         
         #status { text-align: center; padding: 15px; font-size: 0.85rem; color: #888; }
+
+        /* دکمه‌های شناور ارتباط با پشتیبانی */
+        .contact-banner-container {
+            position: fixed; bottom: 15px; left: 85px; right: 15px; z-index: 90;
+            display: flex; gap: 10px; pointer-events: none;
+        }
+
+        .contact-banner {
+            flex: 1; display: inline-flex; align-items: center; justify-content: center;
+            color: white !important; padding: 12px 5px; border-radius: 12px;
+            font-weight: bold; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-size: 0.85rem; pointer-events: auto; white-space: nowrap;
+        }
+
+        /* دکمه شناور سبد خرید */
+        .cart-fab {
+            position: fixed; bottom: 15px; left: 15px; z-index: 150;
+            background-color: var(--primary-color); color: white;
+            width: 60px; height: 60px; border-radius: 18px;
+            display: none; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
+            font-size: 1.6rem; transition: transform 0.2s;
+        }
+        .cart-fab:active { transform: scale(0.9); }
+        .cart-badge {
+            position: absolute; top: -6px; right: -6px;
+            background-color: var(--danger-color); color: white;
+            font-size: 0.85rem; font-weight: bold; border-radius: 50%;
+            width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--bg-color); box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* استایل پنجره‌های پاپ‌آپ */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 200;
+            align-items: center; justify-content: center; backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background: var(--box-bg); padding: 25px 20px; border-radius: 20px;
+            width: 90%; max-width: 380px; text-align: center; max-height: 85vh; display: flex; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: popIn 0.3s ease;
+        }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; color: var(--text-color); line-height: 1.5; }
+        .modal-price { color: var(--success-color); font-size: 0.95rem; margin-bottom: 20px; }
+        
+        .qty-control { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .qty-btn { background: var(--bg-color); border: 2px solid var(--border-color); width: 40px; height: 40px; border-radius: 12px; font-size: 1.5rem; color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        .qty-btn:active { background: var(--border-color); }
+        .qty-input { width: 70px; text-align: center; font-size: 1.2rem; padding: 8px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--bg-color); color: var(--text-color); font-weight: bold;}
+        
+        .modal-total { font-size: 1.05rem; font-weight: bold; margin-bottom: 20px; padding-top: 15px; border-top: 1px dashed var(--border-color); }
+        
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+        .btn-modal { padding: 14px; border-radius: 12px; border: none; font-weight: bold; color: white; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; text-decoration: none;}
+        .btn-primary { background: var(--primary-color); }
+        .btn-excel { background: var(--excel-color); }
+        .btn-cancel { background: transparent; color: #888; border: 1px solid var(--border-color); }
+        .btn-telegram { background-color: #2AABEE; }
+        .btn-eitaa { background-color: #E67E22; }
+
+        .cart-list-container { overflow-y: auto; max-height: 40vh; margin-bottom: 15px; padding-right: 5px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; text-align: right; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+        .cart-item-details { flex: 1; margin-left: 10px; }
+        .cart-item-name { font-weight: bold; font-size: 0.95rem; color: var(--text-color); margin-bottom: 5px;}
+        .cart-item-calc { font-size: 0.9rem; font-weight: bold; color: var(--success-color); }
+        .cart-remove-btn { background: var(--danger-color); color: white; border: none; border-radius: 8px; width: 32px; height: 32px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center;}
+        
+        /* استایل دکمه‌های جدید تنظیم تعداد در سبد خرید */
+        .cart-qty-mini { display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .cart-qty-mini button { background: var(--box-bg); border: none; color: var(--text-color); width: 28px; height: 28px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
+        .cart-qty-mini button:active { background: var(--border-color); }
+        .cart-qty-mini span { font-size: 0.95rem; font-weight: bold; min-width: 25px; text-align: center; color: var(--text-color); }
+
+        .btn-icon { width: 18px; height: 18px; fill: white; margin-left: 8px; }
     </style>
 </head>
 <body>
 
 <div class="header-box">
-    <input type="text" id="myInput" onkeyup="doSearch()" placeholder="🔍 نام کالا را جستجو کنید...">
+    <input type="text" id="myInput" onkeyup="doSearchDebounced()" placeholder="🔍 نام کالا را جستجو کنید... ">
 </div>
 
 <div class="content">
@@ -65,6 +158,74 @@
         <tbody id="tableBody"></tbody>
     </table>
     <div id="status">در حال بارگذاری...</div>
+</div>
+
+<div class="contact-banner-container">
+    <a href="https://t.me/tahrir_ir_f" target="_blank" class="contact-banner btn-telegram">
+        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        تلگرام
+    </a>
+    <a href="https://eitaa.com/Tahrir_ir_f" target="_blank" class="contact-banner btn-eitaa">
+        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        ایتا
+    </a>
+</div>
+
+<div class="cart-fab" id="cartFab" onclick="openCartModal()">
+    🛒
+    <span class="cart-badge" id="cartBadge">0</span>
+</div>
+
+<div id="orderModal" class="modal-overlay" onclick="closeModalOnBG(event, 'orderModal')">
+    <div class="modal-content" style="max-width: 320px;">
+        <div id="modalItemName" class="modal-title">نام کالا</div>
+        <div id="modalItemPrice" class="modal-price">قیمت واحد: 0 تومان</div>
+        
+        <div class="qty-control">
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+            <input type="number" inputmode="numeric" id="modalQty" class="qty-input" value="1" min="1" onchange="calcTotal()" onkeyup="calcTotal()">
+            <button class="qty-btn" onclick="changeQty(-1)">-</button>
+        </div>
+        
+        <div id="modalTotal" class="modal-total">جمع کل: 0 تومان</div>
+        
+        <div class="modal-actions">
+            <button onclick="addToCart()" class="btn-modal btn-primary">🛒 افزودن به سبد سفارش</button>
+            <button onclick="closeModal('orderModal')" class="btn-modal btn-cancel">انصراف</button>
+        </div>
+    </div>
+</div>
+
+<div id="cartModal" class="modal-overlay" onclick="closeModalOnBG(event, 'cartModal')">
+    <div class="modal-content">
+        <div class="modal-title" style="border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">🛒 پیش‌فاکتور شما</div>
+        
+        <div id="cartItemsList" class="cart-list-container"></div>
+        
+        <div id="cartSumTotal" class="modal-total" style="font-size: 1.1rem; color: var(--primary-color);">جمع کل: 0 تومان</div>
+        
+        <div class="modal-actions">
+            <button onclick="exportToCSV()" class="btn-modal btn-excel">📥 دانلود فایل اکسل (مخصوص حسابداری)</button>
+            <button onclick="sendFinalOrder('telegram')" class="btn-modal btn-telegram">ارسال سفارش به تلگرام 🚀</button>
+            <button onclick="sendFinalOrder('eitaa')" class="btn-modal btn-eitaa">ارسال سفارش به ایتا 🚀</button>
+            <button onclick="clearCart()" class="btn-modal btn-cancel" style="color: var(--danger-color); border-color: var(--danger-color);">🗑 حذف تمام سفارشات</button>
+            <button onclick="closeModal('cartModal')" class="btn-modal btn-cancel">بستن سبد / ادامه خرید</button>
+        </div>
+    </div>
+</div>
+
+<div id="eitaaModal" class="modal-overlay" onclick="closeModalOnBG(event, 'eitaaModal')">
+    <div class="modal-content" style="max-width: 320px;">
+        <div class="modal-title" style="color: var(--success-color); font-size: 1.2rem; margin-bottom: 15px;">فاکتور شما کپی شد ✅</div>
+        <p style="font-size: 0.95rem; line-height: 1.8; margin-bottom: 25px; color: var(--text-color);">
+            چون ایتا اجازه تایپ خودکار را نمی‌دهد، فاکتور در گوشی شما کپی شد.<br><br>
+            لطفاً پس از ورود به صفحه چت، در کادر پیام دست خود را نگه دارید و <b>Paste (جایگذاری)</b> را بزنید.
+        </p>
+        <div class="modal-actions">
+            <a href="https://eitaa.com/Tahrir_ir_f" target="_blank" onclick="closeModal('eitaaModal')" class="btn-modal btn-eitaa">باز کردن چت ایتا</a>
+            <button onclick="closeModal('eitaaModal')" class="btn-modal btn-cancel">بستن</button>
+        </div>
+    </div>
 </div>
 
 <textarea id="myData" style="display:none;">
@@ -3467,7 +3628,7 @@
 1,429,000	قیچی سیکلاس لارج
 919,000	قیچی سیکلاس مدیوم
 500,000	قیچی صریرمهدکودک پلاستیکی
-638,000	قیچی کد960
+650,000	قیچی کد960
 380,000	قیچی کد501ـ539ـ519
 467,500	قیچی کد6021
 638,000	قیچی کد2012
@@ -3478,6 +3639,7 @@
 425,000	قیچی کد518
 425,000	قیچی کد558
 755,000	قیچی کد559
+455,000	قیچی کد 515
 998,000	قیچی کرونااداری3485
 686,400	قیچی کروناروکشدار5380
 1,332,000	قیچی کوچک کورس 35130
@@ -4290,11 +4452,13 @@
 3,245,000	مدادمشکی ام کیو80طرح استندی
 1,960,000	مدادمشکی ام کیو H13تاH18
 1,960,000	مدادمشکی ام کیو3گوش زغالی پاکن دار
+980,000	مدادمشکی ام کیو6تایی
 7,586,000	مدادمشکی ام کیوپاکندار48تایی
 2,300,000	مدادمشکی ام کیوپاکندارکرومی12تای
 1,896,000	مدادمشکی ام کیوپاکن دار
 1,960,000	مدادمشکی ام کیوزغالی12عددی
 7,980,000	مدادمشکی ام کیوزغالی پاکن دار48تای
+1,960,000	مدادمشکی ام کیوH22ماه وستاره
 1,345,000	مدادمشکی بینهایت پاکندار6تایی
 12,800,000	مدادمشکی پاکندارتیزوپلاس 72تایی
 2,521,000	مدادمشکی پالموطرحدار
@@ -4496,11 +4660,13 @@
 530,000	یدک لاک نواری سی کلاس
 165,000	یدک ماژیک شارژی یونی وان
 195,000	یدک مغزی مدادفشنگی
-
 </textarea>
 
 <script>
     var allItems = [];
+    var cart = JSON.parse(localStorage.getItem('userCart')) || []; 
+    var currentItemName = "";
+    var currentItemPrice = 0;
     
     function normalize(t) { 
         var str = t.replace(/آ|أ|إ/g, "ا").replace(/ي/g, "ی").replace(/ك/g, "ک").replace(/‌/g, " ").toLowerCase(); 
@@ -4515,27 +4681,73 @@
     window.onload = function() {
         var text = document.getElementById("myData").value;
         var lines = text.split("\n");
+        var originalIndex = 0; // اضافه شدن آیدی برای امنیت کلیک‌ها
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i].trim();
             if (!line) continue;
             var parts = line.split("\t");
             if (parts.length >= 2) {
-                var p = parts[0].replace(/,/g, '').replace(/"/g, '').trim(); 
+                var p = parseInt(parts[0].replace(/,/g, '').replace(/"/g, '').trim()); 
                 var n = parts[1].replace(/"/g, '').trim();
-                allItems.push({ p: p, n: n, sn: normalize(n) });
+                allItems.push({ id: originalIndex++, p: p, n: n, sn: normalize(n) });
             }
         }
+        
+        var cartUpdated = false;
+        for (var c = 0; c < cart.length; c++) {
+            var liveItem = allItems.find(function(item) { return item.n === cart[c].name; });
+            if (liveItem) {
+                if (cart[c].price !== liveItem.p) {
+                    cart[c].price = liveItem.p;
+                    cartUpdated = true;
+                }
+            } else {
+                cart.splice(c, 1);
+                c--;
+                cartUpdated = true;
+            }
+        }
+        if (cartUpdated) saveCart();
+
         showItems(allItems);
+        updateCartUI(); 
     };
 
+    window.addEventListener('beforeunload', function (e) {
+        if (cart.length > 0) {
+            var confirmationMessage = 'شما کالاهایی در سبد خرید دارید که هنوز ارسال نشده‌اند. مطمئنید که می‌خواهید خارج شوید؟';
+            e.returnValue = confirmationMessage;
+            return confirmationMessage;
+        }
+    });
+
+    /* ---------------- تابع نمایش و امنیت کلیک (XSS Fix) ---------------- */
     function showItems(items) {
         var html = "";
         var limit = Math.min(items.length, 150); 
         for (var i = 0; i < limit; i++) {
-            html += "<tr><td>" + items[i].n + "</td><td class='price-cell'>" + formatToToman(items[i].p) + "</td></tr>";
+            // به جای پاس دادن رشته متن، فقط آیدی پاس داده می‌شود تا HTML نشکند
+            html += "<tr onclick='openOrderModalByIndex(" + items[i].id + ")'>" +
+                    "<td>" + items[i].n + "</td>" +
+                    "<td class='price-cell'>" + formatToToman(items[i].p) + "</td>" +
+                    "</tr>";
         }
         document.getElementById("tableBody").innerHTML = html;
-        document.getElementById("status").innerText = "نمایش " + limit + " مورد از " + items.length + " کالا";
+        document.getElementById("status").innerText = "نمایش " + limit + " مورد از " + items.length + " کالا (برای سفارش کلیک کنید)";
+    }
+
+    function openOrderModalByIndex(id) {
+        var item = allItems.find(function(x) { return x.id === id; });
+        if(item) {
+            openOrderModal(item.n, item.p);
+        }
+    }
+
+    /* ---------------- تابع جستجو با تاخیر (Debounce) ---------------- */
+    var searchTimeout;
+    function doSearchDebounced() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(doSearch, 150);
     }
 
     function doSearch() {
@@ -4553,6 +4765,179 @@
         if(isNaN(num)) return n;
         var toman = Math.floor(num / 10); 
         return toman.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " تومان";
+    }
+
+    /* ---------------- توابع مدال و محاسبه ---------------- */
+    function openOrderModal(name, price) {
+        currentItemName = name;
+        currentItemPrice = parseInt(price);
+        document.getElementById("modalItemName").innerText = name;
+        document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(price);
+        document.getElementById("modalQty").value = 1;
+        calcTotal();
+        document.getElementById("orderModal").style.display = "flex";
+    }
+
+    function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
+    function closeModalOnBG(event, modalId) { if(event.target.id === modalId) { closeModal(modalId); } }
+
+    function changeQty(amount) {
+        var input = document.getElementById("modalQty");
+        var current = parseInt(input.value) || 0;
+        var newVal = current + amount;
+        if (newVal >= 1) { input.value = newVal; calcTotal(); }
+    }
+
+    function calcTotal() {
+        var qty = parseInt(document.getElementById("modalQty").value) || 1;
+        var total = currentItemPrice * qty;
+        document.getElementById("modalTotal").innerText = "جمع کل: " + formatToToman(total);
+    }
+
+    /* ---------------- توابع مدیریت سبد خرید و حافظه ---------------- */
+    function saveCart() {
+        localStorage.setItem('userCart', JSON.stringify(cart));
+    }
+
+    function clearCart() {
+        var confirmClear = confirm("آیا از حذف تمام کالاهای سبد خرید مطمئن هستید؟");
+        if(confirmClear) {
+            cart = [];
+            saveCart();
+            updateCartUI();
+            closeModal('cartModal');
+        }
+    }
+
+    function addToCart() {
+        var qty = parseInt(document.getElementById("modalQty").value) || 1;
+        var existingItemIndex = cart.findIndex(function(item) { return item.name === currentItemName; });
+        if(existingItemIndex !== -1) { cart[existingItemIndex].qty += qty; } 
+        else { cart.push({ name: currentItemName, price: currentItemPrice, qty: qty }); }
+        
+        saveCart(); 
+        updateCartUI();
+        closeModal('orderModal');
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        saveCart(); 
+        updateCartUI();
+        renderCartList();
+        if(cart.length === 0) closeModal('cartModal');
+    }
+
+    /* ---------------- تابع جدید ویرایش تعداد داخل سبد خرید ---------------- */
+    function updateCartQty(index, change) {
+        cart[index].qty += change;
+        if (cart[index].qty <= 0) {
+            cart.splice(index, 1);
+        }
+        saveCart();
+        updateCartUI();
+        renderCartList();
+        if (cart.length === 0) closeModal('cartModal');
+    }
+
+    function updateCartUI() {
+        var fab = document.getElementById("cartFab");
+        var badge = document.getElementById("cartBadge");
+        if (cart.length > 0) {
+            fab.style.display = "flex";
+            badge.innerText = cart.length;
+        } else {
+            fab.style.display = "none";
+        }
+    }
+
+    function openCartModal() {
+        if(cart.length === 0) return;
+        renderCartList();
+        document.getElementById("cartModal").style.display = "flex";
+    }
+
+    /* ---------------- رندر سبد خرید با دکمه‌های کنترل تعداد ---------------- */
+    function renderCartList() {
+        var listContainer = document.getElementById("cartItemsList");
+        var sumTotalEl = document.getElementById("cartSumTotal");
+        listContainer.innerHTML = "";
+        var finalSum = 0;
+        for (var i = 0; i < cart.length; i++) {
+            var item = cart[i];
+            var rowTotal = item.price * item.qty;
+            finalSum += rowTotal;
+            listContainer.innerHTML += 
+                "<div class='cart-item'>" +
+                    "<div class='cart-item-details'>" +
+                        "<div class='cart-item-name'>" + item.name + "</div>" +
+                        "<div style='display:flex; align-items:center; gap:15px; margin-top:8px;'>" +
+                            "<div class='cart-qty-mini'>" +
+                                "<button onclick='updateCartQty(" + i + ", 1)'>+</button>" +
+                                "<span>" + item.qty + "</span>" +
+                                "<button onclick='updateCartQty(" + i + ", -1)'>-</button>" +
+                            "</div>" +
+                            "<div class='cart-item-calc'>" + formatToToman(rowTotal) + "</div>" +
+                        "</div>" +
+                    "</div>" +
+                    "<button class='cart-remove-btn' style='margin-right:10px;' onclick='removeFromCart(" + i + ")'>✖</button>" +
+                "</div>";
+        }
+        sumTotalEl.innerText = "جمع کل پیش‌فاکتور: " + formatToToman(finalSum);
+    }
+
+    /* ---------------- توابع خروجی اکسل و ارسال نهایی ---------------- */
+    function exportToCSV() {
+        if(cart.length === 0) return;
+        var csvContent = "\uFEFF"; 
+        /* جداکننده از کاما به نقطه ویرگول (;) تغییر کرد تا در اکسل فارسی دچار مشکل نشود */
+        csvContent += "ردیف;نام کالا;تعداد;قیمت واحد (تومان);جمع کل (تومان)\n";
+        for (var i = 0; i < cart.length; i++) {
+            var item = cart[i];
+            var total = item.price * item.qty;
+            var safeName = '"' + item.name.replace(/"/g, '""') + '"';
+            csvContent += (i + 1) + ";" + safeName + ";" + item.qty + ";" + item.price + ";" + total + "\n";
+        }
+        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Sefaresh-Omdeh.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function copyToClipboard(text) {
+        var tempInput = document.createElement("textarea");
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+    }
+
+    function sendFinalOrder(platform) {
+        if(cart.length === 0) return;
+        var message = "📋 سلام، پیش‌فاکتور سفارش جدید:\n\n";
+        var finalSum = 0;
+        for (var i = 0; i < cart.length; i++) {
+            var item = cart[i];
+            finalSum += (item.price * item.qty);
+            message += "🔸 " + (i+1) + ". " + item.name + "\n   تعداد: " + item.qty + " عدد | فی: " + formatToToman(item.price) + "\n";
+        }
+        message += "\n💰 جمع کل سفارش: " + formatToToman(finalSum);
+        var encodedMessage = encodeURIComponent(message);
+        
+        if (platform === 'telegram') {
+            var url = "https://t.me/tahrir_ir_f?text=" + encodedMessage;
+            window.open(url, '_blank');
+            closeModal('cartModal');
+        } else if (platform === 'eitaa') {
+            copyToClipboard(message);
+            closeModal('cartModal'); 
+            document.getElementById("eitaaModal").style.display = "flex"; 
+        }
     }
 </script>
 </body>
