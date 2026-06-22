@@ -8,6 +8,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
         /* فونت مدرن وزیرمتن */
@@ -176,6 +178,7 @@
         <div class="modal-actions">
             <button onclick="sendOrderTelegram()" class="btn-modal" style="background: #2AABEE; color: white;"> ارسال سفارش در تلگرام</button>
             <button onclick="sendOrderBale()" class="btn-modal" style="background: #12C19E; color: white;"> ارسال سفارش در بله</button>
+            <button onclick="sendOrderEitaa()" class="btn-modal" style="background: #E85D04; color: white;"> ارسال سفارش در ایتا</button>
             <button onclick="openConfirmClearModal()" class="btn-modal btn-cancel" style="color: var(--danger-color); border-color: var(--danger-color);">🗑 حذف تمام سفارشات</button>
             <button onclick="closeModal('cartModal')" class="btn-modal btn-cancel">بستن سبد / ادامه خرید</button>
         </div>
@@ -188,6 +191,19 @@
         <div class="modal-actions">
             <button onclick="confirmClearCart()" class="btn-modal btn-primary" style="background: var(--danger-color);">بله، حذف کن</button>
             <button onclick="closeModal('confirmClearModal')" class="btn-modal btn-cancel">انصراف</button>
+        </div>
+    </div>
+</div>
+
+<div id="eitaaModal" class="modal-overlay" onclick="closeModalOnBG(event, 'eitaaModal')">
+    <div class="modal-content" style="max-width: 320px;">
+        <div class="modal-title" style="color: var(--success-color); margin-bottom: 15px;">✅ متن فاکتور کپی شد!</div>
+        <div style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 22px; text-align: center; color: var(--text-color);">
+            سفارش شما در حافظه کپی شد.<br><br>
+            لطفاً پس از ورود به صفحه چت واحد فروش، متن کپی‌شده را جای‌گذاری (Paste) و ارسال نمایید.
+        </div>
+        <div class="modal-actions">
+            <button onclick="redirectToEitaa()" class="btn-modal btn-primary">متوجه شدم و باز کردن چت</button>
         </div>
     </div>
 </div>
@@ -2240,6 +2256,7 @@
 4,390,000	دفترحسابداری کل خشتی160
 5,990,000	دفترحسابداری مسکن اجاره100رحلی
 11,990,000	دفترحسابداری معین200رحلی
+4,390,000	دفترحسابداری معین160برگ
 5,990,000	دفترحسابداری نگهبانی100رحلی
 11,990,000	دفترحسابداری نگهبانی200رحلی
 4,600,000	دفترحسابداری نوبت دهی160برگ
@@ -2876,6 +2893,13 @@
 209,000	ساک دستی سون کفه پهن بلندسایز17
 368,000	ساک دستی سون کفه پهن سایز9
 164,000	ساک دستی سهندطلقی10*28*20
+285,000	ساک دستی شاپرک سایز12(1*8*)12
+305,000	ساک دستی شاپرک سایز16(2*9*)16
+460,000	ساک دستی شاپرک سایز10(3*13/5*20
+555,000	ساک دستی شاپرک سایز23(4*9*)23
+695,000	ساک دستی شاپرک سایز9(6*24*)38
+955,000	ساک دستی شاپرک سایز12(7*30*)40
+295,000	ساک دستی شاپرک سایز6(9*11*)14/5
 65,000	ساک دستی کاغذدیواری سایز1
 100,000	ساک دستی کاغذدیواری سایز3
 80,000	ساک دستی کاغذ دیواری سایز 2
@@ -3159,6 +3183,7 @@
 8,250,000	طلق ضخیم سوپرباندA4
 160,000	طلق ضخیم سهندشفاف A4
 75,000	طلق ضخیم وزیری شفاف
+300,000	طلق ضخیمA3
 75,000	طلق ضخیمa5
 1,919,000	ظرف غذاآریامستطیل بزرگ
 1,737,200	ظرف غذااریامربع
@@ -3798,6 +3823,7 @@
 7,500,000	کاغذکپی سفید80گرمA4نقدی
 3,900,000	کاغذکپی سفید80گرمA5نقدی
 12,000,000	کاغذکپی مکس رنگی 5رنگ
+1,250,000	کاغذکپیA3کلیپس 80گرم
 2,580,000	کاغذکشی10رنگ
 13,750,000	کاغذگلاسه200گرم125برگ A3
 6,875,000	کاغذگلاسه200گرم125برگ A4
@@ -4714,6 +4740,7 @@
 1,650,000	ورق طلا
 1,650,000	ورق مس
 25,000	هزینه چاپ
+245,000	هزینه حمل
 1,364,000	هفت تیرترقه ای اسمیت سوپرآرمان
 285,000	یادداشت 1/8طلقی میعاد
 650,000	یادداشت الیساته رنگ 10*10
@@ -4977,7 +5004,26 @@
         sumTotalEl.innerText = "جمع کل پیش‌فاکتور: " + formatToToman(finalSum);
     }
 
-    /* === توابع جدید برای ارسال مستقیم سفارش === */
+    /* === توابع عبور از محدودیت و ارسال سفارش === */
+
+    function openSafeLink(url) {
+        // روش اول: استفاده از API وب‌اپ با دستور صریح برای خروج از مینی‌اپ
+        if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp && typeof window.Telegram.WebApp.openLink === 'function') {
+            
+            // اضافه شدن { try_browser: true } مینی‌اپ را مجبور می‌کند لینک را در مرورگر اصلی گوشی باز کند
+            window.Telegram.WebApp.openLink(url, { try_browser: true });
+            
+        } else {
+            // روش دوم: شبیه‌سازی کلیک با تنظیمات امنیتی برای خروج از صفحه فعلی
+            var a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank'; // دستور باز شدن در پنجره جدید
+            a.rel = 'noopener noreferrer'; // قطع ارتباط با مرورگر داخلی برای فورس کردن مرورگر خارجی
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function() { document.body.removeChild(a); }, 100);
+        }
+    }
 
     function getOrderMessageText() {
         if(cart.length === 0) return "";
@@ -4996,15 +5042,66 @@
         var text = getOrderMessageText();
         if(!text) return;
         var url = "https://t.me/tahrir_ir_f?text=" + encodeURIComponent(text);
-        window.open(url, '_blank');
+        openSafeLink(url); // جایگزین شدن تابع ایمن
     }
 
     function sendOrderBale() {
         var text = getOrderMessageText();
         if(!text) return;
         var url = "https://ble.ir/tahrir_ir_f?text=" + encodeURIComponent(text);
-        window.open(url, '_blank');
+        openSafeLink(url); // جایگزین شدن تابع ایمن
     }
+
+    function sendOrderEitaa() {
+        var text = getOrderMessageText();
+        if(!text) return;
+        
+        var copyToClipboard = function(str) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(str);
+            } else {
+                return new Promise(function(resolve, reject) {
+                    var textArea = document.createElement("textarea");
+                    textArea.value = str;
+                    textArea.style.position = "fixed";
+                    textArea.style.opacity = "0";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        var successful = document.execCommand('copy');
+                        if (successful) resolve();
+                        else reject();
+                    } catch (err) {
+                        reject();
+                    }
+                    document.body.removeChild(textArea);
+                });
+            }
+        };
+
+        copyToClipboard(text).then(function() {
+            // نمایش پاپ‌آپ داخلی فقط جهت اطلاع‌رسانی
+            document.getElementById("eitaaModal").style.display = "flex";
+        }).catch(function() {
+            // در صورت قدیمی بودن مرورگر یا عدم دسترسی
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            document.getElementById("eitaaModal").style.display = "flex";
+        });
+    }
+
+    // باز کردن چت ایتا پس از تایید کاربر در پاپ‌آپ
+    function redirectToEitaa() {
+        closeModal('eitaaModal');
+        closeModal('cartModal'); // بستن سبد خرید برای تجربه کاربری بهتر
+        openSafeLink("https://eitaa.com/tahrir_ir_f");
+    }
+
 </script>
 </body>
 </html>
