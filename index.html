@@ -9,8 +9,16 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+    <script>
+        var ua = navigator.userAgent.toLowerCase();
+        var hash = window.location.hash.toLowerCase();
+        // تشخیص اینکه کاربر داخل مینی‌اپ ایتا است یا تلگرام/بله
+        if (ua.indexOf('eitaa') > -1 || hash.indexOf('eitaa') > -1) {
+            document.write('<script src="https://developer.eitaa.com/eitaa-web-app.js"><\/script>');
+        } else {
+            document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
+        }
+    </script>
 
     <style>
         /* فونت مدرن وزیرمتن */
@@ -204,7 +212,7 @@
             لطفاً پس از ورود به صفحه چت واحد فروش، متن کپی‌شده را جای‌گذاری (Paste) و ارسال نمایید.
         </div>
         <div class="modal-actions">
-            <button onclick="redirectToEitaa()" class="btn-modal btn-primary">متوجه شدم و باز کردن چت</button>
+            <button onclick="redirectToEitaa()" class="btn-modal btn-primary">متوجه شدم </button>
         </div>
     </div>
 </div>
@@ -5005,28 +5013,38 @@
         sumTotalEl.innerText = "جمع کل پیش‌فاکتور: " + formatToToman(finalSum);
     }
 
-    /* === توابع عبور از محدودیت و ارسال سفارش در تمام پلتفرم‌ها === */
+    /* === سیستم جامع مدیریت لینک برای ایتا، تلگرام و بله === */
 
-    // پیدا کردن شیء اصلی مینی‌اپ در صورت وجود
+    // دریافت شیء فعال وب‌اپ (جلوگیری از خطای تداخل)
     function getWebApp() {
-        if (window.Eitaa && window.Eitaa.WebApp) return window.Eitaa.WebApp;
-        if (window.Telegram && window.Telegram.WebApp) return window.Telegram.WebApp;
+        if (typeof window.Eitaa !== 'undefined' && window.Eitaa.WebApp) return window.Eitaa.WebApp;
+        if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) return window.Telegram.WebApp;
         return null;
     }
 
-    // باز کردن لینک‌های خارجی (مثل تلگرام و بله)
-    function openSafeLink(url) {
+    // هدایت ایمن و هوشمندانه
+    function openSafeLink(url, platform) {
         var app = getWebApp();
         
-        if (app && typeof app.openLink === 'function') {
+        if (app) {
             try {
-                // این متد طبق مستندات برنامک بسته نخواهد شد و لینک را باز میکند
-                app.openLink(url, { try_browser: true });
-                return;
-            } catch(e) {}
+                // اگر می‌خواهیم در ایتا یک چت باز کنیم و متد آن در دسترس است
+                if (platform === 'eitaa' && typeof app.openEitaaLink === 'function') {
+                    app.openEitaaLink(url);
+                    return;
+                }
+                
+                // در غیر این صورت از متد استاندارد تلگرام/بله برای خروج از وب‌ویو استفاده می‌کنیم
+                if (typeof app.openLink === 'function') {
+                    app.openLink(url, { try_browser: true });
+                    return;
+                }
+            } catch(e) {
+                console.log("WebApp API Error:", e);
+            }
         }
         
-        // در صورتی که در نسخه وب یا ویندوز باشیم (بک‌آپ)
+        // آخرین راهکار امن برای ویندوز / نسخه مرورگر وب
         var a = document.createElement('a');
         a.href = url;
         a.target = '_blank';
@@ -5049,20 +5067,23 @@
         return message;
     }
 
+    // ارسال تلگرام
     function sendOrderTelegram() {
         var text = getOrderMessageText();
         if(!text) return;
         var url = "https://t.me/tahrir_ir_f?text=" + encodeURIComponent(text);
-        openSafeLink(url);
+        openSafeLink(url, 'telegram');
     }
 
+    // ارسال بله
     function sendOrderBale() {
         var text = getOrderMessageText();
         if(!text) return;
         var url = "https://ble.ir/tahrir_ir_f?text=" + encodeURIComponent(text);
-        openSafeLink(url); 
+        openSafeLink(url, 'bale');
     }
 
+    // کپی سفارش برای ایتا
     function sendOrderEitaa() {
         var text = getOrderMessageText();
         if(!text) return;
@@ -5104,40 +5125,13 @@
         });
     }
 
-    // هدایت قطعی به چت ایتا (مبتنی بر مستندات رسمی توسعه برنامک)
+    // هدایت به ایتا بعد از کلیک روی پاپ‌آپ
     function redirectToEitaa() {
         closeModal('eitaaModal');
         closeModal('cartModal'); // بستن سبد خرید
         
         var targetUrl = "https://eitaa.com/tahrir_ir_f";
-        var app = getWebApp();
-        
-        if (app) {
-            // طبق مستندات ایتا: این تابع برای باز کردن لینک داخلی ایتا استفاده می‌شود
-            // و پس از اجرا شدن مینی‌اپ را به صورت خودکار می‌بندد
-            if (typeof app.openEitaaLink === 'function') {
-                try {
-                    app.openEitaaLink(targetUrl);
-                    return; 
-                } catch(e) {}
-            }
-            // بک‌آپ برای زمانی که از اسکریپت تلگرام لود شده باشیم
-            if (typeof app.openTelegramLink === 'function') {
-                try {
-                    app.openTelegramLink(targetUrl);
-                    return; 
-                } catch(e) {}
-            }
-        } 
-        
-        // بک‌آپ نهایی (برای دسکتاپ و محیط‌هایی که مینی‌اپ نیستند)
-        var a = document.createElement('a');
-        a.href = targetUrl;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() { document.body.removeChild(a); }, 100);
+        openSafeLink(targetUrl, 'eitaa');
     }
 
 </script>
