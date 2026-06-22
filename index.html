@@ -203,7 +203,7 @@
             لطفاً پس از ورود به صفحه چت واحد فروش، متن کپی‌شده را جای‌گذاری (Paste) و ارسال نمایید.
         </div>
         <div class="modal-actions">
-            <button onclick="redirectToEitaa()" class="btn-modal btn-primary">متوجه شدم و باز کردن چت</button>
+            <a href="https://eitaa.com/tahrir_ir_f" target="_blank" rel="noopener noreferrer" class="btn-modal btn-primary" style="text-decoration: none;" onclick="closeEitaaPopup()">متوجه شدم و باز کردن چت</a>
         </div>
     </div>
 </div>
@@ -5007,18 +5007,13 @@
     /* === توابع عبور از محدودیت و ارسال سفارش === */
 
     function openSafeLink(url) {
-        // روش اول: استفاده از API وب‌اپ با دستور صریح برای خروج از مینی‌اپ
         if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp && typeof window.Telegram.WebApp.openLink === 'function') {
-            
-            // اضافه شدن { try_browser: true } مینی‌اپ را مجبور می‌کند لینک را در مرورگر اصلی گوشی باز کند
             window.Telegram.WebApp.openLink(url, { try_browser: true });
-            
         } else {
-            // روش دوم: شبیه‌سازی کلیک با تنظیمات امنیتی برای خروج از صفحه فعلی
             var a = document.createElement('a');
             a.href = url;
-            a.target = '_blank'; // دستور باز شدن در پنجره جدید
-            a.rel = 'noopener noreferrer'; // قطع ارتباط با مرورگر داخلی برای فورس کردن مرورگر خارجی
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
             document.body.appendChild(a);
             a.click();
             setTimeout(function() { document.body.removeChild(a); }, 100);
@@ -5042,14 +5037,14 @@
         var text = getOrderMessageText();
         if(!text) return;
         var url = "https://t.me/tahrir_ir_f?text=" + encodeURIComponent(text);
-        openSafeLink(url); // جایگزین شدن تابع ایمن
+        openSafeLink(url);
     }
 
     function sendOrderBale() {
         var text = getOrderMessageText();
         if(!text) return;
         var url = "https://ble.ir/tahrir_ir_f?text=" + encodeURIComponent(text);
-        openSafeLink(url); // جایگزین شدن تابع ایمن
+        openSafeLink(url); 
     }
 
     function sendOrderEitaa() {
@@ -5081,10 +5076,8 @@
         };
 
         copyToClipboard(text).then(function() {
-            // نمایش پاپ‌آپ داخلی فقط جهت اطلاع‌رسانی
             document.getElementById("eitaaModal").style.display = "flex";
         }).catch(function() {
-            // در صورت قدیمی بودن مرورگر یا عدم دسترسی
             var textArea = document.createElement("textarea");
             textArea.value = text;
             document.body.appendChild(textArea);
@@ -5095,11 +5088,10 @@
         });
     }
 
-    // باز کردن چت ایتا پس از تایید کاربر در پاپ‌آپ
-    function redirectToEitaa() {
+    // این تابع فقط برای بستن پاپ‌آپ‌ها هنگام کلیک روی لینک ایتا استفاده می‌شود
+    function closeEitaaPopup() {
         closeModal('eitaaModal');
-        closeModal('cartModal'); // بستن سبد خرید برای تجربه کاربری بهتر
-        openSafeLink("https://eitaa.com/tahrir_ir_f");
+        closeModal('cartModal');
     }
 
 </script>
