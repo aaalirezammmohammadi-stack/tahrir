@@ -49,39 +49,29 @@
         
         body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.3s; }
         
-        .header-box { position: sticky; top: 0; background: var(--box-bg); padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 100; }
-        
-        /* استایل‌های جذاب نوار تبلیغات بالای صفحه */
-        .channels-banner {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            justify-content: space-between;
+        /* کانتینر جدید برای چسبیدن همزمان تبلیغات و نوار جستجو به بالای صفحه */
+        .sticky-container {
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column;
         }
-        .channel-link {
-            flex: 1;
-            padding: 10px 5px;
-            border-radius: 10px;
-            color: white !important;
-            font-size: 0.85rem;
-            font-weight: bold;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .channel-link:active { 
-            transform: scale(0.93); 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-        }
-        /* رنگ‌های مشابه دکمه‌های سبد خرید با افکت ملایم */
-        .bg-telegram { background: linear-gradient(135deg, #2AABEE, #1c8abd); }
-        .bg-eitaa { background: linear-gradient(135deg, #E85D04, #c95103); }
-        .bg-bale { background: linear-gradient(135deg, #12C19E, #0e967a); }
 
+        /* استایل نوار تبلیغاتی مدرن */
+        .promo-banner {
+            width: 100%; padding: 10px; box-sizing: border-box; text-align: center;
+            color: white; font-size: 0.85rem; font-weight: bold; cursor: pointer;
+            transition: background-color 0.5s ease;
+            display: flex; justify-content: center; align-items: center; min-height: 40px;
+        }
+        
+        .promo-text {
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; text-overflow: ellipsis; line-height: 1.4;
+            transition: opacity 0.4s ease;
+        }
+
+        .header-box { background: var(--box-bg); padding: 15px; border-bottom: 1px solid var(--border-color); }
+        
         input { 
             width: 100%; padding: 14px; font-size: 16px; 
             border: 2px solid var(--border-color); border-radius: 12px; 
@@ -170,20 +160,13 @@
 </head>
 <body>
 
-<div class="header-box">
-    <div class="channels-banner">
-        <div class="channel-link bg-telegram" onclick="openSafeLink('https://t.me/tahrir_ir', 'telegram')">
-           کانال تلگرام  
-        </div>
-        <div class="channel-link bg-eitaa" onclick="openSafeLink('https://eitaa.com/tahrir_ir', 'eitaa')">
-           کانال ایتا
-        </div>
-        <div class="channel-link bg-bale" onclick="openSafeLink('https://ble.ir/tahrir_ir', 'bale')">
-           کانال بله
-        </div>
+<div class="sticky-container">
+    <div id="promoBanner" class="promo-banner" onclick="handlePromoClick()">
+        <span id="promoText" class="promo-text">در حال بارگذاری...</span>
     </div>
-
-    <input type="text" id="myInput" onkeyup="doSearch()" placeholder="🔍 نام کالا را جستجو کنید... ">
+    <div class="header-box">
+        <input type="text" id="myInput" onkeyup="doSearch()" placeholder="🔍 نام کالا را جستجو کنید... ">
+    </div>
 </div>
 
 <div class="content">
@@ -1153,6 +1136,7 @@
 5,000,000	تخته وایت مادر40*20
 49,200,000	تخته وایت مغناطیسی الفا150*90
 26,040,000	تخته وایت مغناطیسی الفا70*100
+27,840,000	تخته وایت مغناطیسی الفا80*100
 7,560,000	تخته وایت مغناطیسی بتا40*30
 10,560,000	تخته وایت مغناطیسی بتا60*40
 12,720,000	تخته وایت مغناطیسی بتا70*50
@@ -1308,6 +1292,7 @@
 750,000	تقویم رومیزی1405ارال
 650,000	تقویم رومیزی1405گلاسه اعلا
 780,000	تقویم رومیزی1405نفیس پیچک
+750,000	تقویم رومیزی1405
 700,000	تقویم رومیزی ام دی اف 1405
 1,480,000	تقویم رومیزی ایهان یادداشت دار
 1,580,000	تقویم رومیزی چوبی باکاغذعرش 405
@@ -1765,6 +1750,7 @@
 830,000	چسب مایع فوم وپازل استورم60میل
 980,000	چسب مایع کاسپین همه کاره100میل
 1,280,000	چسب مدرسه استورم100میل
+550,000	چسب نواری72یارد
 540,000	چسب نواری استورم36
 847,000	چسب نواری اکلیلی اتودی555
 590,000	چسب نواری پارسیکاربزرگ 72
@@ -1970,7 +1956,6 @@
 278,000	خودکارکنکوفینوآبی
 340,000	خودکارکنکوفینورنگی
 1,250,000	خودکارکیان6رنگ
-189,000	خودکارکیان1.6خوشنویسی آبی
 155,000	خودکارکیان صفا
 8,500,000	خودکارلاکچری پنتر 101جعبه دار
 28,000,000	خودکارلاکچری پنتر103جفتی جعبه دار
@@ -2555,6 +2540,7 @@
 450,000	دفترمن ونقاشی نقاشی دسته دار
 1,150,000	دفترمهرتحریرمجلد50برگ
 1,250,000	دفترمهرتحریرمجلد60برگ
+1,900,000	دفترمیکرو100برگ سلفونی
 1,500,000	دفترمیکرو64برگ F26ـ20*14
 605,000	دفترمیکروته چسب 50برگ
 1,540,000	دفترمیکروته چسب 80برگ
@@ -4308,7 +4294,7 @@
 3,850,000	ماژیک وایت بردبیفا
 4,000,000	ماژیک وایت بردبیک
 5,100,000	ماژیک وایت بردپرشیارنگی
-2,500,000	ماژیک وایت بردپلیکان آبی گرد
+2,900,000	ماژیک وایت بردپلیکان آبی گرد
 1,570,000	ماژیک وایت بردجکسین
 4,180,000	ماژیک وایت بردشارژی بنیتوآبی
 1,890,000	ماژیک وایت بردشارژی یونی وان گرد
@@ -4833,8 +4819,6 @@
 530,000	یدک لاک نواری سی کلاس
 165,000	یدک ماژیک شارژی یونی وان
 195,000	یدک مغزی مدادفشنگی
-
-
 </textarea>
 
 <script>
@@ -5179,6 +5163,51 @@
         var targetUrl = "https://eitaa.com/tahrir_ir_f";
         openSafeLink(targetUrl, 'eitaa');
     }
+
+    /* === سیستم نوار تبلیغات چرخشی === */
+    var promoAds = [
+        { text: "مشاهده جدید ترین محصولات همراه با جشنواره ها و تخفیف ها در کانال بله", link: "https://ble.ir/tahrir_ir/", color: "#12C19E", platform: "bale" },
+        { text: "مشاهده جدید ترین محصولات همراه با جشنواره ها و تخفیف ها در کانال ایتا", link: "https://eitaa.ir/tahrir_ir/", color: "#E85D04", platform: "eitaa" },
+        { text: "مشاهده جدید ترین محصولات همراه با جشنواره ها و تخفیف ها در کانال تلگرام", link: "https://t.me/tahrir_ir/", color: "#2AABEE", platform: "telegram" },
+        { text: "📞 تماس با ما", link: "tel:02536664666", color: "var(--primary-color)", platform: "other" },
+        { text: "📍 لوکیشن فروشگاه در نشان", link: "https://nshn.ir/39sbsRpKWxvcis", color: "#dc3545", platform: "other" },
+        { text: "📍 لوکیشن فروشگاه در گوگل مپ", link: "https://maps.app.goo.gl/kyKWkKLWq9X4r6nU6", color: "#28a745", platform: "other" },
+        { text: "ℹ️ در باره ی ما", link: "https://takl.ink/tahrir_ir", color: "#6c757d", platform: "other" }
+    ];
+
+    var currentAdIndex = 0;
+
+    function updatePromoBanner() {
+        var banner = document.getElementById("promoBanner");
+        var textSpan = document.getElementById("promoText");
+        var ad = promoAds[currentAdIndex];
+        
+        textSpan.style.opacity = "0";
+        
+        setTimeout(function() {
+            textSpan.innerText = ad.text;
+            banner.style.backgroundColor = ad.color;
+            textSpan.style.opacity = "1";
+        }, 400); 
+        
+        currentAdIndex = (currentAdIndex + 1) % promoAds.length;
+    }
+
+    function handlePromoClick() {
+        var displayedIndex = (currentAdIndex - 1 + promoAds.length) % promoAds.length;
+        var ad = promoAds[displayedIndex];
+        
+        if (ad.link.startsWith('tel:')) {
+            window.location.href = ad.link;
+        } else {
+            openSafeLink(ad.link, ad.platform);
+        }
+    }
+
+    // تغییر محتوا هر ۱۵ ثانیه
+    setInterval(updatePromoBanner, 15000);
+    // اجرای اولیه
+    setTimeout(updatePromoBanner, 100);
 
 </script>
 </body>
