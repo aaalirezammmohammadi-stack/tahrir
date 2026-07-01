@@ -7,10 +7,6 @@
     
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
     
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
     <script>
         var ua = navigator.userAgent.toLowerCase();
         var hash = window.location.hash.toLowerCase();
@@ -113,6 +109,9 @@
             scroll-behavior: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            /* انتقال پردازش اسکرول به کارت گرافیک (GPU) */
+            will-change: scroll-position;
+            transform: translateZ(0);
         }
         .marquee::-webkit-scrollbar { display: none; }
         
@@ -253,7 +252,7 @@
         <span id="promoText" class="promo-text">در حال بارگذاری...</span>
     </div>
     <div class="header-box">
-        <input type="text" id="myInput" onkeyup="doSearch()" placeholder="جستجوی نام کالا...">
+        <input type="text" id="myInput" onkeyup="debouncedSearch()" placeholder="جستجوی نام کالا...">
     </div>
     
     <div class="slider-container">
@@ -4921,6 +4920,7 @@
 165,000	یدک ماژیک شارژی یونی وان
 195,000	یدک مغزی مدادفشنگی
 
+
 </textarea>
 
 <script>
@@ -5046,7 +5046,6 @@
         input.value = word; 
         doSearch(); 
         
-        // --- این بخش اصلاح شد ---
         // اسکرول به بالاترین نقطه صفحه (پیکسل 0) تا هدر روی نتایج جستجو را نپوشاند
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -5107,6 +5106,13 @@
         if(item) {
             openOrderModal(item.n, item.p);
         }
+    }
+
+    // متغیر و تابع جدید برای پیاده‌سازی Debounce
+    var searchTimeout;
+    function debouncedSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(doSearch, 300);
     }
 
     function doSearch() {
