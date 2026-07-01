@@ -23,193 +23,227 @@
     </script>
 
     <style>
+        /* === متغیرهای رنگی مدرن === */
         :root { 
-            --primary-color: #0056b3; 
-            --success-color: #28a745; 
-            --danger-color: #dc3545;
-            --bg-color: #f8f9fa; 
-            --text-color: #333;
-            --box-bg: white;
-            --border-color: #eee;
+            --primary-color: #6366f1; 
+            --primary-hover: #4f46e5;
+            --success-color: #10b981; 
+            --danger-color: #ef4444;
+            --bg-color: #f8fafc; 
+            --text-color: #334155;
+            --text-muted: #64748b;
+            --box-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
+            --radius-md: 12px; 
+            --radius-lg: 18px;
+            --radius-full: 9999px;
         }
 
-        /* تم تاریک خودکار */
+        /* تم تاریک */
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #121212;
-                --text-color: #e0e0e0;
-                --box-bg: #1e1e1e;
-                --border-color: #333;
-                --success-color: #4cd137;
-                --danger-color: #ff4757;
+                --bg-color: #0f172a;
+                --text-color: #f8fafc;
+                --text-muted: #94a3b8;
+                --box-bg: #1e293b;
+                --border-color: #334155;
+                --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+                --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
             }
         }
 
+        /* استایل‌های پایه */
         body, input, button, textarea { font-family: 'Vazirmatn', Tahoma, sans-serif !important; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.4s ease; -webkit-tap-highlight-color: transparent; }
         
-        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.3s; }
-        
-        /* کانتینر جدید برای چسبیدن همزمان تبلیغات و نوار جستجو به بالای صفحه */
+        /* هدر شیشه‌ای معلق */
         .sticky-container {
             position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
             display: flex; flex-direction: column;
-            background: var(--box-bg);
+            padding-bottom: 8px;
+        }
+        @media (prefers-color-scheme: dark) {
+            .sticky-container {
+                background: rgba(30, 41, 59, 0.75);
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
         }
 
-        /* استایل نوار تبلیغاتی مدرن */
+        /* نوار تبلیغاتی مدرن */
         .promo-banner {
-            width: 100%; padding: 10px; box-sizing: border-box; text-align: center;
-            color: white; font-size: 0.85rem; font-weight: bold; cursor: pointer;
-            transition: background-color 0.5s ease;
-            display: flex; justify-content: center; align-items: center; min-height: 40px;
+            width: calc(100% - 24px); margin: 8px auto; padding: 10px; box-sizing: border-box; text-align: center;
+            color: white; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-sm);
+            display: flex; justify-content: center; align-items: center; min-height: 38px;
+            transition: background-color 0.5s ease, transform 0.2s ease;
         }
-        
-        .promo-text {
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden; text-overflow: ellipsis; line-height: 1.4;
-            transition: opacity 0.4s ease;
-        }
+        .promo-banner:active { transform: scale(0.97); }
+        .promo-text { transition: opacity 0.4s ease; letter-spacing: 0.1px; }
 
-        .header-box { background: var(--box-bg); padding: 10px 15px; border-bottom: 1px solid var(--border-color); }
-        
+        /* نوار جستجوی پیشرفته */
+        .header-box { padding: 4px 12px; background: transparent; border: none; }
         input { 
-            width: 100%; padding: 14px; font-size: 16px; 
-            border: 2px solid var(--border-color); border-radius: 12px; 
-            box-sizing: border-box; text-align: center; outline: none;
-            background-color: var(--bg-color); color: var(--text-color);
+            width: 100%; padding: 12px; padding-right: 42px; font-size: 14px; 
+            border: 2px solid transparent; border-radius: var(--radius-full); 
+            box-sizing: border-box; outline: none;
+            background-color: var(--box-bg); color: var(--text-color);
+            box-shadow: var(--shadow-sm); transition: all 0.3s ease;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center; background-size: 18px;
         }
-        input:focus { border-color: var(--primary-color); }
+        input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12); }
+        input::placeholder { color: var(--text-muted); font-weight: 500; }
         
-        /* استایل اسلایدرهای دسته‌بندی و برند */
-        .slider-container {
-            padding: 8px 0;
-            background: var(--box-bg);
-            border-bottom: 1px solid var(--border-color);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        /* === تنظیمات اسلایدر بی‌نهایت === */
+        .slider-container { background: transparent; border: none; padding: 4px 0; gap: 10px; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .marquee { 
+            display: flex; 
+            overflow-x: auto; 
+            user-select: none; 
+            padding: 4px 0;
+            width: 100%;
+            scroll-behavior: auto; /* برای جلوگیری از پرش ناگهانی هنگام لوپ شدن */
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
-        .marquee {
-            display: flex;
-            overflow: hidden;
-            user-select: none;
-            gap: 8px;
+        .marquee::-webkit-scrollbar { display: none; }
+        
+        .marquee-content { 
+            display: flex; 
+            flex-shrink: 0; 
+            gap: 10px; 
+            padding-right: 10px; /* این پدینگ دقیقاً برابر با gap است تا لوپ بی‌نقص شود */
         }
-        .marquee-content {
-            display: flex;
-            flex-shrink: 0;
-            gap: 8px;
-            padding-left: 8px; /* هم‌اندازه با gap */
-            animation: scroll-rtl 80s linear infinite;
-        }
-        .marquee-content.reverse {
-            animation-direction: reverse;
-            animation-duration: 85s; /* سرعت کمی متفاوت برای زیبایی بیشتر */
-        }
-        /* توقف انیمیشن هنگام لمس یا نگه داشتن موس برای کلیک راحت‌تر */
-        .marquee:hover .marquee-content, .marquee:active .marquee-content {
-            animation-play-state: paused;
-        }
-        @keyframes scroll-rtl {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(100%); }
-        }
+        
+        /* دکمه‌های تگ (Chips) */
         .chip {
-            padding: 5px 14px;
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: var(--text-color);
-            white-space: nowrap;
-            transition: all 0.2s ease;
+            padding: 6px 14px; background: var(--box-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-full); cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            color: var(--text-muted); white-space: nowrap; box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease; direction: rtl;
         }
         .chip:active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-            transform: scale(0.95);
+            background: var(--primary-color) !important; color: white !important; border-color: var(--primary-color) !important;
+            transform: scale(0.92); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
         }
-
-        .content { padding: 10px; padding-bottom: 90px; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--box-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        
-        td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; line-height: 1.4; color: var(--text-color); }
-        tr:last-child td { border-bottom: none; }
-        
-        tr { cursor: pointer; transition: background-color 0.1s; }
-        tr:active { background-color: var(--border-color) !important; }
-
-        .price-cell { color: var(--success-color); font-weight: bold; white-space: nowrap; text-align: left; width: 120px; direction: rtl; }
-        
-        tr:nth-child(even) { background-color: rgba(0,0,0,0.02); }
         @media (prefers-color-scheme: dark) {
-            tr:nth-child(even) { background-color: rgba(255,255,255,0.03); }
+            .chip:active { box-shadow: 0 2px 8px rgba(129, 140, 248, 0.4) !important; }
         }
+
+        /* ساختار فشرده‌تر لیست کالاها */
+        .content { padding: 12px; padding-bottom: 100px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; background: transparent; }
         
-        #status { text-align: center; padding: 15px; font-size: 0.85rem; color: #888; }
+        tr { 
+            background-color: var(--box-bg); border-radius: var(--radius-md); 
+            box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeIn 0.3s ease backwards;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        
+        tr:active { transform: scale(0.98); background-color: var(--border-color); }
+        
+        td { border: none; padding: 0; font-size: 0.9rem; color: var(--text-color); font-weight: 600; }
+        .price-cell { 
+            color: var(--primary-color); font-weight: 800; font-size: 0.95rem; 
+            background: rgba(99, 102, 241, 0.08); padding: 4px 10px; border-radius: 8px; white-space: nowrap; direction: rtl; 
+        }
+        @media (prefers-color-scheme: dark) { .price-cell { color: #818cf8; background: rgba(129, 140, 248, 0.12); } }
+        
+        #status { text-align: center; padding: 12px; font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
 
         /* دکمه شناور سبد خرید */
         .cart-fab {
-            position: fixed; bottom: 15px; left: 15px; z-index: 150;
-            background-color: var(--primary-color); color: white;
-            width: 60px; height: 60px; border-radius: 18px;
+            position: fixed; bottom: 16px; left: 16px; z-index: 150;
+            background: linear-gradient(135deg, var(--primary-color), #818cf8); color: white;
+            width: 54px; height: 54px; border-radius: 18px;
             display: none; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
-            font-size: 1.6rem; transition: transform 0.2s;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35); cursor: pointer;
+            font-size: 1.4rem; transition: all 0.2s ease;
         }
-        .cart-fab:active { transform: scale(0.9); }
+        .cart-fab:active { transform: scale(0.92); }
         .cart-badge {
             position: absolute; top: -6px; right: -6px;
             background-color: var(--danger-color); color: white;
-            font-size: 0.85rem; font-weight: bold; border-radius: 50%;
-            width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-            border: 2px solid var(--bg-color); box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 0.78rem; font-weight: 800; border-radius: 50%;
+            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+            border: 2.5px solid var(--bg-color); box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
 
-        /* استایل پنجره‌های پاپ‌آپ */
+        /* پنجره‌های پاپ‌آپ کوچک و بهینه‌شده */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 200;
-            align-items: center; justify-content: center; backdrop-filter: blur(3px);
+            background: rgba(0,0,0,0.5); z-index: 200;
+            align-items: center; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
         }
         .modal-content {
-            background: var(--box-bg); padding: 25px 20px; border-radius: 20px;
-            width: 90%; max-width: 380px; text-align: center; max-height: 85vh; display: flex; flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: popIn 0.3s ease;
+            background: var(--box-bg); padding: 22px 18px; border-radius: var(--radius-md);
+            width: 88%; max-width: 340px; text-align: center; max-height: 82vh; display: flex; flex-direction: column;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.05);
+            animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes popIn { from { transform: scale(0.9) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
         
-        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; color: var(--text-color); line-height: 1.5; }
-        .modal-price { color: var(--success-color); font-size: 0.95rem; margin-bottom: 20px; }
+        .modal-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 10px; color: var(--text-color); line-height: 1.4; }
+        .modal-price { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; background: var(--bg-color); padding: 8px; border-radius: 10px; display: inline-block; margin: 0 auto 18px auto; }
         
-        .qty-control { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        .qty-btn { background: var(--bg-color); border: 2px solid var(--border-color); width: 40px; height: 40px; border-radius: 12px; font-size: 1.5rem; color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center;}
-        .qty-btn:active { background: var(--border-color); }
-        .qty-input { width: 70px; text-align: center; font-size: 1.2rem; padding: 8px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--bg-color); color: var(--text-color); font-weight: bold;}
+        .qty-control { 
+            display: inline-flex; align-items: center; justify-content: center; gap: 12px; 
+            margin: 0 auto 18px auto; background: var(--bg-color); padding: 6px; border-radius: var(--radius-full);
+        }
+        .qty-btn { 
+            background: var(--box-bg); border: none; width: 36px; height: 36px; border-radius: 50%; 
+            font-size: 1.2rem; color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-sm); transition: all 0.2s; font-weight: 500;
+        }
+        .qty-btn:active { transform: scale(0.9); }
+        .qty-input { width: 50px; text-align: center; font-size: 1.2rem; padding: 2px; border: none; background: transparent; color: var(--text-color); font-weight: 800; }
         
-        .modal-total { font-size: 1.05rem; font-weight: bold; margin-bottom: 20px; padding-top: 15px; border-top: 1px dashed var(--border-color); }
+        .modal-total { font-size: 1.05rem; font-weight: 800; color: var(--primary-color); margin-bottom: 18px; padding-top: 14px; border-top: 2px dashed var(--border-color); }
         
         .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-        .btn-modal { padding: 14px; border-radius: 12px; border: none; font-weight: bold; color: white; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; text-decoration: none;}
-        .btn-primary { background: var(--primary-color); }
-        .btn-cancel { background: transparent; color: #888; border: 1px solid var(--border-color); }
+        .btn-modal { padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;}
+        .btn-primary { background: linear-gradient(135deg, var(--primary-color), #818cf8); color: white; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-cancel { background: var(--box-bg); color: var(--text-muted); border: 1px solid var(--border-color); }
 
-        .cart-list-container { overflow-y: auto; max-height: 40vh; margin-bottom: 15px; padding-right: 5px; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; text-align: right; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
-        .cart-item-details { flex: 1; margin-left: 10px; }
-        .cart-item-name { font-weight: bold; font-size: 0.95rem; color: var(--text-color); margin-bottom: 5px;}
-        .cart-item-calc { font-size: 0.9rem; font-weight: bold; color: var(--success-color); }
-        .cart-remove-btn { background: var(--danger-color); color: white; border: none; border-radius: 8px; width: 32px; height: 32px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center;}
+        /* استایل سبد خرید */
+        .cart-list-container { overflow-y: auto; max-height: 40vh; margin-bottom: 15px; padding-right: 2px; }
+        .cart-list-container::-webkit-scrollbar { width: 4px; }
+        .cart-list-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
         
-        /* استایل دکمه‌های جدید تنظیم تعداد در سبد خرید */
-        .cart-qty-mini { display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .cart-qty-mini button { background: var(--box-bg); border: none; color: var(--text-color); width: 28px; height: 28px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
-        .cart-qty-mini button:active { background: var(--border-color); }
-        .cart-qty-mini span { font-size: 0.95rem; font-weight: bold; min-width: 25px; text-align: center; color: var(--text-color); }
+        .cart-item { 
+            display: flex; justify-content: space-between; align-items: center; text-align: right; 
+            padding: 12px; margin-bottom: 10px; background: var(--bg-color); border: 1px solid var(--border-color); 
+            border-radius: var(--radius-md); 
+        }
+        .cart-item-details { flex: 1; margin-left: 8px; }
+        .cart-item-name { font-weight: 800; font-size: 0.9rem; color: var(--text-color); margin-bottom: 6px;}
+        .cart-item-calc { font-size: 0.9rem; font-weight: 800; color: var(--primary-color); background: rgba(99,102,241,0.08); padding: 3px 8px; border-radius: 6px; }
+        .cart-remove-btn { 
+            background: rgba(239, 68, 68, 0.08); color: var(--danger-color); border: none; 
+            border-radius: 10px; width: 34px; height: 34px; font-weight: bold; font-size: 1rem;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s;
+        }
+        
+        .cart-qty-mini { display: flex; align-items: center; gap: 6px; background: var(--box-bg); padding: 2px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .cart-qty-mini button { background: transparent; border: none; color: var(--primary-color); width: 26px; height: 26px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        .cart-qty-mini span { font-size: 0.9rem; font-weight: 800; min-width: 22px; text-align: center; color: var(--text-color); }
+
+        /* اورراید رنگ دکمه‌های شبکه‌های اجتماعی در پاپ‌آب */
+        #cartModal .btn-modal[style*="2AABEE"] { background: linear-gradient(135deg, #2AABEE, #1c93d4) !important; border: none; color: white !important;}
+        #cartModal .btn-modal[style*="12C19E"] { background: linear-gradient(135deg, #12C19E, #0e9d80) !important; border: none; color: white !important;}
+        #cartModal .btn-modal[style*="E85D04"] { background: linear-gradient(135deg, #E85D04, #cc5203) !important; border: none; color: white !important;}
     </style>
 </head>
 <body>
@@ -219,15 +253,15 @@
         <span id="promoText" class="promo-text">در حال بارگذاری...</span>
     </div>
     <div class="header-box">
-        <input type="text" id="myInput" onkeyup="doSearch()" placeholder="🔍 نام کالا را جستجو کنید... ">
+        <input type="text" id="myInput" onkeyup="doSearch()" placeholder="جستجوی نام کالا...">
     </div>
     
     <div class="slider-container">
-        <div class="marquee">
-            <div class="marquee-content reverse" id="cat-content-1"></div>
-            <div class="marquee-content reverse" id="cat-content-2"></div>
+        <div class="marquee" id="marquee-cats">
+            <div class="marquee-content" id="cat-content-1"></div>
+            <div class="marquee-content" id="cat-content-2"></div>
         </div>
-        <div class="marquee">
+        <div class="marquee" id="marquee-brands">
             <div class="marquee-content" id="brand-content-1"></div>
             <div class="marquee-content" id="brand-content-2"></div>
         </div>
@@ -247,7 +281,7 @@
 </div>
 
 <div id="orderModal" class="modal-overlay" onclick="closeModalOnBG(event, 'orderModal')">
-    <div class="modal-content" style="max-width: 320px;">
+    <div class="modal-content" style="max-width: 300px;">
         <div id="modalItemName" class="modal-title">نام کالا</div>
         <div id="modalItemPrice" class="modal-price">قیمت واحد: 0 تومان</div>
         
@@ -268,7 +302,7 @@
 
 <div id="cartModal" class="modal-overlay" onclick="closeModalOnBG(event, 'cartModal')">
     <div class="modal-content">
-        <div class="modal-title" style="border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">🛒 پیش‌فاکتور شما</div>
+        <div class="modal-title" style="padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border-color);">🛒 پیش‌فاکتور شما</div>
         
         <div id="cartItemsList" class="cart-list-container"></div>
         
@@ -278,14 +312,14 @@
             <button onclick="sendOrderTelegram()" class="btn-modal" style="background: #2AABEE; color: white;"> ارسال سفارش در تلگرام</button>
             <button onclick="sendOrderBale()" class="btn-modal" style="background: #12C19E; color: white;"> ارسال سفارش در بله</button>
             <button onclick="sendOrderEitaa()" class="btn-modal" style="background: #E85D04; color: white;"> ارسال سفارش در ایتا</button>
-            <button onclick="openConfirmClearModal()" class="btn-modal btn-cancel" style="color: var(--danger-color); border-color: var(--danger-color);">🗑 حذف تمام سفارشات</button>
+            <button onclick="openConfirmClearModal()" class="btn-modal btn-cancel" style="color: var(--danger-color); border-color: var(--danger-color); background: rgba(239, 68, 68, 0.03);">🗑 حذف تمام سفارشات</button>
             <button onclick="closeModal('cartModal')" class="btn-modal btn-cancel">بستن سبد / ادامه خرید</button>
         </div>
     </div>
 </div>
 
 <div id="confirmClearModal" class="modal-overlay" onclick="closeModalOnBG(event, 'confirmClearModal')">
-    <div class="modal-content" style="max-width: 320px;">
+    <div class="modal-content" style="max-width: 300px;">
         <div class="modal-title" style="margin-bottom: 20px;">آیا از حذف تمام کالاهای سبد خرید مطمئن هستید؟</div>
         <div class="modal-actions">
             <button onclick="confirmClearCart()" class="btn-modal btn-primary" style="background: var(--danger-color);">بله، حذف کن</button>
@@ -295,11 +329,11 @@
 </div>
 
 <div id="eitaaModal" class="modal-overlay" onclick="closeModalOnBG(event, 'eitaaModal')">
-    <div class="modal-content" style="max-width: 320px;">
-        <div class="modal-title" style="color: var(--success-color); margin-bottom: 15px;">✅ متن فاکتور کپی شد!</div>
-        <div style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 22px; text-align: center; color: var(--text-color);">
+    <div class="modal-content" style="max-width: 300px;">
+        <div class="modal-title" style="color: var(--success-color); margin-bottom: 12px; font-size: 1.3rem;">✅ متن کپی شد!</div>
+        <div style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; text-align: center; color: var(--text-color); font-weight: 500;">
             سفارش شما در حافظه کپی شد.<br><br>
-            لطفاً پس از ورود به صفحه چت واحد فروش، متن کپی‌شده را جای‌گذاری (Paste) و ارسال نمایید.
+            لطفاً پس از ورود به صفحه چت واحد فروش، متن را جای‌گذاری (Paste) و ارسال نمایید.
         </div>
         <div class="modal-actions">
             <button onclick="redirectToEitaa()" class="btn-modal btn-primary">متوجه شدم </button>
@@ -449,8 +483,8 @@
 390,000	اتودوشکوضربه ای853
 978,000	اتودوشکوگریپ دار2311
 490,000	اتودهیپو
-980,000	اتودهیروکلاسیک H92
-1,150,000	اتودهیروکلاسیک H59
+980,000	اتودهیروH92
+1,150,000	اتودهیروH59
 280,000	اتود فیلا
 1,800,000	اتیکت اسپادانا
 1,500,000	اسپری وارنیش درنا
@@ -528,6 +562,9 @@
 5,720,000	بادکنک کرونا
 980,000	بادکنک کوچک بسته بندی جور
 75,000	بادکنک لبخندچوبی
+1,199,000	بازی آرمان ست شکارچیM16
+1,649,000	بازی آرمان کلاش کاردینال
+735,000	بازی آرمانM16اکونومی سلفونی
 5,078,700	بازی ادابازی
 1,043,000	بازی استیم بدن انسان
 1,900,000	بازی اسرارزمین
@@ -536,7 +573,7 @@
 4,779,500	بازی اموزشی الفبازی
 638,000	بازی بامبو
 980,000	بازی برج هیجان سلفونی ایرانی
-3,850,000	بازی بردیاجامپراستوانه ای کلاسیک
+3,850,000	بازی بردیاجامپراستوانه ای
 5,390,000	بازی بوم بوم بالن ارمان
 1,460,000	بازی بیگ بلوک 34قطعه سلفونی
 3,894,000	بازی بینگودبرناکیفی
@@ -591,7 +628,7 @@
 4,077,200	بازی دوزچهارسوبزرگ
 2,610,300	بازی دوزچهارسومتوسط
 650,000	بازی راکت تنیس کیفی
-3,955,600	بازی رنگ چین4نفره
+3,956,000	بازی رنگ چین4نفره
 1,080,000	بازی روبیک فانتزیا
 1,299,500	بازی روبیک هرمی351
 530,000	بازی روپولی جیرجیرک
@@ -640,7 +677,7 @@
 7,085,100	بازی کلاش جلیقه کارتی ارمان
 5,803,600	بازی کلاش حرفه ای16آرمان
 6,996,000	بازی کلاش حرفه ای جعبه ایAK47
-2,198,900	بازی کلاش سه کاره بوران آرمان
+2,199,000	بازی کلاش سه کاره بوران آرمان
 3,242,800	بازی کلاش نانچیکوکارتی آرمان
 3,960,000	بازی کلاش وکلت ترقه دراگون ارمان
 3,697,100	بازی کلاش هفت تیرکارتی الفاارمان
@@ -650,7 +687,7 @@
 3,784,000	بازی کوبیز
 1,145,000	بازی کوبیییو
 2,156,300	بازی کیف اعدادوالفباتوتک
-1,343,100	بازی گل یاپوچ جعبه ای آرمان
+1,344,000	بازی گل یاپوچ جعبه ای آرمان
 5,544,000	بازی لگوبردیاسطلی4031
 6,000,000	بازی لگوبردیاسطلی4032
 1,225,000	بازی لگودخترانه بلوک 0801
@@ -818,7 +855,7 @@
 1,200,000	پاکن اتودی تی ام کیوبایدک
 1,980,000	پاکن اتودی تی ام کیو
 10,350,000	پاکن اتودی خرس لوتسو30عددی6330
-650,000	پاکن اتودی سی کلاس بایدک
+650,000	پاکن اتودی سیکلاس بایدک
 800,000	پاکن اتودی فانتزی پارسیکار306
 350,000	پاکن اتودی فانتزی کرومی لبوبو
 298,000	پاکن اتودی فانتزی کرومی
@@ -1993,16 +2030,16 @@
 218,000	خودکاردکترپنترکریستال0/7آبی
 661,500	خودکارراین201
 609,000	خودکارراین202
-250,000	خودکاررنگی سی کلاس سافت تاچ
-180,000	خودکاررنگی سی کلاس سلفی بال
+250,000	خودکاررنگی سیکلاس سافت تاچ
+180,000	خودکاررنگی سیکلاس سلفی بال
 624,000	خودکارزبراآبی
 264,000	خودکارزبرابدنه جیرz1sآبی
 72,000	خودکارساچمه ای48عددی
 138,000	خودکارسلنا/5آبی
 138,000	خودکارسلناآبی
 346,000	خودکارسلنافشاری آبی
+250,000	خودکارسیکلاس آفیس
 100,000	خودکارسیکلاس ژله ای999
-250,000	خودکارسی کلاس آفیس
 1,520,000	خودکارصدف 8رنگ
 113,000	خودکارصدف S1آبی
 1,035,000	خودکارفابرکاستل آبی
@@ -2811,7 +2848,6 @@
 792,000	رنگ اکرولیک ترمه21میل
 7,942,000	رنگ اکرولیک ترمه12رنگ
 1,672,000	رنگ اکرولیک ترمه75میل
-4,114,000	رنگ اکرولیک ترمه6رنگ
 7,942,000	رنگ اکرولیک ترمه ساران12رنگ
 1,700,000	رنگ اکرولیک حرفه ای75میل شلوی
 450,000	رنگ اکرولیک رپین22میل
@@ -2832,7 +2868,7 @@
 1,700,000	رنگ بیندروستا125میل
 770,000	رنگ پارچه30میل رپین
 9,000,000	رنگ پارچه ورسای6رنگ
-750,000	رنگ پودری متالیک صدفی وفلزی رپین
+750,000	رنگ پودری متالیک فلزی رپین
 4,620,000	رنگ تکست لایت 6تایی راپین
 11,000,000	رنگ روغن12رنگ کامران
 14,000,000	رنگ روغن12رنگ وستا21میل
@@ -3287,7 +3323,7 @@
 170,000	طلق ضخیم پاپکو80عددی
 135,000	طلق ضخیم پرگه شفاف A4
 4,236,000	طلق ضخیم سوپرباندوزیری
-8,250,000	طلق ضخیم سوپرباندA4
+6,800,000	طلق ضخیم سوپرباندA4
 160,000	طلق ضخیم سهندشفاف A4
 75,000	طلق ضخیم وزیری شفاف
 300,000	طلق ضخیمA3
@@ -4044,7 +4080,7 @@
 748,700	کلربوک پرگه20برگ
 605,000	کلربوک رویالکس 20برگ
 5,880,000	کلربوک سوپرباند100برگ قابدار
-696,000	کلربوک سوپرباند10برگ
+790,000	کلربوک سوپرباند10برگ
 1,140,000	کلربوک سوپرباند20برگ
 2,064,000	کلربوک سوپرباند40برگ
 2,592,000	کلربوک سوپرباند60برگ
@@ -4527,11 +4563,11 @@
 13,268,000	مدادرنگی سوسمارلوله36رنگ
 8,213,000	مدادرنگی سوسمارمقوا24رنگ
 12,320,000	مدادرنگی سوسمارمقوا36رنگ
-3,509,000	مدادرنگی سی کلاس اتودی لوله12رنگ
-6,420,000	مدادرنگی سی کلاس اتودی لوله24رنگ
-9,560,000	مدادرنگی سی کلاس اتودی لوله36رنگ
-4,970,000	مدادرنگی سی کلاس اتودی لوله18رنگ
-4,400,000	مدادرنگی سی کلاس مقوا24رنگ
+3,509,000	مدادرنگی سیکلاس اتودی لوله12رنگ
+6,420,000	مدادرنگی سیکلاس اتودی لوله24رنگ
+9,560,000	مدادرنگی سیکلاس اتودی لوله36رنگ
+4,970,000	مدادرنگی سیکلاس اتودی لوله18رنگ
+4,400,000	مدادرنگی سیکلاس مقوا24رنگ
 7,113,000	مدادرنگی فابرکاستل آبرنگی12رنگ
 14,000,000	مدادرنگی فابرکاستل آبرنگی24رنگ
 6,594,000	مدادرنگی فابرکاستل پوست 10رنگ
@@ -4820,8 +4856,8 @@
 260,000	نوک رنگی2میل میکرو938
 2,015,000	نوک روترینگ
 1,800,000	نوک سومر
+3,000,000	نوک سیکلاس بلند
 4,000,000	نوک سیکلاس فشاری
-3,000,000	نوک سی کلاس بلند
 7,080,000	نوک عادل رگلامی24تایی
 13,830,000	نوک فابرکاستل جین 62500
 13,680,000	نوک فانتزی لبوبو36عددی38
@@ -4881,7 +4917,7 @@
 900,000	یدک کلاسورنگار20سوراخ100برگ
 1,380,000	یدک کلاسوریکشین26سوراخ80گرم
 265,000	یدک لاک نواری اسکول500
-530,000	یدک لاک نواری سی کلاس
+530,000	یدک لاک نواری سیکلاس
 165,000	یدک ماژیک شارژی یونی وان
 195,000	یدک مغزی مدادفشنگی
 </textarea>
@@ -4892,7 +4928,7 @@
     var currentItemName = "";
     var currentItemPrice = 0;
     
-    // دیکشنری کاراکترها برای پردازش سریع 
+    // دیکشنری کاراکترها 
     var charMap = {
         '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
         '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
@@ -4903,18 +4939,15 @@
         return t.replace(/[۰-۹٠-٩آأإيك‌]/g, function(w) { return charMap[w] || w; }).toLowerCase();
     }
 
-    // لودینگ غیرمسدودکننده 
     window.onload = function() {
-        initSliders(); // راه‌اندازی اسلایدرها
+        initSliders(); 
         setTimeout(processData, 50);
     };
 
-    /* === سیستم ایجاد اسلایدرهای دسته‌بندی و برند === */
+    /* === سیستم قدرتمند مدیریت اسلایدر بی‌نهایت === */
     function initSliders() {
-        // حذف موارد تکراری با Set برای عملکرد بهتر
-        var brandsList = [...new Set(["یکشین", "فابر", "استدلر", "زبرا", "سی کلاس", "سهند", "لاکسر", "گلف", "کویلو", "کرونا", "مدیر", "صدف", "سومر", "وردا", "وشکو", "سویل", "میکرو", "ام کیو", "موربیت", "کملیون", "اعتدال", "سوپر باند", "پرشیا", "سلنا", "کیان", "ادمیرال", "اسکول مکس", "کانکس", "رازی", "فکتیس", "پنتر", "آریا", "فابل", "پیکاسو", "بنیتو", "پالمو", "ووک", "آذین", "پلیکان", "پاپکو", "پارسیکار", "کنکو", "مپد", "کادبلیو", "اوات", "نوآوران"])];
-        
-        var categoriesList = [...new Set(["پست ایت", "مداد مشکی", "مداد قرمز", "مداد رنگی", "چسب 5 سانت", "چسب نواری 36", "خودکار", "پانچ", "جامدادی", "پوشه دکمه دار", "قمقمه", "کلاسور", "دفتر", "دفترچه", "غلط گیر", "لاک نواری", "یدک کلاسور", "ماشین حساب", "باطری", "دوخت", "سوزن", "کیف فایل", "کلربوک", "کاور", "ماژیک فسفری", "ماژیک وایت برد", "ماژیک معمولی", "خمیر", "ساک دستی", "گواش", "آبرنگ", "رنگ انگشتی", "پاک کن", "راپید", "بوم", "پرگار", "چسب ماتیکی", "چراغ مطالعه", "روان", "مداد طراحی", "قلمو", "کاغذ نقدی"])];
+        var brandsList = [...new Set(["یکشین", "فابر", "استدلر", "زبرا", "سیکلاس", "سهند", "لاکسر", "گلف", "کویلو", "وحدت", "کرونا", "اطلس", "مدیر", "صدف", "سومر", "وردا", "وشکو", "هیرو", "کیکو", "سویل", "پیداکس", "آرتلاین", "میکرو", "ام کیو", "موربیت", "کملیون", "اعتدال", "سوپر باند", "پرشیا", "سلنا", "کیان", "ادمیرال", "اسکول مکس", "کانکس", "رازی", "فکتیس", "پنتر", "آریا", "فابل", "پیکاسو", "بنیتو", "پالمو", "ووک", "آذین", "پلیکان", "پاپکو", "پارسیکار", "کنکو", "مپد", "کادبلیو", "اوات", "نوآوران"])];
+        var categoriesList = [...new Set(["پست ایت", "مداد مشکی", "مداد قرمز", "دفتر منگنه", "مداد رنگی", "چسب 5 سانت", "چسب نواری 36", "خودکار", "پانچ", "تراش", "جامدادی", "پوشه دکمه دار", "قمقمه", "کلاسور", "دفتر", "دفترچه", "غلط گیر", "لاک نواری", "یدک کلاسور", "ماشین حساب", "باطری", "دوخت", "سوزن", "کیف فایل", "کلربوک", "کاور", "ماژیک فسفری", "ماژیک وایت برد", "ماژیک معمولی", "خمیر", "ساک دستی", "گواش", "آبرنگ", "رنگ انگشتی", "پاک کن", "راپید", "بوم", "پرگار", "چسب ماتیکی", "چراغ مطالعه", "روان", "مداد طراحی", "قلمو", "کاغذ نقدی"])];
 
         function createChipsHTML(items) {
             return items.map(function(item) {
@@ -4922,24 +4955,99 @@
             }).join('');
         }
 
-        var brandsHTML = createChipsHTML(brandsList);
-        document.getElementById('brand-content-1').innerHTML = brandsHTML;
-        document.getElementById('brand-content-2').innerHTML = brandsHTML;
+        document.getElementById('cat-content-1').innerHTML = createChipsHTML(categoriesList);
+        document.getElementById('cat-content-2').innerHTML = createChipsHTML(categoriesList);
+        
+        document.getElementById('brand-content-1').innerHTML = createChipsHTML(brandsList);
+        document.getElementById('brand-content-2').innerHTML = createChipsHTML(brandsList);
 
-        var catsHTML = createChipsHTML(categoriesList);
-        document.getElementById('cat-content-1').innerHTML = catsHTML;
-        document.getElementById('cat-content-2').innerHTML = catsHTML;
+        // فعال‌سازی اسکرول بی‌نهایت:
+        // دسته بندی به سمت راست حرکت میکند (عدد منفی)
+        setupMarqueeTouchAndAuto('marquee-cats', -0.3); 
+        // برندها به سمت چپ حرکت میکند (عدد مثبت)
+        setupMarqueeTouchAndAuto('marquee-brands', 0.3); 
     }
 
-    // عملکرد دکمه‌های اسلایدر
-    function setQuickSearch(word) {
-        var input = document.getElementById("myInput");
-        input.value = word; // قرار دادن کلمه در کادر
-        doSearch(); // اجرای جستجو
-        // اسکرول نرم به سمت لیست محصولات
-        window.scrollTo({ top: document.querySelector('.header-box').offsetTop, behavior: 'smooth' });
+    function setupMarqueeTouchAndAuto(elementId, speed) {
+        var el = document.getElementById(elementId);
+        if (!el) return;
+        
+        // تنظیم اجباری جهت LTR برای محاسبه دقیق ریاضیِ اسکرول بی‌نهایت روی تمامی موبایل‌ها
+        el.dir = "ltr"; 
+        
+        var isInteracting = false;
+        var timeoutId = null;
+        var exactScroll = 0; // متغیر جدید برای حفظ مقادیر اعشاری
+
+        // منتظر می‌مانیم تا مرورگر عرض دقیق المان‌ها را محاسبه کند
+        setTimeout(function() {
+            var halfWidth = el.scrollWidth / 2;
+            
+            // تعیین نقطه شروع بر اساس جهت
+            if (speed < 0) { exactScroll = halfWidth; } 
+            else { exactScroll = 0; }
+            
+            el.scrollLeft = exactScroll;
+
+            // تابع چک کردن رسیدن به انتهای لیست و اجرای حلقه بی‌نهایت
+            function checkWrap() {
+                halfWidth = el.scrollWidth / 2; 
+                if (speed > 0) {
+                    // حرکت به چپ
+                    if (exactScroll >= halfWidth) { exactScroll -= halfWidth; } 
+                    else if (exactScroll <= 0) { exactScroll += halfWidth; }
+                } else {
+                    // حرکت به راست
+                    if (exactScroll <= 0) { exactScroll += halfWidth; } 
+                    else if (exactScroll >= halfWidth) { exactScroll -= halfWidth; }
+                }
+            }
+
+            function scrollLoop() {
+                if (!isInteracting) {
+                    exactScroll += speed;
+                    checkWrap();
+                    el.scrollLeft = exactScroll; 
+                } else {
+                    // همگام‌سازی متغیر در زمان اسکرول دستی با انگشت
+                    exactScroll = el.scrollLeft;
+                }
+                requestAnimationFrame(scrollLoop);
+            }
+
+            // مانیتورینگ دائمی حتی زمانیکه کاربر نوار را با دست لمس می‌کند و می‌کشد
+            el.addEventListener('scroll', function() {
+                if (isInteracting) { checkWrap(); }
+            }, {passive: true});
+
+            function startInteract() {
+                isInteracting = true;
+                clearTimeout(timeoutId);
+            }
+            
+            function endInteract() {
+                timeoutId = setTimeout(function() {
+                    isInteracting = false;
+                }, 1500); // شروع مجدد حرکت بعد از 1.5 ثانیه رها کردن
+            }
+
+            el.addEventListener('touchstart', startInteract, {passive: true});
+            el.addEventListener('touchend', endInteract, {passive: true});
+            el.addEventListener('mousedown', startInteract);
+            el.addEventListener('mouseup', endInteract);
+            el.addEventListener('mouseleave', endInteract);
+
+            requestAnimationFrame(scrollLoop);
+        }, 150);
     }
     /* ============================================== */
+
+    function setQuickSearch(word) {
+        var input = document.getElementById("myInput");
+        input.value = word; 
+        doSearch(); 
+        window.scrollTo({ top: document.querySelector('.header-box').offsetTop, behavior: 'smooth' });
+    }
 
     function processData() {
         var text = document.getElementById("myData").value;
@@ -5149,15 +5257,12 @@
     }
 
     /* === سیستم جامع مدیریت لینک برای ایتا، تلگرام و بله === */
-
-    // دریافت شیء فعال وب‌اپ 
     function getWebApp() {
         if (typeof window.Eitaa !== 'undefined' && window.Eitaa.WebApp) return window.Eitaa.WebApp;
         if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) return window.Telegram.WebApp;
         return null;
     }
 
-    // هدایت ایمن 
     function openSafeLink(url, platform) {
         var app = getWebApp();
         
@@ -5265,7 +5370,7 @@
     /* === سیستم نوار تبلیغات چرخشی === */
     var promoAds = [
         { text: " مشاهده جدید ترین محصولات در کانال بله", link: "https://ble.ir/tahrir_ir/", color: "#12C19E", platform: "bale" },
-        { text: " مشاهده جدید ترین محصولات در کانال ایتا", link: "https://eitaa.ir/tahrir_ir/", color: "#E85D04", platform: "eitaa" },
+        { text: " مشاهده جدید ترین محصولات در کانال ایتا", link: "https://eitaa.com/tahrir_ir/", color: "#E85D04", platform: "eitaa" },
         { text: " مشاهده جدید ترین محصولات در کانال تلگرام", link: "https://t.me/tahrir_ir/", color: "#2AABEE", platform: "telegram" },
         { text: "📞 تماس با ما", link: "tel:02536664666", color: "var(--primary-color)", platform: "other" },
         { text: "📍 لوکیشن فروشگاه در نشان", link: "https://nshn.ir/39sbsRpKWxvcis", color: "#dc3545", platform: "other" },
@@ -5302,9 +5407,7 @@
         }
     }
 
-    // تغییر محتوا هر ۱۵ ثانیه
     setInterval(updatePromoBanner, 15000);
-    // اجرای اولیه
     setTimeout(updatePromoBanner, 100);
 
 </script>
