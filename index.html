@@ -110,7 +110,7 @@
             user-select: none; 
             padding: 4px 0;
             width: 100%;
-            scroll-behavior: auto; /* برای جلوگیری از پرش ناگهانی هنگام لوپ شدن */
+            scroll-behavior: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
@@ -120,7 +120,7 @@
             display: flex; 
             flex-shrink: 0; 
             gap: 10px; 
-            padding-right: 10px; /* این پدینگ دقیقاً برابر با gap است تا لوپ بی‌نقص شود */
+            padding-right: 10px; 
         }
         
         /* دکمه‌های تگ (Chips) */
@@ -142,14 +142,16 @@
         .content { padding: 12px; padding-bottom: 100px; }
         table { width: 100%; border-collapse: separate; border-spacing: 0 8px; background: transparent; }
         
+        /* انیمیشن پرش ردیف‌ها برای تجربه بهتر جستجو حذف شد و به کل جدول منتقل شد */
+        #myTable { animation: tableFadeIn 0.5s ease-out; }
+        @keyframes tableFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         tr { 
             background-color: var(--box-bg); border-radius: var(--radius-md); 
             box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; 
             padding: 12px 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            animation: fadeIn 0.3s ease backwards;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         
         tr:active { transform: scale(0.98); background-color: var(--border-color); }
         
@@ -180,7 +182,7 @@
             border: 2.5px solid var(--bg-color); box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
 
-        /* پنجره‌های پاپ‌آپ کوچک و بهینه‌شده */
+        /* پنجره‌های پاپ‌آپ */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 200;
@@ -240,7 +242,6 @@
         .cart-qty-mini button { background: transparent; border: none; color: var(--primary-color); width: 26px; height: 26px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;}
         .cart-qty-mini span { font-size: 0.9rem; font-weight: 800; min-width: 22px; text-align: center; color: var(--text-color); }
 
-        /* اورراید رنگ دکمه‌های شبکه‌های اجتماعی در پاپ‌آب */
         #cartModal .btn-modal[style*="2AABEE"] { background: linear-gradient(135deg, #2AABEE, #1c93d4) !important; border: none; color: white !important;}
         #cartModal .btn-modal[style*="12C19E"] { background: linear-gradient(135deg, #12C19E, #0e9d80) !important; border: none; color: white !important;}
         #cartModal .btn-modal[style*="E85D04"] { background: linear-gradient(135deg, #E85D04, #cc5203) !important; border: none; color: white !important;}
@@ -4920,6 +4921,7 @@
 530,000	یدک لاک نواری سیکلاس
 165,000	یدک ماژیک شارژی یونی وان
 195,000	یدک مغزی مدادفشنگی
+
 </textarea>
 
 <script>
@@ -4944,7 +4946,6 @@
         setTimeout(processData, 50);
     };
 
-    /* === سیستم قدرتمند مدیریت اسلایدر بی‌نهایت === */
     function initSliders() {
         var brandsList = [...new Set(["یکشین", "فابر", "استدلر", "زبرا", "سیکلاس", "سهند", "لاکسر", "گلف", "کویلو", "وحدت", "کرونا", "اطلس", "مدیر", "صدف", "سومر", "وردا", "وشکو", "هیرو", "کیکو", "سویل", "پیداکس", "آرتلاین", "میکرو", "ام کیو", "موربیت", "کملیون", "اعتدال", "سوپر باند", "پرشیا", "سلنا", "کیان", "ادمیرال", "اسکول مکس", "کانکس", "رازی", "فکتیس", "پنتر", "آریا", "فابل", "پیکاسو", "بنیتو", "پالمو", "ووک", "آذین", "پلیکان", "پاپکو", "پارسیکار", "کنکو", "مپد", "کادبلیو", "اوات", "نوآوران"])];
         var categoriesList = [...new Set(["پست ایت", "مداد مشکی", "مداد قرمز", "دفتر منگنه", "مداد رنگی", "چسب 5 سانت", "چسب نواری 36", "خودکار", "پانچ", "تراش", "جامدادی", "پوشه دکمه دار", "قمقمه", "کلاسور", "دفتر", "دفترچه", "غلط گیر", "لاک نواری", "یدک کلاسور", "ماشین حساب", "باطری", "دوخت", "سوزن", "کیف فایل", "کلربوک", "کاور", "ماژیک فسفری", "ماژیک وایت برد", "ماژیک معمولی", "خمیر", "ساک دستی", "گواش", "آبرنگ", "رنگ انگشتی", "پاک کن", "راپید", "بوم", "پرگار", "چسب ماتیکی", "چراغ مطالعه", "روان", "مداد طراحی", "قلمو", "کاغذ نقدی"])];
@@ -4961,61 +4962,63 @@
         document.getElementById('brand-content-1').innerHTML = createChipsHTML(brandsList);
         document.getElementById('brand-content-2').innerHTML = createChipsHTML(brandsList);
 
-        // فعال‌سازی اسکرول بی‌نهایت:
-        // دسته بندی به سمت راست حرکت میکند (عدد منفی)
+        // تنظیم سرعت روی 0.3 و 0.3- با سیستم جدید زمانی
         setupMarqueeTouchAndAuto('marquee-cats', -0.3); 
-        // برندها به سمت چپ حرکت میکند (عدد مثبت)
         setupMarqueeTouchAndAuto('marquee-brands', 0.3); 
     }
 
+    /* === سیستم جامع اسکرول مبتنی بر زمان (Delta Time) === */
     function setupMarqueeTouchAndAuto(elementId, speed) {
         var el = document.getElementById(elementId);
         if (!el) return;
         
-        // تنظیم اجباری جهت LTR برای محاسبه دقیق ریاضیِ اسکرول بی‌نهایت روی تمامی موبایل‌ها
         el.dir = "ltr"; 
         
         var isInteracting = false;
         var timeoutId = null;
-        var exactScroll = 0; // متغیر جدید برای حفظ مقادیر اعشاری
+        var exactScroll = 0; 
+        var lastTimestamp = null; 
 
-        // منتظر می‌مانیم تا مرورگر عرض دقیق المان‌ها را محاسبه کند
         setTimeout(function() {
             var halfWidth = el.scrollWidth / 2;
             
-            // تعیین نقطه شروع بر اساس جهت
             if (speed < 0) { exactScroll = halfWidth; } 
             else { exactScroll = 0; }
             
             el.scrollLeft = exactScroll;
 
-            // تابع چک کردن رسیدن به انتهای لیست و اجرای حلقه بی‌نهایت
             function checkWrap() {
                 halfWidth = el.scrollWidth / 2; 
                 if (speed > 0) {
-                    // حرکت به چپ
                     if (exactScroll >= halfWidth) { exactScroll -= halfWidth; } 
                     else if (exactScroll <= 0) { exactScroll += halfWidth; }
                 } else {
-                    // حرکت به راست
                     if (exactScroll <= 0) { exactScroll += halfWidth; } 
                     else if (exactScroll >= halfWidth) { exactScroll -= halfWidth; }
                 }
             }
 
-            function scrollLoop() {
+            // حلقه اصلی محاسبه زمان
+            function scrollLoop(timestamp) {
+                if (!lastTimestamp) lastTimestamp = timestamp;
+                var deltaTime = timestamp - lastTimestamp;
+                lastTimestamp = timestamp;
+
+                // جلوگیری از پرش‌های بزرگ اگر کاربر تب رو مینیمایز کرد
+                if (deltaTime > 100) deltaTime = 16.66; 
+
                 if (!isInteracting) {
-                    exactScroll += speed;
+                    // محاسبه ضریب سرعت بر اساس فریم ۶۰ هرتز (16.66 میلی‌ثانیه)
+                    var timeMultiplier = deltaTime / 16.66;
+                    exactScroll += (speed * timeMultiplier);
                     checkWrap();
                     el.scrollLeft = exactScroll; 
                 } else {
-                    // همگام‌سازی متغیر در زمان اسکرول دستی با انگشت
                     exactScroll = el.scrollLeft;
                 }
                 requestAnimationFrame(scrollLoop);
             }
 
-            // مانیتورینگ دائمی حتی زمانیکه کاربر نوار را با دست لمس می‌کند و می‌کشد
             el.addEventListener('scroll', function() {
                 if (isInteracting) { checkWrap(); }
             }, {passive: true});
@@ -5028,7 +5031,8 @@
             function endInteract() {
                 timeoutId = setTimeout(function() {
                     isInteracting = false;
-                }, 1500); // شروع مجدد حرکت بعد از 1.5 ثانیه رها کردن
+                    lastTimestamp = null; // ریست کردن تایمر تا پرش نکند
+                }, 1500); 
             }
 
             el.addEventListener('touchstart', startInteract, {passive: true});
