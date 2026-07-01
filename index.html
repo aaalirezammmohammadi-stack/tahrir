@@ -142,7 +142,6 @@
         .content { padding: 12px; padding-bottom: 100px; }
         table { width: 100%; border-collapse: separate; border-spacing: 0 8px; background: transparent; }
         
-        /* انیمیشن پرش ردیف‌ها برای تجربه بهتر جستجو حذف شد و به کل جدول منتقل شد */
         #myTable { animation: tableFadeIn 0.5s ease-out; }
         @keyframes tableFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -4962,7 +4961,6 @@
         document.getElementById('brand-content-1').innerHTML = createChipsHTML(brandsList);
         document.getElementById('brand-content-2').innerHTML = createChipsHTML(brandsList);
 
-        // تنظیم سرعت روی 0.3 و 0.3- با سیستم جدید زمانی
         setupMarqueeTouchAndAuto('marquee-cats', -0.3); 
         setupMarqueeTouchAndAuto('marquee-brands', 0.3); 
     }
@@ -4998,17 +4996,14 @@
                 }
             }
 
-            // حلقه اصلی محاسبه زمان
             function scrollLoop(timestamp) {
                 if (!lastTimestamp) lastTimestamp = timestamp;
                 var deltaTime = timestamp - lastTimestamp;
                 lastTimestamp = timestamp;
 
-                // جلوگیری از پرش‌های بزرگ اگر کاربر تب رو مینیمایز کرد
                 if (deltaTime > 100) deltaTime = 16.66; 
 
                 if (!isInteracting) {
-                    // محاسبه ضریب سرعت بر اساس فریم ۶۰ هرتز (16.66 میلی‌ثانیه)
                     var timeMultiplier = deltaTime / 16.66;
                     exactScroll += (speed * timeMultiplier);
                     checkWrap();
@@ -5031,7 +5026,7 @@
             function endInteract() {
                 timeoutId = setTimeout(function() {
                     isInteracting = false;
-                    lastTimestamp = null; // ریست کردن تایمر تا پرش نکند
+                    lastTimestamp = null;
                 }, 1500); 
             }
 
@@ -5050,7 +5045,10 @@
         var input = document.getElementById("myInput");
         input.value = word; 
         doSearch(); 
-        window.scrollTo({ top: document.querySelector('.header-box').offsetTop, behavior: 'smooth' });
+        
+        // --- این بخش اصلاح شد ---
+        // اسکرول به بالاترین نقطه صفحه (پیکسل 0) تا هدر روی نتایج جستجو را نپوشاند
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function processData() {
