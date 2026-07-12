@@ -55,6 +55,45 @@
         body, input, button, textarea { font-family: 'Vazirmatn', Tahoma, sans-serif !important; }
         body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.4s ease; -webkit-tap-highlight-color: transparent; }
         
+        /* === بنر قطعی برق اضافه شده === */
+        .power-banner {
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+            color: #ffffff;
+            padding: 12px 45px 12px 15px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-align: right;
+            position: relative;
+            line-height: 1.6;
+            max-height: 150px;
+            opacity: 1;
+            box-sizing: border-box;
+            transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 200;
+        }
+        .power-banner-close {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .power-banner-close:active { background: rgba(255, 255, 255, 0.3); transform: translateY(-50%) scale(0.9); }
+        /* ================================ */
+
         /* هدر شیشه‌ای معلق */
         .sticky-container {
             position: sticky; top: 0; z-index: 100;
@@ -246,6 +285,12 @@
     </style>
 </head>
 <body>
+
+<!-- بنر اطلاع رسانی اضافه شده به بالاترین قسمت -->
+<div id="powerBanner" class="power-banner">
+    ⚡️ همراهان همیشگی؛ پیشاپیش از شکیبایی شما در زمان قطعی برق (۱۴۰۵/۰۴/۲۲ - ساعت ۱۶:۱۵ الی ۱۸) و عدم امکان پاسخگویی سپاسگزاریم
+    <button class="power-banner-close" onclick="closePowerBanner()">✖</button>
+</div>
 
 <div class="sticky-container">
     <div id="promoBanner" class="promo-banner" onclick="handlePromoClick()">
@@ -4968,7 +5013,6 @@
 
 
 
-
 </textarea>
 
 <script>
@@ -4977,6 +5021,20 @@
     var currentItemName = "";
     var currentItemPrice = 0;
     
+    // تابع بستن بنر قطعی برق با افکت اسکرول
+    function closePowerBanner() {
+        var banner = document.getElementById('powerBanner');
+        if(banner) {
+            banner.style.maxHeight = '0px';
+            banner.style.paddingTop = '0px';
+            banner.style.paddingBottom = '0px';
+            banner.style.opacity = '0';
+            setTimeout(function() {
+                banner.style.display = 'none';
+            }, 400); 
+        }
+    }
+
     // دیکشنری کاراکترها 
     var charMap = {
         '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
