@@ -55,6 +55,45 @@
         body, input, button, textarea { font-family: 'Vazirmatn', Tahoma, sans-serif !important; }
         body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.4s ease; -webkit-tap-highlight-color: transparent; }
         
+        /* === بنر قطعی برق اضافه شده === */
+        .power-banner {
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+            color: #ffffff;
+            padding: 12px 45px 12px 15px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-align: right;
+            position: relative;
+            line-height: 1.6;
+            max-height: 150px;
+            opacity: 1;
+            box-sizing: border-box;
+            transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 200;
+        }
+        .power-banner-close {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .power-banner-close:active { background: rgba(255, 255, 255, 0.3); transform: translateY(-50%) scale(0.9); }
+        /* ================================ */
+
         /* هدر شیشه‌ای معلق */
         .sticky-container {
             position: sticky; top: 0; z-index: 100;
@@ -246,6 +285,12 @@
     </style>
 </head>
 <body>
+
+<!-- بنر اطلاع رسانی اضافه شده به بالاترین قسمت -->
+<div id="powerBanner" class="power-banner">
+    ⚡️ همراهان همیشگی؛ پیشاپیش از شکیبایی شما در زمان قطعی برق (1405/04/27 - ساعت 18 الی 20) و عدم امکان پاسخگویی سپاسگزاریم
+    <button class="power-banner-close" onclick="closePowerBanner()">✖</button>
+</div>
 
 <div class="sticky-container">
     <div id="promoBanner" class="promo-banner" onclick="handlePromoClick()">
@@ -893,6 +938,7 @@
 260,000	پاکن سی بی اس رنگی4009
 153,384,000	پاکن فابرکاستل استندی
 16,500,000	پاکن فابرکاستل رنگ جور
+12,194,000	پاکن فابرکاستل سفید جور
 32,000,000	پاکن فابرکاستل فرچه ای
 185,000	پاکن فانتزی جورجدید
 575,000	پاکن فانتزی ربات کارتی
@@ -1256,7 +1302,7 @@
 450,000	تخته وایت مقوایی کوچک
 5,800,000	تخته وایت نمونه50*30
 580,000	تخته وایت یخچالی کینگ
-95,000,000	تخته وایت SMSمغناطیسی200*100
+100,860,000	تخته وایت SMSمغناطیسی200*100
 87,000,000	تخته وایت SMSمغناطیسی150*90
 245,000	تخم مرغ شادی
 69,000	تراش 160120
@@ -2074,7 +2120,7 @@
 100,000	خودکارسیکلاس ژله ای999
 1,520,000	خودکارصدف 8رنگ
 113,000	خودکارصدف S1آبی
-946,000	خودکارفابرکاستل آبی
+948,800	خودکارفابرکاستل آبی
 110,000	خودکارفابل آبی
 990,000	خودکارفشاری3رنگ کوتاه اسکول فنس
 135,000	خودکارفشاری اطلس بدنه سفید
@@ -2127,7 +2173,6 @@
 225,000	دستمال عطری ایرانی16تایی
 195,000	دسته چک تشویقی
 750,000	دعوت به تولدپاکت بازشوبزرگ
-1,180,000	دفتر100برگ جلدسخت رقعی سویل849
 2,200,000	دفتر100برگ رحلی جلدسخت آسمان
 4,500,000	دفتر100رحلی گالینگوری ته دوخت
 2,193,000	دفتر100سلفون ته دوخت عرش کد11A
@@ -4597,14 +4642,14 @@
 4,970,000	مدادرنگی سیکلاس اتودی لوله18رنگ
 4,400,000	مدادرنگی سیکلاس مقوا24رنگ
 6,000,000	مدادرنگی فابرکاستل 12تکشاخ
+12,000,000	مدادرنگی فابرکاستل 24تکشاخ
 7,113,000	مدادرنگی فابرکاستل آبرنگی12رنگ
 14,000,000	مدادرنگی فابرکاستل آبرنگی24رنگ
 6,594,000	مدادرنگی فابرکاستل پوست 10رنگ
 13,266,000	مدادرنگی فابرکاستل پوست 22رنگ
-77,550,000	مدادرنگی فابرکاستل تخت 100رنگ
-48,048,000	مدادرنگی فابرکاستل تخت 60رنگ
+77,616,000	مدادرنگی فابرکاستل تخت 100رنگ
 8,467,000	مدادرنگی فابرکاستل تخت 12رنگ
-15,521,000	مدادرنگی فابرکاستل تخت 24رنگ
+15,523,200	مدادرنگی فابرکاستل تخت 24رنگ
 25,401,000	مدادرنگی فابرکاستل تخت 36رنگ
 7,056,000	مدادرنگی فابرکاستل لوله12رنگ
 30,912,000	مدادرنگی فابرکاستل مقوا60رنگ
@@ -4709,8 +4754,8 @@
 80,000	مدادقرمز
 4,887,500	مدادکنته اسکول مکس
 2,600,000	مدادکنته پارس
-2,926,000	مدادکنته سفیدفابرکاستل
-3,344,000	مدادکنته مشکی فابرکاستل
+2,934,800	مدادکنته سفیدفابرکاستل
+3,347,300	مدادکنته مشکی فابرکاستل
 150,000	مدادگیردبه ای
 2,250,000	مدادلاکپشت 3گوش مشکی
 2,625,000	مدادمشکی آریاطرحدار
@@ -4961,6 +5006,8 @@
 660,000	یدک مینی لیست سویل8*13
 
 
+
+
 </textarea>
 
 <script>
@@ -4969,6 +5016,20 @@
     var currentItemName = "";
     var currentItemPrice = 0;
     
+    // تابع بستن بنر قطعی برق با افکت اسکرول
+    function closePowerBanner() {
+        var banner = document.getElementById('powerBanner');
+        if(banner) {
+            banner.style.maxHeight = '0px';
+            banner.style.paddingTop = '0px';
+            banner.style.paddingBottom = '0px';
+            banner.style.opacity = '0';
+            setTimeout(function() {
+                banner.style.display = 'none';
+            }, 400); 
+        }
+    }
+
     // دیکشنری کاراکترها 
     var charMap = {
         '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
