@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>لیست قیمت و سفارش عمده</title>
     
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
@@ -10,7 +10,6 @@
     <script>
         var ua = navigator.userAgent.toLowerCase();
         var hash = window.location.hash.toLowerCase();
-        // تشخیص اینکه کاربر داخل مینی‌اپ ایتا است یا تلگرام/بله
         if (ua.indexOf('eitaa') > -1 || hash.indexOf('eitaa') > -1) {
             document.write('<script src="https://developer.eitaa.com/eitaa-web-app.js"><\/script>');
         } else {
@@ -19,26 +18,25 @@
     </script>
 
     <style>
-        /* === متغیرهای رنگی مدرن === */
         :root { 
-            --primary-color: #6366f1; 
-            --primary-hover: #4f46e5;
+            --primary-color: #4f46e5; 
+            --primary-hover: #4338ca;
             --success-color: #10b981; 
             --danger-color: #ef4444;
-            --bg-color: #f8fafc; 
-            --text-color: #334155;
+            --bg-color: #f1f5f9; 
+            --text-color: #1e293b;
             --text-muted: #64748b;
             --box-bg: #ffffff;
             --border-color: #e2e8f0;
-            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
-            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
-            --radius-md: 12px; 
-            --radius-lg: 18px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --radius-md: 16px; 
+            --radius-lg: 24px;
             --radius-full: 9999px;
+            --safe-area-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        /* تم تاریک */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #0f172a;
@@ -46,345 +44,266 @@
                 --text-muted: #94a3b8;
                 --box-bg: #1e293b;
                 --border-color: #334155;
-                --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
-                --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
             }
         }
 
-        /* استایل‌های پایه */
-        body, input, button, textarea { font-family: 'Vazirmatn', Tahoma, sans-serif !important; }
-        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.4s ease; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, input, button, textarea { font-family: 'Vazirmatn', Tahoma, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.3s ease; }
         
-        /* === بنر قطعی برق اضافه شده === */
-        .power-banner {
-            background: linear-gradient(135deg, #f59e0b, #ea580c);
-            color: #ffffff;
-            padding: 12px 45px 12px 15px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-align: right;
-            position: relative;
-            line-height: 1.6;
-            max-height: 150px;
-            opacity: 1;
-            box-sizing: border-box;
-            transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 200;
-        }
-        .power-banner-close {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
-        }
-        .power-banner-close:active { background: rgba(255, 255, 255, 0.3); transform: translateY(-50%) scale(0.9); }
-        /* ================================ */
-
-        /* هدر شیشه‌ای معلق */
-        .sticky-container {
+        /* هدر معلق */
+        .header-container {
             position: sticky; top: 0; z-index: 100;
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            display: flex; flex-direction: column;
-            padding-bottom: 8px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            display: flex; flex-direction: column; gap: 12px;
         }
         @media (prefers-color-scheme: dark) {
-            .sticky-container {
-                background: rgba(30, 41, 59, 0.75);
-                border-bottom: 1px solid rgba(255,255,255,0.05);
-            }
+            .header-container { background: rgba(30, 41, 59, 0.85); }
         }
 
-        /* نوار تبلیغاتی مدرن */
+        /* نوار تبلیغات */
         .promo-banner {
-            width: calc(100% - 24px); margin: 8px auto; padding: 10px; box-sizing: border-box; text-align: center;
-            color: white; font-size: 0.82rem; font-weight: 700; cursor: pointer;
-            border-radius: var(--radius-full);
-            box-shadow: var(--shadow-sm);
-            display: flex; justify-content: center; align-items: center; min-height: 38px;
-            transition: background-color 0.5s ease, transform 0.2s ease;
+            width: 100%; padding: 8px 12px; text-align: center;
+            color: white; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+            border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+            display: flex; justify-content: center; align-items: center; min-height: 40px;
+            transition: background-color 0.4s ease, transform 0.2s ease;
         }
-        .promo-banner:active { transform: scale(0.97); }
-        .promo-text { transition: opacity 0.4s ease; letter-spacing: 0.1px; }
+        .promo-banner:active { transform: scale(0.98); }
+        .promo-text { transition: opacity 0.3s ease; }
 
-        /* نوار جستجوی پیشرفته */
-        .header-box { padding: 4px 12px; background: transparent; border: none; }
-        input { 
-            width: 100%; padding: 12px; padding-right: 42px; font-size: 14px; 
-            border: 2px solid transparent; border-radius: var(--radius-full); 
-            box-sizing: border-box; outline: none;
+        /* جستجو */
+        .search-box { position: relative; width: 100%; }
+        .search-box input { 
+            width: 100%; padding: 14px 44px 14px 16px; font-size: 0.95rem; 
+            border: 1px solid var(--border-color); border-radius: var(--radius-full); 
             background-color: var(--box-bg); color: var(--text-color);
-            box-shadow: var(--shadow-sm); transition: all 0.3s ease;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 14px center; background-size: 18px;
+            transition: all 0.2s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            outline: none;
         }
-        input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12); }
-        input::placeholder { color: var(--text-muted); font-weight: 500; }
-        
-        /* === تنظیمات اسلایدر بی‌نهایت === */
-        .slider-container { background: transparent; border: none; padding: 4px 0; gap: 10px; overflow: hidden; display: flex; flex-direction: column; }
-        
-        .marquee { 
-            display: flex; 
-            overflow-x: auto; 
-            user-select: none; 
-            padding: 4px 0;
-            width: 100%;
-            scroll-behavior: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            /* انتقال پردازش اسکرول به کارت گرافیک (GPU) */
-            will-change: scroll-position;
-            transform: translateZ(0);
+        .search-box input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15); }
+        .search-box svg {
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            width: 20px; height: 20px; color: var(--text-muted); pointer-events: none;
         }
-        .marquee::-webkit-scrollbar { display: none; }
-        
-        .marquee-content { 
-            display: flex; 
-            flex-shrink: 0; 
-            gap: 10px; 
-            padding-right: 10px; 
+
+        /* اسلایدر تگ‌ها (Native Horizontal Scroll) */
+        .chips-container {
+            display: flex; overflow-x: auto; gap: 8px; padding-bottom: 4px;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch;
         }
-        
-        /* دکمه‌های تگ (Chips) */
+        .chips-container::-webkit-scrollbar { display: none; }
         .chip {
-            padding: 6px 14px; background: var(--box-bg); border: 1px solid var(--border-color);
-            border-radius: var(--radius-full); cursor: pointer; font-size: 0.8rem; font-weight: 600;
-            color: var(--text-muted); white-space: nowrap; box-shadow: var(--shadow-sm);
-            transition: all 0.2s ease; direction: rtl;
+            padding: 6px 16px; background: var(--box-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-full); cursor: pointer; font-size: 0.85rem; font-weight: 600;
+            color: var(--text-muted); white-space: nowrap; transition: all 0.2s ease;
         }
-        .chip:active {
-            background: var(--primary-color) !important; color: white !important; border-color: var(--primary-color) !important;
-            transform: scale(0.92); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
-        }
-        @media (prefers-color-scheme: dark) {
-            .chip:active { box-shadow: 0 2px 8px rgba(129, 140, 248, 0.4) !important; }
-        }
+        .chip:active { background: var(--primary-color); color: white; border-color: var(--primary-color); transform: scale(0.95); }
 
-        /* ساختار فشرده‌تر لیست کالاها */
-        .content { padding: 12px; padding-bottom: 100px; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; background: transparent; }
-        
-        #myTable { animation: tableFadeIn 0.5s ease-out; }
-        @keyframes tableFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        tr { 
+        /* لیست محصولات */
+        .content { padding: 16px; padding-bottom: 120px; display: flex; flex-direction: column; gap: 10px; }
+        .product-item {
             background-color: var(--box-bg); border-radius: var(--radius-md); 
             box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            padding: 16px; cursor: pointer; transition: transform 0.15s, background-color 0.15s;
+            animation: fadeIn 0.4s ease-out;
         }
-        
-        tr:active { transform: scale(0.98); background-color: var(--border-color); }
-        
-        td { border: none; padding: 0; font-size: 0.9rem; color: var(--text-color); font-weight: 600; }
-        .price-cell { 
+        .product-item:active { transform: scale(0.98); background-color: var(--border-color); }
+        .product-name { font-size: 0.95rem; font-weight: 700; color: var(--text-color); line-height: 1.4; flex: 1; padding-left: 12px; }
+        .product-price { 
             color: var(--primary-color); font-weight: 800; font-size: 0.95rem; 
-            background: rgba(99, 102, 241, 0.08); padding: 4px 10px; border-radius: 8px; white-space: nowrap; direction: rtl; 
+            background: rgba(79, 70, 229, 0.1); padding: 6px 12px; border-radius: 10px; white-space: nowrap; 
         }
-        @media (prefers-color-scheme: dark) { .price-cell { color: #818cf8; background: rgba(129, 140, 248, 0.12); } }
-        
-        #status { text-align: center; padding: 12px; font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+        #status { text-align: center; padding: 16px; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
         /* دکمه شناور سبد خرید */
         .cart-fab {
-            position: fixed; bottom: 16px; left: 16px; z-index: 150;
-            background: linear-gradient(135deg, var(--primary-color), #818cf8); color: white;
-            width: 54px; height: 54px; border-radius: 18px;
+            position: fixed; bottom: 24px; left: 24px; z-index: 90;
+            background: var(--primary-color); color: white;
+            width: 60px; height: 60px; border-radius: 20px;
             display: none; align-items: center; justify-content: center;
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35); cursor: pointer;
-            font-size: 1.4rem; transition: all 0.2s ease;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); cursor: pointer;
+            font-size: 1.6rem; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .cart-fab:active { transform: scale(0.92); }
+        .cart-fab:active { transform: scale(0.9); }
         .cart-badge {
             position: absolute; top: -6px; right: -6px;
             background-color: var(--danger-color); color: white;
-            font-size: 0.78rem; font-weight: 800; border-radius: 50%;
-            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
-            border: 2.5px solid var(--bg-color); box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            font-size: 0.8rem; font-weight: 800; border-radius: 50%;
+            width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+            border: 3px solid var(--bg-color);
         }
 
-        /* پنجره‌های پاپ‌آپ */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 200;
-            align-items: center; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        /* Bottom Sheet (مُدال‌های کشویی) */
+        .bottom-sheet-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 200;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
         }
-        .modal-content {
-            background: var(--box-bg); padding: 22px 18px; border-radius: var(--radius-md);
-            width: 88%; max-width: 340px; text-align: center; max-height: 82vh; display: flex; flex-direction: column;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.05);
-            animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        .bottom-sheet-overlay.active { opacity: 1; visibility: visible; }
+        
+        .bottom-sheet {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--box-bg); border-radius: 28px 28px 0 0;
+            padding: 24px 20px calc(var(--safe-area-bottom) + 20px) 20px;
+            transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 201; display: flex; flex-direction: column; max-height: 85vh;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
         }
-        @keyframes popIn { from { transform: scale(0.9) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        .bottom-sheet.active { transform: translateY(0); }
+        .sheet-drag-handle { width: 40px; height: 5px; background: var(--border-color); border-radius: 10px; margin: 0 auto 20px auto; }
         
-        .modal-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 10px; color: var(--text-color); line-height: 1.4; }
-        .modal-price { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; background: var(--bg-color); padding: 8px; border-radius: 10px; display: inline-block; margin: 0 auto 18px auto; }
+        .sheet-title { font-size: 1.15rem; font-weight: 800; color: var(--text-color); margin-bottom: 8px; text-align: center; }
+        .sheet-subtitle { color: var(--text-muted); font-size: 0.95rem; text-align: center; margin-bottom: 24px; font-weight: 600;}
         
+        /* کنترل تعداد */
         .qty-control { 
-            display: inline-flex; align-items: center; justify-content: center; gap: 12px; 
-            margin: 0 auto 18px auto; background: var(--bg-color); padding: 6px; border-radius: var(--radius-full);
+            display: flex; align-items: center; justify-content: space-between; 
+            background: var(--bg-color); padding: 8px; border-radius: var(--radius-full);
+            margin: 0 auto 24px auto; width: 160px; border: 1px solid var(--border-color);
         }
         .qty-btn { 
-            background: var(--box-bg); border: none; width: 36px; height: 36px; border-radius: 50%; 
-            font-size: 1.2rem; color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: var(--shadow-sm); transition: all 0.2s; font-weight: 500;
+            background: var(--box-bg); border: none; width: 40px; height: 40px; border-radius: 50%; 
+            font-size: 1.4rem; color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-sm); transition: transform 0.1s;
         }
-        .qty-btn:active { transform: scale(0.9); }
-        .qty-input { width: 50px; text-align: center; font-size: 1.2rem; padding: 2px; border: none; background: transparent; color: var(--text-color); font-weight: 800; }
+        .qty-btn:active { transform: scale(0.9); background: var(--border-color); }
+        .qty-input { width: 50px; text-align: center; font-size: 1.2rem; border: none; background: transparent; color: var(--text-color); font-weight: 800; outline: none; padding: 0;}
         
-        .modal-total { font-size: 1.05rem; font-weight: 800; color: var(--primary-color); margin-bottom: 18px; padding-top: 14px; border-top: 2px dashed var(--border-color); }
+        .total-price { font-size: 1.2rem; font-weight: 800; color: var(--primary-color); text-align: center; margin-bottom: 24px; }
         
-        .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-        .btn-modal { padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;}
-        .btn-primary { background: linear-gradient(135deg, var(--primary-color), #818cf8); color: white; }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-cancel { background: var(--box-bg); color: var(--text-muted); border: 1px solid var(--border-color); }
+        /* دکمه‌ها */
+        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
+        .btn { 
+            width: 100%; padding: 14px; border-radius: var(--radius-md); border: none; 
+            font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-secondary { background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid rgba(239, 68, 68, 0.2); }
 
-        /* استایل سبد خرید */
-        .cart-list-container { overflow-y: auto; max-height: 40vh; margin-bottom: 15px; padding-right: 2px; }
-        .cart-list-container::-webkit-scrollbar { width: 4px; }
-        .cart-list-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-        
+        /* لیست سبد خرید */
+        .cart-list { overflow-y: auto; max-height: 45vh; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; padding: 4px; }
         .cart-item { 
-            display: flex; justify-content: space-between; align-items: center; text-align: right; 
-            padding: 12px; margin-bottom: 10px; background: var(--bg-color); border: 1px solid var(--border-color); 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 14px; background: var(--bg-color); border: 1px solid var(--border-color); 
             border-radius: var(--radius-md); 
         }
-        .cart-item-details { flex: 1; margin-left: 8px; }
-        .cart-item-name { font-weight: 800; font-size: 0.9rem; color: var(--text-color); margin-bottom: 6px;}
-        .cart-item-calc { font-size: 0.9rem; font-weight: 800; color: var(--primary-color); background: rgba(99,102,241,0.08); padding: 3px 8px; border-radius: 6px; }
-        .cart-remove-btn { 
-            background: rgba(239, 68, 68, 0.08); color: var(--danger-color); border: none; 
-            border-radius: 10px; width: 34px; height: 34px; font-weight: bold; font-size: 1rem;
-            cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s;
-        }
-        
-        .cart-qty-mini { display: flex; align-items: center; gap: 6px; background: var(--box-bg); padding: 2px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .cart-qty-mini button { background: transparent; border: none; color: var(--primary-color); width: 26px; height: 26px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;}
-        .cart-qty-mini span { font-size: 0.9rem; font-weight: 800; min-width: 22px; text-align: center; color: var(--text-color); }
+        .cart-item-info { flex: 1; margin-left: 12px; }
+        .cart-item-title { font-weight: 800; font-size: 0.9rem; color: var(--text-color); margin-bottom: 8px; }
+        .cart-item-row { display: flex; align-items: center; gap: 12px; }
+        .cart-item-price { font-size: 0.9rem; font-weight: 800; color: var(--primary-color); }
+        .mini-qty { display: flex; align-items: center; gap: 8px; background: var(--box-bg); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .mini-qty button { background: none; border: none; color: var(--text-color); font-size: 1.1rem; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .mini-qty span { font-weight: 700; font-size: 0.9rem; min-width: 20px; text-align: center; }
+        .btn-remove { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: none; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
 
-        #cartModal .btn-modal[style*="2AABEE"] { background: linear-gradient(135deg, #2AABEE, #1c93d4) !important; border: none; color: white !important;}
-        #cartModal .btn-modal[style*="12C19E"] { background: linear-gradient(135deg, #12C19E, #0e9d80) !important; border: none; color: white !important;}
-        #cartModal .btn-modal[style*="E85D04"] { background: linear-gradient(135deg, #E85D04, #cc5203) !important; border: none; color: white !important;}
+        /* رنگ برندها */
+        .bg-telegram { background-color: #2AABEE; color: white; }
+        .bg-bale { background-color: #12C19E; color: white; }
+        .bg-eitaa { background-color: #E85D04; color: white; }
     </style>
 </head>
 <body>
 
-<!-- بنر اطلاع رسانی اضافه شده به بالاترین قسمت -->
-<div id="powerBanner" class="power-banner">
-    ⚡️ همراهان همیشگی؛ پیشاپیش از شکیبایی شما در زمان قطعی برق (1405/04/29 - ساعت 18 الی 20) و عدم امکان پاسخگویی سپاسگزاریم
-    <button class="power-banner-close" onclick="closePowerBanner()">✖</button>
-</div>
-
-<div class="sticky-container">
+<div class="header-container">
     <div id="promoBanner" class="promo-banner" onclick="handlePromoClick()">
         <span id="promoText" class="promo-text">در حال بارگذاری...</span>
     </div>
-    <div class="header-box">
-        <input type="text" id="myInput" onkeyup="debouncedSearch()" placeholder="جستجوی نام کالا...">
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" oninput="debouncedSearch()" placeholder="جستجوی نام کالا...">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
     </div>
     
-    <div class="slider-container">
-        <div class="marquee" id="marquee-cats">
-            <div class="marquee-content" id="cat-content-1"></div>
-            <div class="marquee-content" id="cat-content-2"></div>
-        </div>
-        <div class="marquee" id="marquee-brands">
-            <div class="marquee-content" id="brand-content-1"></div>
-            <div class="marquee-content" id="brand-content-2"></div>
-        </div>
-    </div>
+    <div class="chips-container" id="categoryChips"></div>
+    <div class="chips-container" id="brandChips"></div>
 </div>
 
-<div class="content">
-    <table id="myTable">
-        <tbody id="tableBody"></tbody>
-    </table>
-    <div id="status">در حال بارگذاری...</div>
-</div>
+<div class="content" id="productList"></div>
+<div id="status">در حال بارگذاری...</div>
 
-<div class="cart-fab" id="cartFab" onclick="openCartModal()">
-    🛒
+<div class="cart-fab" id="cartFab" onclick="openSheet('cartSheet')">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
     <span class="cart-badge" id="cartBadge">0</span>
 </div>
 
-<div id="orderModal" class="modal-overlay" onclick="closeModalOnBG(event, 'orderModal')">
-    <div class="modal-content" style="max-width: 300px;">
-        <div id="modalItemName" class="modal-title">نام کالا</div>
-        <div id="modalItemPrice" class="modal-price">قیمت واحد: 0 تومان</div>
-        
-        <div class="qty-control">
-            <button class="qty-btn" onclick="changeQty(1)">+</button>
-            <input type="number" inputmode="numeric" id="modalQty" class="qty-input" value="1" min="1" onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="calcTotal()">
-            <button class="qty-btn" onclick="changeQty(-1)">-</button>
-        </div>
-        
-        <div id="modalTotal" class="modal-total">جمع کل: 0 تومان</div>
-        
-        <div class="modal-actions">
-            <button onclick="addToCart()" class="btn-modal btn-primary">🛒 افزودن به سبد سفارش</button>
-            <button onclick="closeModal('orderModal')" class="btn-modal btn-cancel">انصراف</button>
-        </div>
+<!-- Overlay مشترک برای تمام شیت‌ها -->
+<div class="bottom-sheet-overlay" id="sheetOverlay" onclick="closeAllSheets()"></div>
+
+<!-- شیت سفارش کالا -->
+<div class="bottom-sheet" id="orderSheet">
+    <div class="sheet-drag-handle"></div>
+    <div class="sheet-title" id="modalItemName">نام کالا</div>
+    <div class="sheet-subtitle" id="modalItemPrice">قیمت واحد: ۰ تومان</div>
+    
+    <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+        <input type="number" inputmode="numeric" id="modalQty" class="qty-input" value="1" min="1" onfocus="this.select()" oninput="calcTotal()">
+        <button class="qty-btn" onclick="changeQty(-1)">-</button>
+    </div>
+    
+    <div class="total-price" id="modalTotal">جمع کل: ۰ تومان</div>
+    
+    <div class="btn-group">
+        <button onclick="addToCart()" class="btn btn-primary">افزودن به سبد سفارش</button>
+        <button onclick="closeAllSheets()" class="btn btn-secondary">انصراف</button>
     </div>
 </div>
 
-<div id="cartModal" class="modal-overlay" onclick="closeModalOnBG(event, 'cartModal')">
-    <div class="modal-content">
-        <div class="modal-title" style="padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border-color);">🛒 پیش‌فاکتور شما</div>
-        
-        <div id="cartItemsList" class="cart-list-container"></div>
-        
-        <div id="cartSumTotal" class="modal-total" style="font-size: 1.1rem; color: var(--primary-color);">جمع کل: 0 تومان</div>
-        
-        <div class="modal-actions">
-            <button onclick="sendOrderTelegram()" class="btn-modal" style="background: #2AABEE; color: white;"> ارسال سفارش در تلگرام</button>
-            <button onclick="sendOrderBale()" class="btn-modal" style="background: #12C19E; color: white;"> ارسال سفارش در بله</button>
-            <button onclick="sendOrderEitaa()" class="btn-modal" style="background: #E85D04; color: white;"> ارسال سفارش در ایتا</button>
-            <button onclick="openConfirmClearModal()" class="btn-modal btn-cancel" style="color: var(--danger-color); border-color: var(--danger-color); background: rgba(239, 68, 68, 0.03);">🗑 حذف تمام سفارشات</button>
-            <button onclick="closeModal('cartModal')" class="btn-modal btn-cancel">بستن سبد / ادامه خرید</button>
-        </div>
+<!-- شیت سبد خرید -->
+<div class="bottom-sheet" id="cartSheet">
+    <div class="sheet-drag-handle"></div>
+    <div class="sheet-title">🛒 پیش‌فاکتور شما</div>
+    
+    <div class="cart-list" id="cartItemsList"></div>
+    
+    <div class="total-price" id="cartSumTotal" style="margin-bottom: 16px;">جمع کل: ۰ تومان</div>
+    
+    <div class="btn-group">
+        <button onclick="sendOrder('telegram')" class="btn bg-telegram">ارسال سفارش در تلگرام</button>
+        <button onclick="sendOrder('bale')" class="btn bg-bale">ارسال سفارش در بله</button>
+        <button onclick="sendOrder('eitaa')" class="btn bg-eitaa">ارسال سفارش در ایتا</button>
+        <button onclick="openSheet('confirmClearSheet')" class="btn btn-danger">حذف تمام سفارشات</button>
     </div>
 </div>
 
-<div id="confirmClearModal" class="modal-overlay" onclick="closeModalOnBG(event, 'confirmClearModal')">
-    <div class="modal-content" style="max-width: 300px;">
-        <div class="modal-title" style="margin-bottom: 20px;">آیا از حذف تمام کالاهای سبد خرید مطمئن هستید؟</div>
-        <div class="modal-actions">
-            <button onclick="confirmClearCart()" class="btn-modal btn-primary" style="background: var(--danger-color);">بله، حذف کن</button>
-            <button onclick="closeModal('confirmClearModal')" class="btn-modal btn-cancel">انصراف</button>
-        </div>
+<!-- شیت تایید حذف -->
+<div class="bottom-sheet" id="confirmClearSheet" style="z-index: 205;">
+    <div class="sheet-drag-handle"></div>
+    <div class="sheet-title">حذف سبد خرید</div>
+    <div class="sheet-subtitle">آیا از حذف تمام کالاها مطمئن هستید؟</div>
+    <div class="btn-group">
+        <button onclick="confirmClearCart()" class="btn btn-primary" style="background: var(--danger-color);">بله، حذف کن</button>
+        <button onclick="closeSheet('confirmClearSheet')" class="btn btn-secondary">انصراف</button>
     </div>
 </div>
 
-<div id="eitaaModal" class="modal-overlay" onclick="closeModalOnBG(event, 'eitaaModal')">
-    <div class="modal-content" style="max-width: 300px;">
-        <div class="modal-title" style="color: var(--success-color); margin-bottom: 12px; font-size: 1.3rem;">✅ متن کپی شد!</div>
-        <div style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; text-align: center; color: var(--text-color); font-weight: 500;">
-            سفارش شما در حافظه کپی شد.<br><br>
-            لطفاً پس از ورود به صفحه چت واحد فروش، متن را جای‌گذاری (Paste) و ارسال نمایید.
-        </div>
-        <div class="modal-actions">
-            <button onclick="redirectToEitaa()" class="btn-modal btn-primary">متوجه شدم </button>
-        </div>
+<!-- شیت راهنمای ایتا -->
+<div class="bottom-sheet" id="eitaaSheet" style="z-index: 205;">
+    <div class="sheet-drag-handle"></div>
+    <div class="sheet-title" style="color: var(--success-color);">✅ متن سفارش کپی شد</div>
+    <div class="sheet-subtitle" style="line-height: 1.6; margin-bottom: 24px;">
+        سفارش شما در حافظه کپی شد.<br>
+        لطفاً در صفحه چت، متن را جای‌گذاری (Paste) و ارسال نمایید.
+    </div>
+    <div class="btn-group">
+        <button onclick="redirectToEitaa()" class="btn btn-primary">ورود به چت ایتا</button>
     </div>
 </div>
 
+<!-- دیتابیس کالاها -->
 <textarea id="myData" style="display:none;">
 1,750,000	آبرنگ 12رنگ طلقی فاتح
 1,654,400	آبرنگ آریا12رنگ
@@ -1934,7 +1853,7 @@
 680,000	چسب مایع پنتر36گرم2سر
 250,000	چسب مایع خمره ای
 830,000	چسب مایع فوم وپازل استورم60میل
-980,000	چسب مایع کاسپین همه کاره100میل
+880,000	چسب مایع کاسپین همه کاره100میل
 1,280,000	چسب مدرسه استورم100میل
 850,000	چسب نواری72یارد
 342,000	چسب نواری36یارد ولفیکس
@@ -2174,7 +2093,8 @@
 1,395,000	دستگاه حرارتی کوچک 6012
 2,300,000	دستگاه حرارتی کوچک پیلس کلیددار
 15,000,000	دستگاه سیمی دوبل پلاستیکی
-250,000,000	دستگاه سیمی لول بدون خلاص کن
+345,000,000	دستگاه سیمی لول باخلاص کن
+298,000,000	دستگاه سیمی لول بدون خلاص کن
 25,000,000	دستگاه لاک اب کن برقی
 300,000	دستمال حوله ای مدرسه20*20
 225,000	دستمال عطری ایرانی16تایی
@@ -2632,6 +2552,7 @@
 2,300,000	دفترکلاسوری سامی100برگ
 2,100,000	دفترکلاسوری سوپرباندطلقی بدون
 2,436,000	دفترکلاسوری سوپرباندطلقی فلزبدون
+3,600,000	دفترکلاسوری سوپرباندطلقی فلز
 3,842,000	دفترکلاسوری سویل20حلقه خشتی فلز
 3,244,000	دفترکلاسوری سویل خشتی قفل پلاستیک
 5,424,000	دفترکلاسوری سویل فلز100برگ 1304
@@ -3006,7 +2927,7 @@
 450,000	روان نویس سالوادور802
 430,000	روان نویس سلنا
 260,000	روان نویس سومرماهان
-530,000	روان نویس سیکلاس اداری مایع
+600,000	روان نویس سیکلاس اداری مایع
 115,000	روان نویس سیکلاس فشاری آبی
 319,900	روان نویس سیکلاس کاندیدآبی
 319,900	روان نویس سیکلاس مورنو
@@ -3077,6 +2998,7 @@
 2,500,000	زونکن کتان4سانتی لبه فلز
 3,120,000	زونکن گلف کتان بزرگ
 5,625,000	زیرپایی فارساباکس پلاستیکی
+10,000,000	زیرتیغی کاترحرفه ای
 835,000	زیردستیA3گیره دار205
 920,000	زیردستی دوقفل خارجی302
 1,800,000	زیردستی سوپرباند2گیره
@@ -3494,6 +3416,7 @@
 400,000	فنرفلزی لول45
 90,000	فنرفلزی لول16
 100,000	فنرفلزی لول18
+32,000	فنرفلزی لول8
 2,160,000	فوم اکلیلی10رنگ اسکول چسبدار
 1,800,000	فوم اکلیلی10رنگ اسکول
 644,100	فوم اکلیلیA4
@@ -3982,7 +3905,7 @@
 252,000	کاترپلاستیکی ورقی کوچک
 889,900	کاترتویودستی بزرگ
 1,542,500	کاترتویوسربی بزرگ
-260,000,000	کاترحرفه ای فلکه ای 828  A4
+297,000,000	کاترحرفه ای فلکه ای 828  A4
 7,000,000	کاتررومیزی چینی سایزA4
 65,550,000	کاتررومیزی کادبلیوa3
 248,000	کاترفانتزی استندی211
@@ -4167,6 +4090,7 @@
 6,768,000	کلربوک پاپکوقابدار60برگ
 8,400,000	کلربوک پاپکوقابدار80برگ
 980,000	کلربوک پرگه20برگ
+1,200,000	کلربوک پرگه30برگ
 605,000	کلربوک رویالکس 20برگ
 5,880,000	کلربوک سوپرباند100برگ قابدار
 790,000	کلربوک سوپرباند10برگ
@@ -4232,7 +4156,7 @@
 2,500,000	کیف کشدارسهنددوردوخت عطف دار
 1,145,000	کیف کشدارسهند
 864,000	کیف کشدارسی بی اس 4110
-605,000	کیف کش دارمیکرو
+1,100,000	کیف کش دارمیکرو
 2,500,000	کیف کوله ای
 9,889,000	کیف کوله پارسیکارسی بی اس 1921
 16,969,000	کیف لب تاب پارسیکارسی بی اس 1902
@@ -4243,7 +4167,6 @@
 282,000	گل سفال بردیا1310
 165,000	گل سفال
 1,750,000	گواش آریاطلقی کوچک 12رنگ
-1,680,000	گواش پارسیکار6رنگ
 1,600,000	گواش پارس تک رنگ
 3,358,000	گواش پالمو12رنگ
 1,670,000	گواش پالمو6رنگ
@@ -4783,6 +4706,7 @@
 2,200,000	مدادمشکی استدلرکمل
 3,360,000	مدادمشکی استورم102
 3,564,000	مدادمشکی استورم103
+3,500,000	مدادمشکی استورم3گوش 310302
 2,500,000	مدادمشکی اسکول مکس
 1,750,000	مدادمشکی اس تی ام
 1,750,000	مدادمشکی الیپون طرح دار
@@ -4988,6 +4912,7 @@
 1,355,000	یدک پاکن اتودی کویلو
 1,250,000	یدک پاکن اتودی مونو
 950,000	یدک تیغ جراحی
+40,000,000	یدک تیغ کاترحرفه ای
 100,000	یدک خودکارپاکن دار
 120,000	یدک خودکارپیچی
 180,000	یدک خودکارفلزی تپل
@@ -5018,368 +4943,222 @@
 165,000	یدک ماژیک شارژی یونی وان
 195,000	یدک مغزی مدادفشنگی
 660,000	یدک مینی لیست سویل8*13
-
-
-
-
 </textarea>
 
 <script>
-    var allItems = [];
-    var cart = JSON.parse(localStorage.getItem('userCart')) || []; 
-    var currentItemName = "";
-    var currentItemPrice = 0;
+    let allItems = [];
+    let cart = JSON.parse(localStorage.getItem('userCart')) || []; 
+    let currentItem = { name: "", price: 0 };
     
-    // تابع بستن بنر قطعی برق با افکت اسکرول
-    function closePowerBanner() {
-        var banner = document.getElementById('powerBanner');
-        if(banner) {
-            banner.style.maxHeight = '0px';
-            banner.style.paddingTop = '0px';
-            banner.style.paddingBottom = '0px';
-            banner.style.opacity = '0';
-            setTimeout(function() {
-                banner.style.display = 'none';
-            }, 400); 
-        }
-    }
-
-    // دیکشنری کاراکترها 
-    var charMap = {
+    const charMap = {
         '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
         '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
         'آ':'ا','أ':'ا','إ':'ا','ي':'ی','ك':'ک','‌':' '
     };
     
-    function normalize(t) { 
-        return t.replace(/[۰-۹٠-٩آأإيك‌]/g, function(w) { return charMap[w] || w; }).toLowerCase();
-    }
+    const normalize = t => t.replace(/[۰-۹٠-٩آأإيك‌]/g, w => charMap[w] || w).toLowerCase();
 
-    window.onload = function() {
-        initSliders(); 
+    window.onload = () => {
+        initChips(); 
         setTimeout(processData, 50);
+        updateCartUI();
     };
 
-    function initSliders() {
-        var brandsList = [...new Set(["یکشین", "فابر", "استدلر", "زبرا", "سیکلاس", "سهند", "لاکسر", "گلف", "کویلو", "وحدت", "کرونا", "اطلس", "مدیر", "صدف", "سومر", "وردا", "وشکو", "هیرو", "کیکو", "سویل", "پیداکس", "آرتلاین", "میکرو", "ام کیو", "موربیت", "کملیون", "اعتدال", "سوپر باند", "پرشیا", "سلنا", "کیان", "ادمیرال", "اسکول مکس", "کانکس", "رازی", "فکتیس", "پنتر", "آریا", "فابل", "پیکاسو", "بنیتو", "پالمو", "ماین", "ووک", "آذین", "پلیکان", "پاپکو", "پارسیکار", "کنکو", "مپد", "کادبلیو", "اوات", "نوآوران"])];
-        var categoriesList = [...new Set(["پست ایت", "مداد مشکی", "مداد قرمز", "دفتر منگنه", "مداد رنگی", "چسب 5 سانت", "چسب نواری 36", "خودکار", "پانچ", "تراش", "جامدادی", "پوشه دکمه دار", "قمقمه", "کلاسور", "دفتر", "دفترچه", "غلط گیر", "لاک نواری", "یدک کلاسور", "ماشین حساب", "باطری", "دوخت", "سوزن", "کیف فایل", "کلربوک", "کاور", "ماژیک فسفری", "ماژیک وایت برد", "ماژیک معمولی", "خمیر", "ساک دستی", "گواش", "آبرنگ", "رنگ انگشتی", "پاک کن", "راپید", "بوم", "پرگار", "چسب ماتیکی", "چراغ مطالعه", "روان", "مداد طراحی", "قلمو", "کاغذ نقدی"])];
+    function initChips() {
+        const brands = ["یکشین", "فابر", "استدلر", "زبرا", "سیکلاس", "سهند", "لاکسر", "گلف", "کویلو", "وحدت", "کرونا", "اطلس", "مدیر", "صدف", "سومر", "وردا", "وشکو", "هیرو", "کیکو", "سویل", "پیداکس", "آرتلاین", "میکرو", "ام کیو", "موربیت", "کملیون", "اعتدال", "سوپر باند", "پرشیا", "سلنا", "کیان", "ادمیرال", "اسکول مکس", "کانکس", "رازی", "فکتیس", "پنتر", "آریا", "فابل", "پیکاسو", "بنیتو", "پالمو", "ماین", "ووک", "آذین", "پلیکان", "پاپکو", "پارسیکار", "کنکو", "مپد", "کادبلیو", "اوات", "نوآوران"];
+        const cats = ["پست ایت", "مداد مشکی", "مداد قرمز", "دفتر منگنه", "مداد رنگی", "چسب 5 سانت", "چسب نواری 36", "خودکار", "پانچ", "تراش", "جامدادی", "پوشه دکمه دار", "قمقمه", "کلاسور", "دفتر", "دفترچه", "غلط گیر", "لاک نواری", "یدک کلاسور", "ماشین حساب", "باطری", "دوخت", "سوزن", "کیف فایل", "کلربوک", "کاور", "ماژیک فسفری", "ماژیک وایت برد", "ماژیک معمولی", "خمیر", "ساک دستی", "گواش", "آبرنگ", "رنگ انگشتی", "پاک کن", "راپید", "بوم", "پرگار", "چسب ماتیکی", "چراغ مطالعه", "روان", "مداد طراحی", "قلمو", "کاغذ نقدی"];
 
-        function createChipsHTML(items) {
-            return items.map(function(item) {
-                return '<div class="chip" onclick="setQuickSearch(\'' + item + '\')">' + item + '</div>';
-            }).join('');
-        }
-
-        document.getElementById('cat-content-1').innerHTML = createChipsHTML(categoriesList);
-        document.getElementById('cat-content-2').innerHTML = createChipsHTML(categoriesList);
+        const createHTML = items => items.map(item => `<div class="chip" onclick="setQuickSearch('${item}')">${item}</div>`).join('');
         
-        document.getElementById('brand-content-1').innerHTML = createChipsHTML(brandsList);
-        document.getElementById('brand-content-2').innerHTML = createChipsHTML(brandsList);
-
-        setupMarqueeTouchAndAuto('marquee-cats', -0.3); 
-        setupMarqueeTouchAndAuto('marquee-brands', 0.3); 
+        document.getElementById('categoryChips').innerHTML = createHTML(cats);
+        document.getElementById('brandChips').innerHTML = createHTML(brands);
     }
-
-    /* === سیستم جامع اسکرول مبتنی بر زمان (Delta Time) === */
-    function setupMarqueeTouchAndAuto(elementId, speed) {
-        var el = document.getElementById(elementId);
-        if (!el) return;
-        
-        el.dir = "ltr"; 
-        
-        var isInteracting = false;
-        var timeoutId = null;
-        var exactScroll = 0; 
-        var lastTimestamp = null; 
-
-        setTimeout(function() {
-            var halfWidth = el.scrollWidth / 2;
-            
-            if (speed < 0) { exactScroll = halfWidth; } 
-            else { exactScroll = 0; }
-            
-            el.scrollLeft = exactScroll;
-
-            function checkWrap() {
-                halfWidth = el.scrollWidth / 2; 
-                if (speed > 0) {
-                    if (exactScroll >= halfWidth) { exactScroll -= halfWidth; } 
-                    else if (exactScroll <= 0) { exactScroll += halfWidth; }
-                } else {
-                    if (exactScroll <= 0) { exactScroll += halfWidth; } 
-                    else if (exactScroll >= halfWidth) { exactScroll -= halfWidth; }
-                }
-            }
-
-            function scrollLoop(timestamp) {
-                if (!lastTimestamp) lastTimestamp = timestamp;
-                var deltaTime = timestamp - lastTimestamp;
-                lastTimestamp = timestamp;
-
-                if (deltaTime > 100) deltaTime = 16.66; 
-
-                if (!isInteracting) {
-                    var timeMultiplier = deltaTime / 16.66;
-                    exactScroll += (speed * timeMultiplier);
-                    checkWrap();
-                    el.scrollLeft = exactScroll; 
-                } else {
-                    exactScroll = el.scrollLeft;
-                }
-                requestAnimationFrame(scrollLoop);
-            }
-
-            el.addEventListener('scroll', function() {
-                if (isInteracting) { checkWrap(); }
-            }, {passive: true});
-
-            function startInteract() {
-                isInteracting = true;
-                clearTimeout(timeoutId);
-            }
-            
-            function endInteract() {
-                timeoutId = setTimeout(function() {
-                    isInteracting = false;
-                    lastTimestamp = null;
-                }, 1500); 
-            }
-
-            el.addEventListener('touchstart', startInteract, {passive: true});
-            el.addEventListener('touchend', endInteract, {passive: true});
-            el.addEventListener('mousedown', startInteract);
-            el.addEventListener('mouseup', endInteract);
-            el.addEventListener('mouseleave', endInteract);
-
-            requestAnimationFrame(scrollLoop);
-        }, 150);
-    }
-    /* ============================================== */
 
     function setQuickSearch(word) {
-        var input = document.getElementById("myInput");
-        input.value = word; 
+        document.getElementById("searchInput").value = word; 
         doSearch(); 
-        
-        // اسکرول به بالاترین نقطه صفحه (پیکسل 0) تا هدر روی نتایج جستجو را نپوشاند
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function processData() {
-        var text = document.getElementById("myData").value;
-        var lines = text.split("\n");
-        var originalIndex = 0;
-        var tempItems = [];
+        const text = document.getElementById("myData").value;
+        const lines = text.split("\n");
+        let idCounter = 0;
 
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i].trim();
-            if (!line || line.startsWith("!!!")) continue; 
-            var parts = line.split("\t");
+        lines.forEach(line => {
+            line = line.trim();
+            if (!line || line.startsWith("!!!")) return; 
+            const parts = line.split("\t");
             if (parts.length >= 2) {
-                var p = parseInt(parts[0].replace(/,/g, '').replace(/"/g, '')); 
-                var n = parts[1].replace(/"/g, '').trim();
-                tempItems.push({ id: originalIndex++, p: p, n: n, sn: normalize(n) });
+                const price = parseInt(parts[0].replace(/[,"]/g, '')); 
+                const name = parts[1].replace(/"/g, '').trim();
+                allItems.push({ id: idCounter++, p: price, n: name, sn: normalize(name) });
             }
-        }
-        allItems = tempItems;
+        });
         
-        var cartUpdated = false;
-        for (var c = 0; c < cart.length; c++) {
-            var liveItem = allItems.find(function(item) { return item.n === cart[c].name; });
+        // همگام‌سازی قیمت‌های سبد خرید
+        let cartUpdated = false;
+        cart = cart.filter(cartItem => {
+            const liveItem = allItems.find(item => item.n === cartItem.name);
             if (liveItem) {
-                if (cart[c].price !== liveItem.p) {
-                    cart[c].price = liveItem.p;
-                    cartUpdated = true;
-                }
-            } else {
-                cart.splice(c, 1);
-                c--;
-                cartUpdated = true;
+                if (cartItem.price !== liveItem.p) { cartItem.price = liveItem.p; cartUpdated = true; }
+                return true;
             }
-        }
+            cartUpdated = true; return false;
+        });
         if (cartUpdated) saveCart();
 
         showItems(allItems);
-        updateCartUI(); 
     }
 
     function showItems(items) {
-        var html = "";
-        var limit = Math.min(items.length, 150); 
-        for (var i = 0; i < limit; i++) {
-            html += "<tr onclick='openOrderModalByIndex(" + items[i].id + ")'>" +
-                    "<td>" + items[i].n + "</td>" +
-                    "<td class='price-cell'>" + formatToToman(items[i].p) + "</td>" +
-                    "</tr>";
+        const limit = Math.min(items.length, 150); 
+        let html = "";
+        for (let i = 0; i < limit; i++) {
+            html += `
+                <div class="product-item" onclick="openOrderSheet(${items[i].id})">
+                    <div class="product-name">${items[i].n}</div>
+                    <div class="product-price">${formatToToman(items[i].p)}</div>
+                </div>`;
         }
-        document.getElementById("tableBody").innerHTML = html;
-        document.getElementById("status").innerText = "نمایش " + limit + " مورد از " + items.length + " کالا (برای سفارش کلیک کنید)";
+        document.getElementById("productList").innerHTML = html;
+        document.getElementById("status").innerText = `نمایش ${limit} مورد از ${items.length} کالا`;
     }
 
-    function openOrderModalByIndex(id) {
-        var item = allItems.find(function(x) { return x.id === id; });
-        if(item) {
-            openOrderModal(item.n, item.p);
-        }
-    }
-
-    // متغیر و تابع جدید برای پیاده‌سازی Debounce
-    var searchTimeout;
+    let searchTimeout;
     function debouncedSearch() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(doSearch, 300);
     }
 
     function doSearch() {
-        var val = normalize(document.getElementById("myInput").value).trim();
-        if (!val) { showItems(allItems); return; }
-        var words = val.split(/\s+/);
-        var filtered = allItems.filter(function(item) {
-            return words.every(function(word) { return item.sn.indexOf(word) > -1; });
-        });
+        const val = normalize(document.getElementById("searchInput").value).trim();
+        if (!val) return showItems(allItems);
+        
+        const words = val.split(/\s+/);
+        const filtered = allItems.filter(item => words.every(word => item.sn.includes(word)));
         showItems(filtered);
     }
 
-    function formatToToman(n) {
-        var num = parseInt(n);
-        if(isNaN(num)) return n;
-        var toman = Math.floor(num / 10); 
-        return toman.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " تومان";
+    function formatToToman(num) {
+        if(isNaN(num)) return num;
+        return Math.floor(num / 10).toLocaleString('fa-IR') + " تومان";
     }
 
-    function openOrderModal(name, price) {
-        currentItemName = name;
-        currentItemPrice = parseInt(price);
-        document.getElementById("modalItemName").innerText = name;
-        document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(price);
+    /* مدیریت Bottom Sheets */
+    function openSheet(id) {
+        if(id === 'cartSheet') renderCartList();
+        document.getElementById('sheetOverlay').classList.add('active');
+        document.getElementById(id).classList.add('active');
+    }
+    
+    function closeSheet(id) {
+        document.getElementById(id).classList.remove('active');
+        checkOverlay();
+    }
+
+    function closeAllSheets() {
+        document.querySelectorAll('.bottom-sheet').forEach(sheet => sheet.classList.remove('active'));
+        document.getElementById('sheetOverlay').classList.remove('active');
+    }
+
+    function checkOverlay() {
+        const anyActive = document.querySelectorAll('.bottom-sheet.active').length > 0;
+        if(!anyActive) document.getElementById('sheetOverlay').classList.remove('active');
+    }
+
+    function openOrderSheet(id) {
+        const item = allItems.find(x => x.id === id);
+        if(!item) return;
+        
+        currentItem = { name: item.n, price: item.p };
+        document.getElementById("modalItemName").innerText = item.n;
+        document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(item.p);
         document.getElementById("modalQty").value = 1;
         calcTotal();
-        document.getElementById("orderModal").style.display = "flex";
-    }
-
-    function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
-    function closeModalOnBG(event, modalId) { if(event.target.id === modalId) { closeModal(modalId); } }
-
-    function clearInputOnFocus(input) {
-        if (input.value == "1") {
-            input.value = "";
-        }
-    }
-
-    function restoreInputOnBlur(input) {
-        if (input.value.trim() === "" || parseInt(input.value) <= 0) {
-            input.value = "1";
-            calcTotal();
-        }
+        openSheet('orderSheet');
     }
 
     function changeQty(amount) {
-        var input = document.getElementById("modalQty");
-        var current = parseInt(input.value) || 0;
-        var newVal = current + amount;
+        const input = document.getElementById("modalQty");
+        const newVal = (parseInt(input.value) || 0) + amount;
         if (newVal >= 1) { input.value = newVal; calcTotal(); }
     }
 
     function calcTotal() {
-        var qtyInput = document.getElementById("modalQty").value;
-        var qty = parseInt(qtyInput) || 0;
-        var total = currentItemPrice * qty;
-        document.getElementById("modalTotal").innerText = "جمع کل: " + formatToToman(total);
+        const qty = parseInt(document.getElementById("modalQty").value) || 0;
+        document.getElementById("modalTotal").innerText = "جمع کل: " + formatToToman(currentItem.price * qty);
     }
 
-    function saveCart() {
-        localStorage.setItem('userCart', JSON.stringify(cart));
-    }
-
-    function openConfirmClearModal() {
-        document.getElementById("confirmClearModal").style.display = "flex";
-    }
-
-    function confirmClearCart() {
-        cart = [];
-        saveCart();
-        updateCartUI();
-        closeModal('confirmClearModal');
-        closeModal('cartModal');
-    }
+    /* مدیریت سبد خرید */
+    function saveCart() { localStorage.setItem('userCart', JSON.stringify(cart)); }
 
     function addToCart() {
-        var qtyInput = document.getElementById("modalQty").value;
-        var qty = parseInt(qtyInput) || 1;
-        var existingItemIndex = cart.findIndex(function(item) { return item.name === currentItemName; });
-        if(existingItemIndex !== -1) { cart[existingItemIndex].qty += qty; } 
-        else { cart.push({ name: currentItemName, price: currentItemPrice, qty: qty }); }
+        const qty = parseInt(document.getElementById("modalQty").value) || 1;
+        const existing = cart.find(item => item.name === currentItem.name);
+        if(existing) existing.qty += qty;
+        else cart.push({ name: currentItem.name, price: currentItem.price, qty });
         
-        saveCart(); 
-        updateCartUI();
-        closeModal('orderModal');
-    }
-
-    function removeFromCart(index) {
-        cart.splice(index, 1);
-        saveCart(); 
-        updateCartUI();
-        renderCartList();
-        if(cart.length === 0) closeModal('cartModal');
-    }
-
-    function updateCartQty(index, change) {
-        cart[index].qty += change;
-        if (cart[index].qty <= 0) {
-            cart.splice(index, 1);
-        }
-        saveCart();
-        updateCartUI();
-        renderCartList();
-        if (cart.length === 0) closeModal('cartModal');
+        saveCart(); updateCartUI(); closeAllSheets();
     }
 
     function updateCartUI() {
-        var fab = document.getElementById("cartFab");
-        var badge = document.getElementById("cartBadge");
+        const fab = document.getElementById("cartFab");
+        const badge = document.getElementById("cartBadge");
         if (cart.length > 0) {
             fab.style.display = "flex";
             badge.innerText = cart.length;
         } else {
             fab.style.display = "none";
+            closeSheet('cartSheet');
         }
-    }
-
-    function openCartModal() {
-        if(cart.length === 0) return;
-        renderCartList();
-        document.getElementById("cartModal").style.display = "flex";
     }
 
     function renderCartList() {
-        var listContainer = document.getElementById("cartItemsList");
-        var sumTotalEl = document.getElementById("cartSumTotal");
+        const listContainer = document.getElementById("cartItemsList");
         listContainer.innerHTML = "";
-        var finalSum = 0;
-        for (var i = 0; i < cart.length; i++) {
-            var item = cart[i];
-            var rowTotal = item.price * item.qty;
+        let finalSum = 0;
+        
+        cart.forEach((item, index) => {
+            const rowTotal = item.price * item.qty;
             finalSum += rowTotal;
-            listContainer.innerHTML += 
-                "<div class='cart-item'>" +
-                    "<div class='cart-item-details'>" +
-                        "<div class='cart-item-name'>" + item.name + "</div>" +
-                        "<div style='display:flex; align-items:center; gap:15px; margin-top:8px;'>" +
-                            "<div class='cart-qty-mini'>" +
-                                "<button onclick='updateCartQty(" + i + ", 1)'>+</button>" +
-                                "<span>" + item.qty + "</span>" +
-                                "<button onclick='updateCartQty(" + i + ", -1)'>-</button>" +
-                            "</div>" +
-                            "<div class='cart-item-calc'>" + formatToToman(rowTotal) + "</div>" +
-                        "</div>" +
-                    "</div>" +
-                    "<button class='cart-remove-btn' style='margin-right:10px;' onclick='removeFromCart(" + i + ")'>✖</button>" +
-                "</div>";
-        }
-        sumTotalEl.innerText = "جمع کل پیش‌فاکتور: " + formatToToman(finalSum);
+            listContainer.innerHTML += `
+                <div class='cart-item'>
+                    <div class='cart-item-info'>
+                        <div class='cart-item-title'>${item.name}</div>
+                        <div class='cart-item-row'>
+                            <div class='mini-qty'>
+                                <button onclick='updateCartQty(${index}, 1)'>+</button>
+                                <span>${item.qty}</span>
+                                <button onclick='updateCartQty(${index}, -1)'>-</button>
+                            </div>
+                            <div class='cart-item-price'>${formatToToman(rowTotal)}</div>
+                        </div>
+                    </div>
+                    <button class='btn-remove' onclick='removeFromCart(${index})'>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                    </button>
+                </div>`;
+        });
+        document.getElementById("cartSumTotal").innerText = "جمع کل: " + formatToToman(finalSum);
     }
 
-    /* === سیستم جامع مدیریت لینک برای ایتا، تلگرام و بله === */
+    function updateCartQty(index, change) {
+        cart[index].qty += change;
+        if (cart[index].qty <= 0) cart.splice(index, 1);
+        saveCart(); updateCartUI(); renderCartList();
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        saveCart(); updateCartUI(); renderCartList();
+    }
+
+    function confirmClearCart() {
+        cart = []; saveCart(); updateCartUI(); closeAllSheets();
+    }
+
+    /* اتصال به پیام‌رسان‌ها */
     function getWebApp() {
         if (typeof window.Eitaa !== 'undefined' && window.Eitaa.WebApp) return window.Eitaa.WebApp;
         if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) return window.Telegram.WebApp;
@@ -5387,151 +5166,92 @@
     }
 
     function openSafeLink(url, platform) {
-        var app = getWebApp();
-        
+        const app = getWebApp();
         if (app) {
             try {
-                if (platform === 'eitaa' && typeof app.openEitaaLink === 'function') {
-                    app.openEitaaLink(url);
-                    return;
-                }
-                
-                if (typeof app.openLink === 'function') {
-                    app.openLink(url, { try_browser: true });
-                    return;
-                }
-            } catch(e) {
-                console.log("WebApp API Error:", e);
-            }
+                if (platform === 'eitaa' && typeof app.openEitaaLink === 'function') return app.openEitaaLink(url);
+                if (typeof app.openLink === 'function') return app.openLink(url, { try_browser: true });
+            } catch(e) { console.log(e); }
         }
         
-        var a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() { document.body.removeChild(a); }, 100);
+        const a = document.createElement('a');
+        a.href = url; a.target = '_blank';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 
     function getOrderMessageText() {
         if(cart.length === 0) return "";
-        var message = "📋 سلام، درخواست سفارش جدید:\n\n";
-        var finalSum = 0;
-        for (var i = 0; i < cart.length; i++) {
-            var item = cart[i];
-            finalSum += (item.price * item.qty);
-            message += "🔸 " + (i+1) + ". " + item.name + "\n   تعداد: " + item.qty + " عدد | فی: " + formatToToman(item.price) + "\n";
-        }
-        message += "\n💰 جمع کل سفارش: " + formatToToman(finalSum);
-        return message;
+        let msg = "📋 سلام، درخواست سفارش جدید:\n\n";
+        let sum = 0;
+        cart.forEach((item, i) => {
+            sum += (item.price * item.qty);
+            msg += `🔸 ${i+1}. ${item.name}\n   تعداد: ${item.qty} عدد | فی: ${formatToToman(item.price)}\n`;
+        });
+        return msg + `\n💰 جمع کل: ${formatToToman(sum)}`;
     }
 
-    function sendOrderTelegram() {
-        var text = getOrderMessageText();
-        if(!text) return;
-        var url = "https://t.me/tahrir_ir_f?text=" + encodeURIComponent(text);
-        openSafeLink(url, 'telegram');
-    }
-
-    function sendOrderBale() {
-        var text = getOrderMessageText();
-        if(!text) return;
-        var url = "https://ble.ir/tahrir_ir_f?text=" + encodeURIComponent(text);
-        openSafeLink(url, 'bale');
-    }
-
-    function sendOrderEitaa() {
-        var text = getOrderMessageText();
+    function sendOrder(platform) {
+        const text = getOrderMessageText();
         if(!text) return;
         
-        var copyToClipboard = function(str) {
-            if (navigator.clipboard && window.isSecureContext) {
-                return navigator.clipboard.writeText(str);
-            } else {
-                return new Promise(function(resolve, reject) {
-                    var textArea = document.createElement("textarea");
-                    textArea.value = str;
-                    textArea.style.position = "fixed";
-                    textArea.style.opacity = "0";
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        var successful = document.execCommand('copy');
-                        if (successful) resolve();
-                        else reject();
-                    } catch (err) {
-                        reject();
-                    }
-                    document.body.removeChild(textArea);
-                });
-            }
-        };
+        if(platform === 'telegram') {
+            openSafeLink("https://t.me/tahrir_ir_f?text=" + encodeURIComponent(text), 'telegram');
+        } else if(platform === 'bale') {
+            openSafeLink("https://ble.ir/tahrir_ir_f?text=" + encodeURIComponent(text), 'bale');
+        } else if(platform === 'eitaa') {
+            copyToClipboard(text).then(() => {
+                closeSheet('cartSheet');
+                openSheet('eitaaSheet');
+            }).catch(() => alert('لطفا اجازه دسترسی به کلیپ‌بورد را بدهید.'));
+        }
+    }
 
-        copyToClipboard(text).then(function() {
-            document.getElementById("eitaaModal").style.display = "flex";
-        }).catch(function() {
-            var textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
+    function copyToClipboard(str) {
+        if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(str);
+        return new Promise((resolve, reject) => {
+            const textArea = document.createElement("textarea");
+            textArea.value = str; textArea.style.position = "fixed"; textArea.style.opacity = "0";
+            document.body.appendChild(textArea); textArea.select();
+            try { document.execCommand('copy') ? resolve() : reject(); } catch (err) { reject(); }
             document.body.removeChild(textArea);
-            document.getElementById("eitaaModal").style.display = "flex";
         });
     }
 
     function redirectToEitaa() {
-        closeModal('eitaaModal');
-        closeModal('cartModal'); 
-        
-        var targetUrl = "https://eitaa.com/tahrir_ir_f";
-        openSafeLink(targetUrl, 'eitaa');
+        closeAllSheets();
+        openSafeLink("https://eitaa.com/tahrir_ir_f", 'eitaa');
     }
 
-    /* === سیستم نوار تبلیغات چرخشی === */
-    var promoAds = [
-        { text: " مشاهده جدید ترین محصولات در کانال بله", link: "https://ble.ir/tahrir_ir/", color: "#12C19E", platform: "bale" },
-        { text: " مشاهده جدید ترین محصولات در کانال ایتا", link: "https://eitaa.com/tahrir_ir/", color: "#E85D04", platform: "eitaa" },
-        { text: " مشاهده جدید ترین محصولات در کانال تلگرام", link: "https://t.me/tahrir_ir/", color: "#2AABEE", platform: "telegram" },
-        { text: "📞 تماس با ما", link: "tel:02536664666", color: "var(--primary-color)", platform: "other" },
-        { text: "📍 لوکیشن فروشگاه در نشان", link: "https://nshn.ir/39sbsRpKWxvcis", color: "#dc3545", platform: "other" },
-        { text: "📍 لوکیشن فروشگاه در گوگل مپ", link: "https://maps.app.goo.gl/kyKWkKLWq9X4r6nU6", color: "#28a745", platform: "other" },
-        { text: "ℹ️ در باره ی ما", link: "https://takl.ink/tahrir_ir", color: "#6c757d", platform: "other" }
+    /* نوار تبلیغات چرخشی */
+    const promoAds = [
+        { text: " مشاهده جدیدترین‌ها در بله", link: "https://ble.ir/tahrir_ir/", color: "#12C19E", p: "bale" },
+        { text: " مشاهده جدیدترین‌ها در ایتا", link: "https://eitaa.com/tahrir_ir/", color: "#E85D04", p: "eitaa" },
+        { text: " مشاهده جدیدترین‌ها در تلگرام", link: "https://t.me/tahrir_ir/", color: "#2AABEE", p: "telegram" },
+        { text: "📞 تماس با ما (02536664666)", link: "tel:02536664666", color: "var(--primary-color)", p: "other" }
     ];
+    let currentAd = 0;
 
-    var currentAdIndex = 0;
-
-    function updatePromoBanner() {
-        var banner = document.getElementById("promoBanner");
-        var textSpan = document.getElementById("promoText");
-        var ad = promoAds[currentAdIndex];
+    function updatePromo() {
+        const textSpan = document.getElementById("promoText");
+        const banner = document.getElementById("promoBanner");
+        const ad = promoAds[currentAd];
         
         textSpan.style.opacity = "0";
-        
-        setTimeout(function() {
+        setTimeout(() => {
             textSpan.innerText = ad.text;
             banner.style.backgroundColor = ad.color;
             textSpan.style.opacity = "1";
-        }, 400); 
-        
-        currentAdIndex = (currentAdIndex + 1) % promoAds.length;
+        }, 300);
+        currentAd = (currentAd + 1) % promoAds.length;
     }
-
+    
     function handlePromoClick() {
-        var displayedIndex = (currentAdIndex - 1 + promoAds.length) % promoAds.length;
-        var ad = promoAds[displayedIndex];
-        
-        if (ad.link.startsWith('tel:')) {
-            window.location.href = ad.link;
-        } else {
-            openSafeLink(ad.link, ad.platform);
-        }
+        const ad = promoAds[(currentAd - 1 + promoAds.length) % promoAds.length];
+        ad.link.startsWith('tel:') ? window.location.href = ad.link : openSafeLink(ad.link, ad.p);
     }
 
-    setInterval(updatePromoBanner, 15000);
-    setTimeout(updatePromoBanner, 100);
+    setInterval(updatePromo, 8000);
+    setTimeout(updatePromo, 100);
 
 </script>
 </body>
