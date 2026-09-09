@@ -8,571 +8,241 @@
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
     
     <script>
-        // پشتیبانی همزمان از Telegram Mini Apps و Eitaa Mini Apps.
-        // برای تست دستی می‌توانید ?platform=eitaa یا ?platform=telegram اضافه کنید.
-        (function () {
-            var ua = (navigator.userAgent || '').toLowerCase();
-            var qs = new URLSearchParams(location.search);
-            var hash = (location.hash || '').toLowerCase();
-            var forced = (qs.get('platform') || '').toLowerCase();
-
-            var isEitaa = forced === 'eitaa' ||
-                forced === 'bale' ||
-                ua.indexOf('eitaa') > -1 ||
-                hash.indexOf('eitaa') > -1;
-
-            window.__MINIAPP_PLATFORM__ = isEitaa ? 'eitaa' : 'telegram';
-
-            var src = isEitaa
-                ? 'https://developer.eitaa.com/eitaa-web-app.js'
-                : 'https://telegram.org/js/telegram-web-app.js';
-
-            document.write('<script src="' + src + '"><\/script>');
-        })();
+        var ua = navigator.userAgent.toLowerCase();
+        var hash = window.location.hash.toLowerCase();
+        // تشخیص اینکه کاربر داخل مینی‌اپ ایتا است یا تلگرام/بله
+        if (ua.indexOf('eitaa') > -1 || hash.indexOf('eitaa') > -1) {
+            document.write('<script src="https://developer.eitaa.com/eitaa-web-app.js"><\/script>');
+        } else {
+            document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
+        }
     </script>
 
     <style>
-        /* =========================================================
-           Mini App UI — Telegram + Eitaa adaptive theme
-           Theme source: WebApp.themeParams / colorScheme
-           ========================================================= */
-        :root {
-            --app-bg: #f4f5f7;
-            --app-surface: #ffffff;
-            --app-surface-2: #eef0f3;
-            --app-text: #202124;
-            --app-hint: #747b84;
-            --app-accent: #2481cc;
-            --app-accent-text: #ffffff;
-            --app-link: #2481cc;
-            --app-header: #f4f5f7;
-            --app-separator: #d9dde3;
-            --app-danger: #e5484d;
-            --app-success: #16a37a;
-
-            --radius-sm: 10px;
-            --radius-md: 14px;
+        /* === متغیرهای رنگی مدرن === */
+        :root { 
+            --primary-color: #6366f1; 
+            --primary-hover: #4f46e5;
+            --success-color: #10b981; 
+            --danger-color: #ef4444;
+            --bg-color: #f8fafc; 
+            --text-color: #334155;
+            --text-muted: #64748b;
+            --box-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
+            --radius-md: 12px; 
             --radius-lg: 18px;
-            --radius-full: 999px;
-
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --radius-full: 9999px;
         }
 
-        * { box-sizing: border-box; }
-
-        html {
-            background: var(--app-bg);
-            color-scheme: light;
-            overscroll-behavior-y: none;
-        }
-
-        html[data-color-scheme="dark"] { color-scheme: dark; }
-
-        body, input, button, textarea {
-            font-family: 'Vazirmatn', Tahoma, sans-serif !important;
-        }
-
-        body {
-            background: var(--app-bg);
-            color: var(--app-text);
-            margin: 0;
-            min-height: 100vh;
-            -webkit-tap-highlight-color: transparent;
-            transition: background-color .2s ease, color .2s ease;
-            padding-bottom: var(--safe-bottom);
-        }
-
-        button, input { -webkit-appearance: none; appearance: none; }
-
-        /* ===== App header ===== */
-        .sticky-container {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: color-mix(in srgb, var(--app-header) 94%, transparent);
-            border-bottom: 1px solid var(--app-separator);
-            padding:
-                calc(7px + var(--safe-top))
-                0
-                7px;
-            backdrop-filter: blur(18px) saturate(1.15);
-            -webkit-backdrop-filter: blur(18px) saturate(1.15);
-        }
-
-        .promo-banner {
-            width: calc(100% - 20px);
-            margin: 2px auto 8px;
-            min-height: 36px;
-            padding: 8px 12px;
-            border: 0;
-            border-radius: var(--radius-full);
-            background: var(--app-accent);
-            color: var(--app-accent-text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: 12px;
-            font-weight: 750;
-            cursor: pointer;
-            box-shadow: 0 4px 14px color-mix(in srgb, var(--app-accent) 22%, transparent);
-            transition: transform .16s ease, opacity .16s ease;
-        }
-
-        .promo-banner:active { transform: scale(.985); }
-
-        .promo-text {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            transition: opacity .22s ease;
-        }
-
-        .header-box {
-            padding: 0 10px;
-            background: transparent;
-        }
-
-        #myInput {
-            width: 100%;
-            height: 46px;
-            border: 1px solid transparent;
-            border-radius: 13px;
-            outline: none;
-            padding: 0 44px 0 14px;
-            background: var(--app-surface-2);
-            color: var(--app-text);
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23747b84' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 18px;
-            transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
-        }
-
-        #myInput:focus {
-            border-color: color-mix(in srgb, var(--app-accent) 55%, transparent);
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent) 14%, transparent);
-            background: var(--app-surface);
-        }
-
-        #myInput::placeholder {
-            color: var(--app-hint);
-            font-weight: 450;
-        }
-
-        /* ===== Horizontal filters ===== */
-        .slider-container {
-            background: transparent;
-            padding: 5px 0 1px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            overflow: hidden;
-        }
-
-        .marquee {
-            display: flex;
-            width: 100%;
-            overflow-x: auto;
-            padding: 3px 0;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-x: contain;
-        }
-
-        .marquee::-webkit-scrollbar { display: none; }
-
-        .marquee-content {
-            display: flex;
-            flex-shrink: 0;
-            gap: 7px;
-            padding-right: 10px;
-        }
-
-        .chip {
-            min-height: 31px;
-            padding: 5px 12px;
-            border-radius: var(--radius-full);
-            border: 1px solid var(--app-separator);
-            background: var(--app-surface);
-            color: var(--app-text);
-            font-size: 11px;
-            font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: transform .14s ease, background-color .14s ease, color .14s ease, border-color .14s ease;
-        }
-
-        .chip:active {
-            transform: scale(.94);
-            background: var(--app-accent);
-            color: var(--app-accent-text);
-            border-color: var(--app-accent);
-        }
-
-        /* ===== Product list ===== */
-        .content {
-            padding: 8px 10px calc(90px + var(--safe-bottom));
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 6px;
-            background: transparent;
-        }
-
-        #myTable {
-            animation: tableFadeIn .22s ease-out;
-        }
-
-        @keyframes tableFadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        tr {
-            width: 100%;
-            min-height: 58px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 9px 11px 9px 10px;
-            border: 1px solid var(--app-separator);
-            border-radius: 13px;
-            background: var(--app-surface);
-            box-shadow: 0 1px 2px rgba(0,0,0,.025);
-            cursor: pointer;
-            transition: transform .12s ease, background-color .12s ease;
-        }
-
-        tr:active {
-            transform: scale(.992);
-            background: var(--app-surface-2);
-        }
-
-        td {
-            border: none;
-            padding: 0;
-            color: var(--app-text);
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        tr td:first-child {
-            min-width: 0;
-            flex: 1;
-            line-height: 1.55;
-        }
-
-        .price-cell {
-            flex: 0 0 auto;
-            padding: 6px 9px;
-            border-radius: 9px;
-            background: color-mix(in srgb, var(--app-accent) 11%, var(--app-surface));
-            color: var(--app-accent);
-            font-size: 12px;
-            font-weight: 800;
-            white-space: nowrap;
-            direction: rtl;
-        }
-
-        #status {
-            text-align: center;
-            padding: 12px 8px;
-            color: var(--app-hint);
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        /* ===== Cart floating action ===== */
-        .cart-fab {
-            position: fixed;
-            left: 14px;
-            bottom: calc(14px + var(--safe-bottom));
-            z-index: 150;
-            width: 54px;
-            height: 54px;
-            border: 0;
-            border-radius: 17px;
-            background: var(--app-accent);
-            color: var(--app-accent-text);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 22px color-mix(in srgb, var(--app-accent) 32%, transparent);
-            cursor: pointer;
-            font-size: 21px;
-            transition: transform .15s ease;
-        }
-
-        .cart-fab:active { transform: scale(.91); }
-
-        .cart-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            min-width: 22px;
-            height: 22px;
-            padding: 0 5px;
-            border: 2px solid var(--app-bg);
-            border-radius: var(--radius-full);
-            background: var(--app-danger);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 800;
-        }
-
-        /* ===== Native-feeling sheets/modals ===== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 200;
-            align-items: flex-end;
-            justify-content: center;
-            padding: 10px;
-            background: rgba(0,0,0,.42);
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
-        }
-
-        .modal-content {
-            width: min(100%, 430px);
-            max-height: min(82vh, 720px);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            padding: 17px 14px calc(14px + var(--safe-bottom));
-            border: 1px solid var(--app-separator);
-            border-radius: 20px 20px 16px 16px;
-            background: var(--app-surface);
-            color: var(--app-text);
-            box-shadow: 0 -12px 45px rgba(0,0,0,.18);
-            animation: sheetIn .2s cubic-bezier(.2,.8,.2,1);
-        }
-
-        @keyframes sheetIn {
-            from { transform: translateY(24px); opacity: .6; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-title {
-            color: var(--app-text);
-            font-size: 15px;
-            font-weight: 800;
-            line-height: 1.5;
-            margin-bottom: 9px;
-        }
-
-        .modal-price {
-            display: inline-block;
-            align-self: center;
-            margin: 0 auto 15px;
-            padding: 7px 10px;
-            border-radius: 9px;
-            background: var(--app-surface-2);
-            color: var(--app-hint);
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .qty-control {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 0 auto 15px;
-            padding: 5px;
-            border-radius: var(--radius-full);
-            background: var(--app-surface-2);
-        }
-
-        .qty-btn {
-            width: 37px;
-            height: 37px;
-            border: 0;
-            border-radius: 50%;
-            background: var(--app-surface);
-            color: var(--app-text);
-            font-size: 20px;
-            font-weight: 500;
-            box-shadow: 0 1px 3px rgba(0,0,0,.08);
-        }
-
-        .qty-btn:active { transform: scale(.9); }
-
-        .qty-input {
-            width: 54px;
-            padding: 3px;
-            border: 0;
-            outline: 0;
-            background: transparent;
-            color: var(--app-text);
-            text-align: center;
-            font-size: 17px;
-            font-weight: 800;
-        }
-
-        .modal-total {
-            margin-bottom: 14px;
-            padding-top: 13px;
-            border-top: 1px dashed var(--app-separator);
-            color: var(--app-accent);
-            font-size: 14px;
-            font-weight: 800;
-            text-align: center;
-        }
-
-        .modal-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: auto;
-        }
-
-        .btn-modal {
-            min-height: 45px;
-            padding: 10px 12px;
-            border: 0;
-            border-radius: 12px;
-            color: var(--app-text);
-            background: var(--app-surface-2);
-            font-size: 12px;
-            font-weight: 750;
-            cursor: pointer;
-            transition: transform .12s ease, opacity .12s ease;
-        }
-
-        .btn-modal:active { transform: scale(.985); opacity: .88; }
-
-        .btn-primary {
-            background: var(--app-accent);
-            color: var(--app-accent-text);
-        }
-
-        .btn-cancel {
-            border: 1px solid var(--app-separator);
-            background: var(--app-surface);
-            color: var(--app-hint);
-        }
-
-        /* ===== Cart ===== */
-        .cart-list-container {
-            overflow-y: auto;
-            max-height: 42vh;
-            margin-bottom: 12px;
-            padding: 1px 2px 1px 0;
-        }
-
-        .cart-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            padding: 10px;
-            margin-bottom: 8px;
-            border: 1px solid var(--app-separator);
-            border-radius: 13px;
-            background: var(--app-surface-2);
-        }
-
-        .cart-item-details {
-            flex: 1;
-            min-width: 0;
-            margin-left: 4px;
-        }
-
-        .cart-item-name {
-            margin-bottom: 5px;
-            color: var(--app-text);
-            font-size: 12px;
-            font-weight: 800;
-            line-height: 1.5;
-        }
-
-        .cart-item-calc {
-            padding: 3px 7px;
-            border-radius: 7px;
-            background: color-mix(in srgb, var(--app-accent) 10%, var(--app-surface));
-            color: var(--app-accent);
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .cart-remove-btn {
-            width: 32px;
-            height: 32px;
-            border: 0;
-            border-radius: 9px;
-            background: color-mix(in srgb, var(--app-danger) 10%, var(--app-surface));
-            color: var(--app-danger);
-            font-weight: 800;
-        }
-
-        .cart-qty-mini {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            padding: 2px;
-            border: 1px solid var(--app-separator);
-            border-radius: 8px;
-            background: var(--app-surface);
-        }
-
-        .cart-qty-mini button {
-            width: 25px;
-            height: 25px;
-            border: 0;
-            background: transparent;
-            color: var(--app-accent);
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .cart-qty-mini span {
-            min-width: 22px;
-            color: var(--app-text);
-            text-align: center;
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        /* Keep platform buttons recognizable, but use compact native-like geometry. */
-        #cartModal .btn-modal[style*="2AABEE"] {
-            background: #2AABEE !important;
-            color: #fff !important;
-        }
-        #cartModal .btn-modal[style*="12C19E"] {
-            background: #12C19E !important;
-            color: #fff !important;
-        }
-        #cartModal .btn-modal[style*="E85D04"] {
-            background: #E85D04 !important;
-            color: #fff !important;
-        }
-
-        @media (min-width: 600px) {
-            .content { max-width: 720px; margin: 0 auto; }
-            .sticky-container { max-width: 720px; margin: 0 auto; }
-            .modal-overlay { align-items: center; }
-            .modal-content { border-radius: 20px; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: .01ms !important;
-                transition-duration: .01ms !important;
+        /* تم تاریک */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --text-color: #f8fafc;
+                --text-muted: #94a3b8;
+                --box-bg: #1e293b;
+                --border-color: #334155;
+                --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+                --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
             }
         }
+
+        /* استایل‌های پایه */
+        body, input, button, textarea { font-family: 'Vazirmatn', Tahoma, sans-serif !important; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background 0.4s ease; -webkit-tap-highlight-color: transparent; }
+        
+        /* هدر شیشه‌ای معلق */
+        .sticky-container {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
+            padding-bottom: 8px;
+        }
+        @media (prefers-color-scheme: dark) {
+            .sticky-container {
+                background: rgba(30, 41, 59, 0.75);
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+        }
+
+        /* نوار تبلیغاتی مدرن */
+        .promo-banner {
+            width: calc(100% - 24px); margin: 8px auto; padding: 10px; box-sizing: border-box; text-align: center;
+            color: white; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-sm);
+            display: flex; justify-content: center; align-items: center; min-height: 38px;
+            transition: background-color 0.5s ease, transform 0.2s ease;
+        }
+        .promo-banner:active { transform: scale(0.97); }
+        .promo-text { transition: opacity 0.4s ease; letter-spacing: 0.1px; }
+
+        /* نوار جستجوی پیشرفته */
+        .header-box { padding: 4px 12px; background: transparent; border: none; }
+        input { 
+            width: 100%; padding: 12px; padding-right: 42px; font-size: 14px; 
+            border: 2px solid transparent; border-radius: var(--radius-full); 
+            box-sizing: border-box; outline: none;
+            background-color: var(--box-bg); color: var(--text-color);
+            box-shadow: var(--shadow-sm); transition: all 0.3s ease;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center; background-size: 18px;
+        }
+        input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12); }
+        input::placeholder { color: var(--text-muted); font-weight: 500; }
+        
+        /* === تنظیمات اسلایدر بی‌نهایت === */
+        .slider-container { background: transparent; border: none; padding: 4px 0; gap: 10px; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .marquee { 
+            display: flex; 
+            overflow-x: auto; 
+            user-select: none; 
+            padding: 4px 0;
+            width: 100%;
+            scroll-behavior: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            /* انتقال پردازش اسکرول به کارت گرافیک (GPU) */
+            will-change: scroll-position;
+            transform: translateZ(0);
+        }
+        .marquee::-webkit-scrollbar { display: none; }
+        
+        .marquee-content { 
+            display: flex; 
+            flex-shrink: 0; 
+            gap: 10px; 
+            padding-right: 10px; 
+        }
+        
+        /* دکمه‌های تگ (Chips) */
+        .chip {
+            padding: 6px 14px; background: var(--box-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-full); cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            color: var(--text-muted); white-space: nowrap; box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease; direction: rtl;
+        }
+        .chip:active {
+            background: var(--primary-color) !important; color: white !important; border-color: var(--primary-color) !important;
+            transform: scale(0.92); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
+        }
+        @media (prefers-color-scheme: dark) {
+            .chip:active { box-shadow: 0 2px 8px rgba(129, 140, 248, 0.4) !important; }
+        }
+
+        /* ساختار فشرده‌تر لیست کالاها */
+        .content { padding: 12px; padding-bottom: 100px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; background: transparent; }
+        
+        #myTable { animation: tableFadeIn 0.5s ease-out; }
+        @keyframes tableFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        tr { 
+            background-color: var(--box-bg); border-radius: var(--radius-md); 
+            box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        tr:active { transform: scale(0.98); background-color: var(--border-color); }
+        
+        td { border: none; padding: 0; font-size: 0.9rem; color: var(--text-color); font-weight: 600; }
+        .price-cell { 
+            color: var(--primary-color); font-weight: 800; font-size: 0.95rem; 
+            background: rgba(99, 102, 241, 0.08); padding: 4px 10px; border-radius: 8px; white-space: nowrap; direction: rtl; 
+        }
+        @media (prefers-color-scheme: dark) { .price-cell { color: #818cf8; background: rgba(129, 140, 248, 0.12); } }
+        
+        #status { text-align: center; padding: 12px; font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+
+        /* دکمه شناور سبد خرید */
+        .cart-fab {
+            position: fixed; bottom: 16px; left: 16px; z-index: 150;
+            background: linear-gradient(135deg, var(--primary-color), #818cf8); color: white;
+            width: 54px; height: 54px; border-radius: 18px;
+            display: none; align-items: center; justify-content: center;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35); cursor: pointer;
+            font-size: 1.4rem; transition: all 0.2s ease;
+        }
+        .cart-fab:active { transform: scale(0.92); }
+        .cart-badge {
+            position: absolute; top: -6px; right: -6px;
+            background-color: var(--danger-color); color: white;
+            font-size: 0.78rem; font-weight: 800; border-radius: 50%;
+            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+            border: 2.5px solid var(--bg-color); box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        /* پنجره‌های پاپ‌آپ */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 200;
+            align-items: center; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        }
+        .modal-content {
+            background: var(--box-bg); padding: 22px 18px; border-radius: var(--radius-md);
+            width: 88%; max-width: 340px; text-align: center; max-height: 82vh; display: flex; flex-direction: column;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.05);
+            animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes popIn { from { transform: scale(0.9) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        
+        .modal-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 10px; color: var(--text-color); line-height: 1.4; }
+        .modal-price { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; background: var(--bg-color); padding: 8px; border-radius: 10px; display: inline-block; margin: 0 auto 18px auto; }
+        
+        .qty-control { 
+            display: inline-flex; align-items: center; justify-content: center; gap: 12px; 
+            margin: 0 auto 18px auto; background: var(--bg-color); padding: 6px; border-radius: var(--radius-full);
+        }
+        .qty-btn { 
+            background: var(--box-bg); border: none; width: 36px; height: 36px; border-radius: 50%; 
+            font-size: 1.2rem; color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-sm); transition: all 0.2s; font-weight: 500;
+        }
+        .qty-btn:active { transform: scale(0.9); }
+        .qty-input { width: 50px; text-align: center; font-size: 1.2rem; padding: 2px; border: none; background: transparent; color: var(--text-color); font-weight: 800; }
+        
+        .modal-total { font-size: 1.05rem; font-weight: 800; color: var(--primary-color); margin-bottom: 18px; padding-top: 14px; border-top: 2px dashed var(--border-color); }
+        
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+        .btn-modal { padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;}
+        .btn-primary { background: linear-gradient(135deg, var(--primary-color), #818cf8); color: white; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-cancel { background: var(--box-bg); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+        /* استایل سبد خرید */
+        .cart-list-container { overflow-y: auto; max-height: 40vh; margin-bottom: 15px; padding-right: 2px; }
+        .cart-list-container::-webkit-scrollbar { width: 4px; }
+        .cart-list-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        
+        .cart-item { 
+            display: flex; justify-content: space-between; align-items: center; text-align: right; 
+            padding: 12px; margin-bottom: 10px; background: var(--bg-color); border: 1px solid var(--border-color); 
+            border-radius: var(--radius-md); 
+        }
+        .cart-item-details { flex: 1; margin-left: 8px; }
+        .cart-item-name { font-weight: 800; font-size: 0.9rem; color: var(--text-color); margin-bottom: 6px;}
+        .cart-item-calc { font-size: 0.9rem; font-weight: 800; color: var(--primary-color); background: rgba(99,102,241,0.08); padding: 3px 8px; border-radius: 6px; }
+        .cart-remove-btn { 
+            background: rgba(239, 68, 68, 0.08); color: var(--danger-color); border: none; 
+            border-radius: 10px; width: 34px; height: 34px; font-weight: bold; font-size: 1rem;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s;
+        }
+        
+        .cart-qty-mini { display: flex; align-items: center; gap: 6px; background: var(--box-bg); padding: 2px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .cart-qty-mini button { background: transparent; border: none; color: var(--primary-color); width: 26px; height: 26px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        .cart-qty-mini span { font-size: 0.9rem; font-weight: 800; min-width: 22px; text-align: center; color: var(--text-color); }
+
+        #cartModal .btn-modal[style*="2AABEE"] { background: linear-gradient(135deg, #2AABEE, #1c93d4) !important; border: none; color: white !important;}
+        #cartModal .btn-modal[style*="12C19E"] { background: linear-gradient(135deg, #12C19E, #0e9d80) !important; border: none; color: white !important;}
+        #cartModal .btn-modal[style*="E85D04"] { background: linear-gradient(135deg, #E85D04, #cc5203) !important; border: none; color: white !important;}
     </style>
 </head>
 <body>
@@ -783,7 +453,6 @@
 285,000	اتودفشنگی فانتزی کرومی لبوبو
 1,500,000	اتودکرندpeden/armic
 730,000	اتودکرونا5010
-730,000	اتودکرونا6010
 935,000	اتودکرونا7010
 1,160,000	اتودکرونا9010
 900,000	اتودکرون کلاس میت
@@ -869,7 +538,7 @@
 1,100,000	اکلیل ورقی
 4,500,000	اکولین6رنگ وستا
 300,000	اکولین وستا40گرم
-11,340,000	الخطاط پارس ارتیست
+11,907,000	الخطاط پارس ارتیست
 2,988,000	الخطاط شاهد3
 4,800,000	الفباآهنربایی بهتا117تکه
 6,790,000	الفباآهنربایی فارسی بازی آموز
@@ -1077,7 +746,8 @@
 341,000	باطری قلم کملیون
 210,000	باطری قلم شارپ
 1,925,000	باطری کتابی کملیون
-550,000	باطری کملیون نیم قلم الکالاین
+1,199,000	باطری کملیون قلم الکالاین الترا
+1,199,000	باطری کملیون نیم قلم الکالاین
 350,000	باطری گیگاسل2025
 7,790,000	باطری گیگاسل شارژی قلمی جفتی
 1,299,000	باطری موربیت بزرگ سوپرهوی دیوتی و
@@ -1104,7 +774,7 @@
 32,000,000	برچسب A4مات وبراق200تایی
 4,851,000	بردیا13بازی4053
 1,300,000	برس نقشه کشی
-1,280,000	برف شادی
+1,480,000	برف شادی
 60,000	برنامه هفتگی
 120,000	بندآویزکارت طلق سینه
 10,744,800	بوم آرتلند120*80
@@ -1112,10 +782,10 @@
 903,000	بوم اعلا10*10
 1,165,500	بوم اعلا20*20
 1,333,500	بوم اعلا30*20
-1,632,800	بوم اعلا30*30
 1,874,300	بوم اعلا40*30
 2,800,000	بوم اعلا50*50
 2,976,800	بوم اعلا60*40
+3,139,500	بوم اعلا70*50
 3,800,000	بوم اعلا80*40
 1,590,800	بوم اعلا24*30
 1,244,300	بوم اعلا24*18
@@ -1208,6 +878,7 @@
 229,000	پاکن پارسیکار3گوش 1148
 230,000	پاکن پارسیکار96عددی1296و1196
 180,000	پاکن پارسیکاررنگی1180
+9,000,000	پاکن پاستلی کرونا88151
 15,000,000	پاکن پنتر
 3,900,000	پاکن تراسلی30عددی
 1,870,000	پاکن تراش استورم2سوراخ
@@ -1248,6 +919,7 @@
 930,000	پاکن کاتری3907یدک دار
 436,000	پاکن کاتری فانتزی کارا1032
 588,000	پاکن کاتری مغزدار2309ـ99719
+11,040,000	پاکن کچل شو24تایی
 4,200,000	پاکن کرومی30تایی
 7,112,000	پاکن کرونا20عددی و30عددی
 13,680,000	پاکن کنکو
@@ -1270,7 +942,7 @@
 2,000,000	پاکن اتودی کرند
 147,000	پاکن
 850,000	پالت تخت
-3,600,000	پالت دفترچه ای پارس ارتیست
+4,590,000	پالت دفترچه ای پارس ارتیست
 1,980,000	پانچ2001
 5,627,400	پانچ ایمر311
 3,141,400	پانچ ایمر316
@@ -1343,7 +1015,7 @@
 200,000	پرچم پارچه ای متوسط
 2,730,000	پرچم رومیزی
 550,000	پرگاراتودی828
-650,000	پرگاراتودی8188
+780,000	پرگاراتودی8188
 2,400,000	پرگاراستادی مپد
 3,100,000	پرگاراستورم ست 3تیکه
 2,079,000	پرگاربرسا12902
@@ -1522,6 +1194,7 @@
 186,000	پونزرنگی50عددی
 155,000	پونزطلایی بنیتو
 4,082,900	پینگوبالانس کیفی فرفره
+150,000	تاج مقوایی
 4,224,000	تاچ پازل
 2,709,000	تبلت جادویی پاندا4121
 998,000	تبلت جادویی
@@ -1547,8 +1220,8 @@
 1,600,000	تخته سیاه ووایت دورچوبی
 1,300,000	تخته سیاه ووایت کاما24*17
 16,984,000	تخته سیاه ووایت نیوتویزپایه دار
-980,000	تخته شاسی احمدسورناA3
-680,000	تخته شاسی احمدسورناA4
+1,280,000	تخته شاسی احمدسورناA3
+780,000	تخته شاسی احمدسورناA4
 4,800,000	تخته شاسی ام دی اف A2
 950,000	تخته شاسی ام دی اف A4طرحدارنگار
 1,750,000	تخته شاسی ام دی اف A3
@@ -1640,7 +1313,7 @@
 38,500	تراش پیکو
 645,000	تراش تک سوراخ سرسیلیکونی3183
 670,000	تراش تیزو2قلو21
-375,000	تراش خرگوش 1339
+1,058,000	تراش خرگوش 1339
 223,600	تراش دانو140100
 655,000	تراش دوسوراخ سرسیلیکونی65ـ2476
 313,000	تراش دوقلوپاکن دار71064
@@ -1726,7 +1399,7 @@
 85,000	تراش وای پلاس 130600
 114,000	تراش وردا8ـ1401
 225,000	تراش وساعت اموزشی
-42,000	تراش وشکو001
+48,000	تراش وشکو001
 215,000	تراش وشکو2809
 275,000	تراش هویج دبه ای2015
 59,000	تراش هیپو 0058
@@ -1773,7 +1446,6 @@
 2,300,000	تودورینگ سویل121
 1,970,000	تودورینگ سویل122
 1,790,000	تودورینگ سویل124ـ123
-2,700,000	تودولیست 6حلقه رنگی سویل1514
 350,000	تودولیست ارتمیس
 135,000	تودولیست پیک سروش پالتویی
 2,700,000	تودولیست دکمه ای سویل1515
@@ -1885,7 +1557,6 @@
 1,870,000	جامدادی تک کار140412
 2,100,000	جامدادی تک کار14022
 2,340,000	جامدادی تک کار14032
-1,296,000	جامدادی تک کار14042
 1,750,000	جامدادی تک کار14052
 2,268,000	جامدادی تک کار140413
 1,300,000	جامدادی تک کار14043
@@ -1921,7 +1592,7 @@
 588,000	جامدادی زوم676510
 1,392,000	جامدادی زوم676521
 456,000	جامدادی زوم پاکتی متوسط676444
-474,000	جامدادی زوم مکعبی طرح دار676500
+550,000	جامدادی زوم مکعبی طرح دار676500
 3,500,000	جامدادی سویل3050
 3,900,000	جامدادی سویل4050
 1,806,000	جامدادی سویل3080
@@ -2039,7 +1710,7 @@
 638,000	جدول هوش فانتزی
 638,000	جدول هوش مذهبی
 2,300,000	جسواکرولیک حرفه ای وستا500میل
-230,000	جشن گوی زنگوله تولد6عددی
+850,000	جشن گوی زنگوله تولد6عددی
 450,000	جعبه خودکارچوبی تکی
 300,000	جعبه خودکارطلقی
 800,000	جعبه خودکارمقوایی پارکری
@@ -2137,6 +1808,7 @@
 421,900	چسب اکواریوم سناسیل
 400,000	چسب اورینت  60میل
 946,000	چسب پازل دتا
+532,200	چسب چوب پمادی کاسپین
 480,000	چسب چوب سنا
 5,000,000	چسب حرارتی استورم اکلیلی کوتاه
 7,000,000	چسب حرارتی استورم باریک اکلیلی
@@ -2145,6 +1817,7 @@
 6,000,000	چسب حرارتی استورم باریک شفاف
 10,812,500	چسب حرارتی بزرگ
 10,812,500	چسب حرارتی کوچک
+2,500,000	چسب دوطرفه استورم102337
 3,550,000	چسب دوطرفه استورم102338
 2,850,000	چسب دوطرفه استورم پیازی139
 1,130,000	چسب دوطرفه استورم دایره مربع
@@ -2158,6 +1831,7 @@
 1,800,000	چسب سفیدپنتر250گرم437
 1,450,000	چسب سفیدپنترنانو
 295,000	چسب قطره ای3گرمی رازی
+456,300	چسب قطره ای کاسپین
 2,500,000	چسب کارتن جانسون
 2,103,600	چسب کاغذی5سانت دیبا
 661,000	چسب کاغذی استورم پهن رنگی18یارد
@@ -2204,6 +1878,7 @@
 250,000	چسب مایع خمره ای40گرم
 830,000	چسب مایع فوم وپازل استورم60میل
 880,000	چسب مایع کاسپین همه کاره100میل
+687,800	چسب مایع کاسپین همه کاره50میل
 1,280,000	چسب مدرسه استورم100میل
 850,000	چسب نواری72یارد
 342,000	چسب نواری36یارد ولفیکس
@@ -2361,7 +2036,7 @@
 1,125,000	خودکارپرتوک 137
 800,000	خودکارپرتوک 119
 155,000	خودکارپرشیالیان آبی
-340,000	خودکارپرشیاLX
+350,000	خودکارپرشیاLX
 250,000	خودکارپری دریایی وطاووس
 240,000	خودکارپنتراستندی جور180عددی
 420,000	خودکارپنترژله ای بدنه جیرآبی
@@ -2493,7 +2168,7 @@
 1,418,000	دفتر50نقاشی مجلدعرش کد86
 1,418,000	دفتر50نقاشی مجلدعرش کد39
 3,375,000	دفتر160سلفون عرش کد148
-1,980,000	دفتر160وزیری طلقی ساده
+2,400,000	دفتر160وزیری طلقی ساده
 2,500,000	دفتر 160چرم ترمولئون
 600,000	دفتر60منگنه لاتین
 950,000	دفتر80برگ سیمی تسنیم
@@ -2505,6 +2180,7 @@
 1,854,000	دفتر80مجلدعرش کد139
 1,854,000	دفتر80مجلدعرش کد92A
 1,854,000	دفتر80مجلدعرش کد92B
+2,500,000	دفتر3خطجلدسخت
 850,000	دفتر3و4خط سهند 60برگ
 3,255,000	دفترآبرنگ سخن وکالجA4
 680,000	دفترآپاداناسیمی طلقی50برگ
@@ -2563,7 +2239,7 @@
 2,520,000	دفترپاپکوسیمی رحلی80برگ 603
 1,450,000	دفترپاپکوسیمی طلقی60برگ کد615
 850,000	دفترپاپکولاتین ته چسب 50برگ
-950,000	دفترپایکوسیمی طلقی100برگ
+1,450,000	دفترپایکوسیمی طلقی100برگ
 790,000	دفترپاییزان نقاشی دسته دار
 1,400,000	دفترپولیشی اسکویشی کارن
 550,000	دفترپویاپونه ته چسب 50برگ
@@ -2626,6 +2302,7 @@
 720,000	دفترچه درخشان1/8پارچه کش دار
 690,000	دفترچه درخشان خودکاردار
 950,000	دفترچه درخشان رقعی پارچه کش دار
+1,050,000	دفترچه دوکا1/10سلفون ته دوخت 140
 1,050,000	دفترچه دوکا1/10سلفون دوختی140
 960,000	دفترچه دوکا1/10سلفون سیمی
 1,600,000	دفترچه دوکا1/8سلفون دوختی
@@ -2693,7 +2370,6 @@
 1,800,000	دفترچه میکرو88برگ کراف F25
 1,450,000	دفترچه میکرو1/8سیمی صحافی
 660,000	دفترچه میکرو1/8سیمی طلقی
-2,450,000	دفترچه میکرو19*15کرافت خطدارF8
 1,400,000	دفترچه میکروسلفونی100B6برگ
 2,450,000	دفترچه میکروکراف 21*14خبرنگارF9
 498,000	دفترچه نفیس 1/16ته دوخت 100برگ
@@ -2818,7 +2494,7 @@
 450,000	دفترسیمی شطرنجی ریز32برگ
 1,260,000	دفترسیمی طلقی100سهندنقاشی
 650,000	دفترسیمی طلقی پایکو50برگ
-860,000	دفترسیمی طلقی پایکو80برگ
+1,250,000	دفترسیمی طلقی پایکو80برگ
 800,000	دفترسیمی طلقی سهند60برگ لاتین
 1,350,000	دفترسیمی فدک 80برگ لمینت 038
 935,000	دفترسیمی میکروایزی نت J35
@@ -2892,7 +2568,7 @@
 6,800,000	دفترکلاسورسویل گلکسی گلد1319
 5,353,200	دفترکلاسوری100پاپکوسلفونی6180
 2,600,000	دفترکلاسوری آپاداناپلاستیک 100برگ
-2,600,000	دفترکلاسوری احمدسلفونی100برگ
+2,680,000	دفترکلاسوری احمدسلفونی100برگ
 4,200,000	دفترکلاسوری ادورقفل رنگی26سوراخ
 2,020,000	دفترکلاسوری اروند100کد101
 3,277,000	دفترکلاسوری اروند100کد202
@@ -2922,7 +2598,7 @@
 7,490,000	دفترکلاسوری سویل فلز100برگ 1304
 1,200,000	دفترکلاسوری سهندبدون یدک طلقی دکمه
 2,220,000	دفترکلاسوری سهندطلقی100برگ
-2,900,000	دفترکلاسوری صبا
+3,350,000	دفترکلاسوری صبا
 5,371,000	دفترکلاسوری عرش 100کد181
 5,965,000	دفترکلاسوری عرش 100کد93
 7,875,000	دفترکلاسوری عرش 100کد234
@@ -2951,12 +2627,11 @@
 5,100,000	دفترکلاسوری میکروفلزی100برگ
 7,200,000	دفترکلاسوری میکروگراف 200برگ
 2,950,000	دفترکلاسوری نفیس فلز100برگ
-1,980,000	دفترکلاسوری نگارخشتی
-2,600,000	دفترکلاسوری نگارسلفونی100برگ
-2,950,000	دفترکلاسوری نگارفلزی100برگ
+2,380,000	دفترکلاسوری نگارخشتی
+2,680,000	دفترکلاسوری نگارسلفونی100برگ
+3,600,000	دفترکلاسوری نگارفلزی100برگ
 2,900,000	دفترکلاسوری وحدت 26سوراخ پلاستیک
 2,900,000	دفترکلاسوری وحدت طلقی100برگ
-3,650,000	دفترکلاسوری وزیک طرح چرم160برگ
 5,650,000	دفترکلاسوری هیروچرم2تکه
 6,500,000	دفترکلاسوری هیروچرم پاستیلیFB59
 3,900,000	دفترکلاسوری هیروسلفون
@@ -3117,7 +2792,7 @@
 4,497,400	دوخت پارسیکار222
 4,497,400	دوخت پارسیکار223
 2,237,400	دوخت پارسیکار233
-3,367,400	دوخت پارسیکار234
+2,800,000	دوخت پارسیکار234
 2,980,000	دوخت پارسیکار217
 4,497,400	دوخت پارسیکار297
 5,175,400	دوخت پارسیکار229
@@ -3214,8 +2889,8 @@
 400,000	ذغال طراحی فابرکاستل
 1,200,000	ذغال گیر
 2,064,000	ذفتر100مجلدعرش کد177
-945,000	راپیدپارس ارتیست
-678,000	راپیدوشکو
+1,090,000	راپیدپارس ارتیست
+786,000	راپیدوشکو
 920,000	راپید
 125,000	ربان6رنگ باریک 36تایی
 500,000	ربان پاپیون50سانت
@@ -3489,7 +3164,6 @@
 23,000,000	ست رومیزی شهاب 8تکه
 4,750,000	ست رومیزی کارا3000
 4,500,000	ست سررسیداروپایی تقویم عرش 1405
-1,950,000	ست سنجاق وگیره طلایی
 14,800,000	ست طلقی پارسی کارسی بی اس 905
 1,155,000	ست طناب عینک وایت برد
 17,500,000	ست قلمو2113پارس آرت
@@ -3667,7 +3341,6 @@
 475,000	شمع تاپرتک لایه20(عددی)
 55,000	شمع عددمتالیک
 285,000	شمع عددمولتی20(عددی)
-90,000	شمع هپی قطاری
 204,000	شیرازه1متری10
 294,000	شیرازه1متری12
 144,000	شیرازه1متری6
@@ -3709,7 +3382,7 @@
 18,000,000	طلق شفاف A3
 8,900,000	طلق شفاف A4
 170,000	طلق ضخیم پاپکو80عددی
-90,000	طلق ضخیم پرگه شفاف )800(A4
+98,000	طلق ضخیم پرگه شفاف )800(A4
 4,236,000	طلق ضخیم سوپرباندوزیری
 6,800,000	طلق ضخیم سوپرباندA4
 160,000	طلق ضخیم سهندشفاف A4
@@ -3718,6 +3391,7 @@
 1,919,000	ظرف غذاآریامستطیل بزرگ
 1,737,200	ظرف غذااریامربع
 2,250,000	ظرف غذااسراکارا
+3,740,000	ظرف غذاانکسیاگرد
 4,125,000	ظرف غذاانکسیامربع
 3,289,000	ظرف غذاانکسیامستطیل1طبقه
 4,730,000	ظرف غذاانکسیامستطیل2طبقه
@@ -3799,6 +3473,7 @@
 5,500,000	فوم برد70*50
 850,000	فوم برسا10رنگA4
 3,650,000	فوم برسااکلیلی چسبدار10A3رنگ
+2,160,000	فوم برسااکلیلی چسبدار10A4برگ
 2,495,500	فوم برسااکلیلی10A3رنگ
 1,800,000	فوم برسا10A3رنگ
 3,134,700	فوم برسا20A3رنگ
@@ -3824,7 +3499,7 @@
 1,870,000	قلمو1000پارس 4
 2,110,000	قلمو1000پارس 5
 4,450,000	قلمو1000پارس 16
-2,270,000	قلمو1000پارس 6
+2,500,000	قلمو1000پارس 6
 2,410,000	قلمو1000پارس 7
 2,770,000	قلمو1000پارس 8
 2,910,000	قلمو1000پارس 9
@@ -3838,7 +3513,7 @@
 1,810,000	قلمو2000پارس 4
 4,010,000	قلمو2000پارس 16
 2,150,000	قلمو2000پارس 6
-4,380,000	قلمو2000پارس 18
+4,820,000	قلمو2000پارس 18
 2,480,000	قلمو2000پارس 8
 1,610,000	قلمو3000پارس 00
 3,570,000	قلمو3000پارس 10
@@ -3847,7 +3522,7 @@
 4,360,000	قلمو3000پارس 14
 2,270,000	قلمو3000پارس 4
 2,410,000	قلمو3000پارس 5
-4,730,000	قلمو3000پارس 16
+5,210,000	قلمو3000پارس 16
 2,560,000	قلمو3000پارس 6
 2,770,000	قلمو3000پارس 7
 3,140,000	قلمو3000پارس 9
@@ -3926,7 +3601,7 @@
 1,150,000	قلمو3010پارس 2
 2,700,000	قلمو3010پارس 14
 3,550,000	قلمو3010پارس 24
-1,550,000	قلمو3010پارس 4
+1,650,000	قلمو3010پارس 4
 2,900,000	قلمو3010پارس 16
 1,680,000	قلمو3010پارس 6
 3,200,000	قلمو3010پارس 18
@@ -4075,6 +3750,9 @@
 1,800,000	قلمو888چتری سایز8
 1,050,000	قلمو888چتری کد0
 37,000	قلموآبرنگ لیوانی
+6,825,000	قلموپارس آرتیست رنگی12عددی
+2,625,000	قلموپارس آرتیست رنگی4عددی
+4,725,000	قلموپارس آرتیست رنگی8عددی
 900,000	قلموتامپو3عددی
 120,000	قلموتخت افشان14
 1,400,000	قلموخرم1/2شمشیری
@@ -4113,7 +3791,7 @@
 410,000	قلموسرتخت 1111پارس ارت 14
 1,000,000	قلموسرتخت 1111پارس ارت 24
 490,000	قلموسرتخت 1111پارس ارت 16
-1,587,000	قلموسرتخت قهوه ای سایز6
+2,200,000	قلموسرتخت قهوه ای سایز6
 2,250,000	قلموسمورتخت جور
 1,850,000	قلموفلزی مموری آرتیست
 1,200,000	قلم ابری
@@ -4132,7 +3810,7 @@
 4,702,500	قمقمه7951
 5,135,000	قمقمه2681
 3,409,000	قمقمه2691
-6,496,300	قمقمه2682
+6,496,300	قمقمه2682خرسی
 7,053,800	قمقمه2692
 3,000,000	قمقمه2کاره12345
 2,394,000	قمقمه2کاره نی دار
@@ -4190,7 +3868,7 @@
 12,200,000	قمقمه فلاکسی استیل بنددار1100میل
 11,700,000	قمقمه فلاکسی استیل بنددار600میل
 11,212,500	قمقمه فلاکسی استیل بنددار750میل
-4,784,000	قمقمه فلاکسی دماسنج دار
+5,650,000	قمقمه فلاکسی دماسنج دار
 12,500,000	قمقمه فلاکسی دوج21686
 5,500,000	قمقمه فلاکسی فانتزی ایرانی
 7,751,000	قمقمه فلاکسی کد 8003
@@ -4205,7 +3883,6 @@
 6,037,500	قمقمه کد802
 6,200,000	قمقمه کد804
 1,668,000	قمقمه کمل807
-1,560,000	قمقمه کمل نی دار812
 924,000	قمقمه کیف دار
 4,000,000	قمقمه مات  1225
 3,880,000	قمقمه مانیا307050ورزشی امگاکوچک
@@ -4237,7 +3914,7 @@
 1,459,500	قیچی بنیتو1206
 2,850,000	قیچی بیک 210م م گریپ داربلیستری
 610,000	قیچی بیک 195م م لیوان20عددی
-180,000	قیچی پیش دبستانی تایانگ MF20
+280,000	قیچی پیش دبستانی تایانگ MF20
 997,800	قیچی دالبری3تیغه
 950,000	قیچی ساوی159
 450,000	قیچی ساوی دم دارریلکس 70817
@@ -4257,7 +3934,7 @@
 425,000	قیچی کد558
 755,000	قیچی کد559
 455,000	قیچی کد 515
-580,000	قیچی کرونا2780
+650,000	قیچی کرونا2708
 686,400	قیچی کروناروکشدار5380
 1,332,000	قیچی کوچک کورس 35130
 986,000	قیچی کیکو2521
@@ -4285,10 +3962,10 @@
 637,000	کاترنقش جهان پلاستیکی
 798,000	کاترنقش جهان سربی
 6,600,000	کاربن خارجی رنگی
-15,000,000	کاربن ماهورA3
+30,000,000	کاربن ماهورA3
 253,000	کارت اعداد0تا10
 480,000	کارت اعدادپارس رسام
-800,000	کارت الفبابزرگ
+900,000	کارت الفبابزرگ
 660,000	کارت الفباکوچک
 660,000	کارت الفبانگاره ها
 980,000	کارت بازی اونو  52کارت
@@ -4310,7 +3987,7 @@
 40,000	کاردستی کلیداهرمی
 55,000	کاردستی کلیدفشاری
 80,000	کاردستی لامپ
-1,980,000	کاردک هنری پارس جور
+2,190,000	کاردک هنری پارس جور
 5,000,000	کارگاه آبرنگ پنتر
 5,500,000	کارگاه چاپ پنتر
 5,900,000	کارگاه طراحی نقاشی پنتر
@@ -4343,7 +4020,7 @@
 1,250,000	کاغذخطداریکشینA4
 10,000,000	کاغذرزپرینت  A4نقدی
 1,050,000	کاغذرنگی24رنگ 24عددی
-12,000,000	کاغذرنگی گلاسه اعلا50*20035برگ
+18,000,000	کاغذرنگی گلاسه اعلا50*20035برگ
 460,000	کاغذسان جورشده10نگ A4
 500,000	کاغذشطرنجی10برگ
 892,500	کاغذشطرنجی سخن20برگ
@@ -4403,7 +4080,7 @@
 112,000	کپسول یدک وایت پیداکس
 9,800,000	کپی هولدر
 450,000	کتاب آرتمیس هوش رقعی
-200,000	کتاب اموزش کودک باهوش من منچ
+450,000	کتاب اموزش کودک باهوش من منچ
 1,100,000	کتاب داستان جلدسخت وزیری
 250,000	کتاب داستان رقعی
 900,000	کتاب دانشنامه رحلی مصور11جلدی
@@ -4412,7 +4089,7 @@
 1,100,000	کتاب رنگ امیزی جلدسخت رقعی
 1,350,000	کتاب شوکوبوک رقعی
 440,000	کتاب نشراستقامت
-8,900,000	کتابیار
+8,000,000	کتابیار
 817,300	کرم کوکی
 1,840,000	کره10
 2,970,000	کره20پایه پلاستیک
@@ -4505,7 +4182,7 @@
 781,000	کیسه توری زیپ دارA4
 445,500	کیسه توری زیپ دارA6
 1,100,000	کیسه چرمی الیسان ملخی
-1,600,000	کیسه چرمی الیسان4A
+1,900,000	کیسه چرمی الیسان4A
 950,000	کیسه چرمی الیسان5A
 2,340,000	کیسه سویل پارچه ای خالدارA4
 7,876,000	کیف آرشیوسهند50*70
@@ -4528,15 +4205,15 @@
 4,620,000	کیف فایل پاپکوقفل دار06
 4,548,000	کیف فایل سهنددسته دار
 4,068,000	کیف فایل سهندکشدار
-9,500,000	کیف قلموچرم طبیعی پارس
-6,400,000	کیف قلموچرم مصنوعی
-6,400,000	کیف قلمومگنتی
+11,900,000	کیف قلموچرم طبیعی پارس
+8,100,000	کیف قلموچرم مصنوعی
+8,100,000	کیف قلمومگنتی
 1,280,000	کیف کشدارپرگه
 1,450,000	کیف کشداردسته دار
 1,850,000	کیف کشداردوردوخت 4165
 2,500,000	کیف کشدارسهنددوردوخت عطف دار
 1,450,000	کیف کشدارسهند
-1,220,000	کیف کشدارسی بی اس 4110
+1,380,000	کیف کشدارسی بی اس 4110
 1,100,000	کیف کش دارمیکرو
 2,500,000	کیف کوله ای
 9,889,000	کیف کوله پارسیکارسی بی اس 1921
@@ -4566,6 +4243,7 @@
 561,000	گونیاصریر30و45درجه بزرگ
 190,000	گونیاصریرژله ای
 140,000	گونیاصریرکریستال
+300,000	گوی طلایی اویز
 358,000	گیره چوبی رنگی وساده الف
 1,600,000	گیره دوبل41
 2,250,000	گیره دوبل51
@@ -4584,7 +4262,7 @@
 3,480,000	گیره دوبل پنتر41
 4,600,000	گیره دوبل پنتر51
 700,000	گیره دوبل فانتزی کلیپس
-420,000	گیره کلیپسی استیل دی ال
+650,000	گیره کلیپسی استیل دی ال152
 820,000	گیره کلیپسی پارسیکارسی بی اس 33میل
 810,000	گیره کلیپسی پارسیکارسی بی اس 28میل
 820,000	گیره کلیپسی رنگی 750دی ال
@@ -4633,7 +4311,7 @@
 580,000	لیوان تاشوکارا جور
 1,000,000	لیوان تاشو اکواریومی
 374,000	لیوان خانه مدرسه ورزشی عروسکمینیون
-400,000	لیوان دردارفانتزی
+480,000	لیوان دردارفانتزی
 320,000	لیوان سرحدجادویی ضدریز
 400,000	لیوان فانتزی درداردسته دار
 650,000	لیوان کارادوجداره بیضی فانتزی
@@ -4846,12 +4524,12 @@
 6,875,000	ماشین حساب کارسهD8
 14,750,000	ماشین حساب کاسیو240
 13,500,000	ماشین حساب کاسیو260
-6,500,000	ماشین حساب کال استارمهندسی991esp
 4,400,000	ماشین حساب کرومی224
 1,300,000	ماشین حساب کنکو 402بدون مرجوعی
 3,500,000	ماشین حساب کنکومهندسیKK-82MS
 3,120,000	ماشین حساب مهندسی991
 3,500,000	ماشین حساب مهندسیCV82MS
+4,500,000	ماشین حساب مهندسی991esp
 2,750,000	ماشین حساب هویج
 15,500,000	ماشین حساب  کاسیو2130
 4,255,000	ماشین حساب kk-837
@@ -4905,7 +4583,7 @@
 441,800	مدادرنگی ادمیرال مقوا6رنگ
 3,200,000	مدادرنگی استدلرمقوا12رنگ
 6,400,000	مدادرنگی استدلرمقوا24رنگ
-980,000	مدادرنگی اسکول فنس 6رنگ مقوا
+1,450,000	مدادرنگی اسکول فنس 6رنگ مقوا
 4,980,000	مدادرنگی اسکول فنس لوله24رنگ
 4,375,000	مدادرنگی اسکول مکس تخت 12رنگ
 11,250,000	مدادرنگی اسکول مکس تخت 36رنگ
@@ -5121,7 +4799,6 @@
 4,510,000	مدادمشکی فابرکاستل
 19,510,000	مدادمشکی فکتیس بامبو72تایی
 19,510,000	مدادمشکی فکتیس زغالی فلش 72ع
-28,750,000	مدادمشکی فکتیس طرحدار 120عددی
 15,812,500	مدادمشکی فکتیس فلورسنت 1415ـ72ع
 19,510,000	مدادمشکی فکتیس گرافیک 72تایی
 22,032,000	مدادمشکی فکتیس گلکسی
@@ -5136,6 +4813,7 @@
 2,840,000	مدادمشکی کویلو
 1,790,000	مدادمشکی لاکپشت
 650,000	مدادمشکی لگویی
+16,775,000	مدادمشکی ووک 20020ـ72تایی
 2,079,000	مدادمشکی ووک زغالی فسفری20021
 1,640,000	مدادمشکی هیرو1010
 1,640,000	مدادمشکی هیرو1011
@@ -5149,7 +4827,7 @@
 1,800,000	مداد مشکی هدهدک
 1,400,000	مدیوم وستا125میل
 550,000	مرکب اعتدال رنگی60میل
-282,700	مرکب خوشنویسی اعتدال
+340,000	مرکب خوشنویسی اعتدال
 5,500,000	مغاردسته پلاستیکی5عددی
 1,500,000	مغزی تقویم منشی
 120,000	مقوا50*35پشت طوسی
@@ -5313,7 +4991,7 @@
 120,000	یدک کاترواشین بزرگ
 60,000	یدک کاترواشین کوچک
 65,000	یدک کپسول ماژیک شارژی
-1,220,000	یدک کلاسور20سوراخ ارمان
+1,375,000	یدک کلاسور20سوراخ ارمان
 2,250,000	یدک کلاسور30سوراخ پاپکو
 2,062,500	یدک کلاسور26سوراخ ارمان حاشیه دار
 1,666,500	یدک کلاسور26سوراخ ارمان
@@ -5322,7 +5000,7 @@
 1,450,000	یدک کلاسور26سوراخ کلیپس
 1,725,000	یدک کلاسور26سوراخ نوین
 1,650,000	یدک کلاسور26سوراخ وحدت
-1,050,000	یدک کلاسور26سوراخ اقتصادی
+1,150,000	یدک کلاسور26سوراخ اقتصادی
 1,650,000	یدک کلاسور26گلبرگ
 1,400,000	یدک کلاسوراروند20سوراخ
 1,450,000	یدک کلاسوراروند26سوراخ 80گرم
@@ -5336,103 +5014,9 @@
 275,000	یدک مغزی مدادفشنگی
 840,000	یدک مینی لیست سویل8*13
 
-
 </textarea>
 
 <script>
-    /* =========================================================
-       Native Theme Bridge
-       Telegram: Telegram.WebApp.themeParams / colorScheme
-       Eitaa:    Eitaa.WebApp.themeParams / colorScheme
-       ========================================================= */
-    (function () {
-        function getApp() {
-            if (window.__MINIAPP_PLATFORM__ === 'eitaa' &&
-                window.Eitaa && window.Eitaa.WebApp) return window.Eitaa.WebApp;
-
-            if (window.Telegram && window.Telegram.WebApp) return window.Telegram.WebApp;
-
-            if (window.Eitaa && window.Eitaa.WebApp) return window.Eitaa.WebApp;
-
-            return null;
-        }
-
-        function validColor(value) {
-            return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)
-                ? value
-                : null;
-        }
-
-        function setVar(name, value, fallback) {
-            document.documentElement.style.setProperty(name, validColor(value) || fallback);
-        }
-
-        function applyPlatformTheme() {
-            var app = getApp();
-            var tp = app && app.themeParams ? app.themeParams : {};
-            var scheme = (app && app.colorScheme) || 'light';
-
-            var darkFallback = scheme === 'dark';
-
-            setVar('--app-bg', tp.bg_color, darkFallback ? '#17212b' : '#f4f5f7');
-            setVar('--app-surface', tp.section_bg_color || tp.secondary_bg_color,
-                darkFallback ? '#202b36' : '#ffffff');
-            setVar('--app-surface-2', tp.secondary_bg_color,
-                darkFallback ? '#263442' : '#eef0f3');
-            setVar('--app-text', tp.text_color,
-                darkFallback ? '#f5f7f9' : '#202124');
-            setVar('--app-hint', tp.hint_color,
-                darkFallback ? '#9eabb7' : '#747b84');
-            setVar('--app-accent', tp.button_color || tp.link_color,
-                darkFallback ? '#5ea7e8' : '#2481cc');
-            setVar('--app-accent-text', tp.button_text_color,
-                darkFallback ? '#ffffff' : '#ffffff');
-            setVar('--app-link', tp.link_color,
-                darkFallback ? '#6ab2f2' : '#2481cc');
-            setVar('--app-header', tp.header_bg_color || tp.bg_color,
-                darkFallback ? '#17212b' : '#f4f5f7');
-            setVar('--app-separator', tp.section_separator_color,
-                darkFallback ? '#34414d' : '#d9dde3');
-            setVar('--app-danger', tp.destructive_text_color,
-                darkFallback ? '#ff6b6b' : '#e5484d');
-
-            document.documentElement.dataset.colorScheme = scheme;
-
-            // Keep the host app's own chrome visually aligned with the page.
-            try {
-                if (app && typeof app.setHeaderColor === 'function') {
-                    app.setHeaderColor(tp.header_bg_color || 'bg_color');
-                }
-                if (app && typeof app.setBackgroundColor === 'function') {
-                    app.setBackgroundColor(tp.bg_color || 'bg_color');
-                }
-            } catch (e) {}
-        }
-
-        function initNativeTheme() {
-            var app = getApp();
-            applyPlatformTheme();
-
-            if (!app) return;
-
-            try {
-                if (typeof app.ready === 'function') app.ready();
-                if (typeof app.expand === 'function') app.expand();
-                if (typeof app.onEvent === 'function') {
-                    app.onEvent('themeChanged', applyPlatformTheme);
-                }
-            } catch (e) {
-                console.log('Mini App theme bridge:', e);
-            }
-        }
-
-        window.getMiniApp = getApp;
-        window.applyMiniAppTheme = applyPlatformTheme;
-
-        // SDK is loaded synchronously above, but wait one tick for client initialization.
-        setTimeout(initNativeTheme, 0);
-    })();
-
     var allItems = [];
     var cart = JSON.parse(localStorage.getItem('userCart')) || []; 
     var currentItemName = "";
@@ -5775,7 +5359,9 @@
 
     /* === سیستم جامع مدیریت لینک برای ایتا، تلگرام و بله === */
     function getWebApp() {
-        return typeof window.getMiniApp === 'function' ? window.getMiniApp() : null;
+        if (typeof window.Eitaa !== 'undefined' && window.Eitaa.WebApp) return window.Eitaa.WebApp;
+        if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) return window.Telegram.WebApp;
+        return null;
     }
 
     function openSafeLink(url, platform) {
