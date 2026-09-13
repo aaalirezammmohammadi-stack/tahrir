@@ -5111,6 +5111,7 @@ input[type=number]{-moz-appearance:textfield}
 275,000	یدک مغزی مدادفشنگی
 840,000	یدک مینی لیست سویل8*13
 
+
 </textarea>
 
 <script>
@@ -5120,6 +5121,22 @@ input[type=number]{-moz-appearance:textfield}
 function getWebApp(){
   if (typeof window.Eitaa !== 'undefined' && window.Eitaa.WebApp) return window.Eitaa.WebApp;
   return null;
+}
+
+/* تشخیص نسخهٔ کلاینت (اندروید/دسکتاپ در برابر نسخهٔ وب) از طریق خود SDK ایتا —
+   نه از روی User-Agent، چون تشخیص مبتنی بر UA قبلاً با کلاینت ایتا مشکل ایجاد می‌کرد.
+   خود برنامک همان فیلد platform را که در مستندات مینی‌اپ تلگرام تعریف شده برمی‌گرداند. */
+function getClientPlatform(){
+  var app = getWebApp();
+  if(!app) return null;
+  var v = app.platform || app.platformType || app.platform_type || app.clientPlatform || app.client_platform || null;
+  return v ? String(v).toLowerCase() : null;
+}
+var WEB_CLIENT_PLATFORMS = ['web','weba','webk','webview','browser'];
+function isWebClient(){
+  var p = getClientPlatform();
+  if(!p) return false;   // اگر پلتفرم قابل تشخیص نبود، نسخهٔ بومی (اندروید/دسکتاپ) فرض می‌شود
+  return WEB_CLIENT_PLATFORMS.indexOf(p) > -1;
 }
 
 /* --- ابزار رنگ --- */
@@ -5664,7 +5681,14 @@ function openSafeLink(url, isEitaaLink){
   var app = getWebApp();
   if(app){
     try{
-      if(isEitaaLink && typeof app.openEitaaLink === 'function'){ app.openEitaaLink(url); return; }
+      /* روی نسخهٔ اندروید/دسکتاپ ایتا، openEitaaLink پی‌وی ادمین را به‌درستی باز می‌کند.
+         روی نسخهٔ وب ایتا (که مثل مینی‌اپ‌های تلگرام وب رفتار می‌کند) این متد کار نمی‌کند؛
+         در آن حالت طبق همان روش استاندارد بازکردن لینک خارجی در مینی‌اپ عمل می‌کنیم که
+         خود کلاینت وب ایتا آن را به‌درستی به پی‌وی ادمین هدایت می‌کند. */
+      if(isEitaaLink && !isWebClient() && typeof app.openEitaaLink === 'function'){
+        app.openEitaaLink(url);
+        return;
+      }
       if(typeof app.openLink === 'function'){ app.openLink(url, { try_browser: true }); return; }
     }catch(e){ console.log("WebApp API Error:", e); }
   }
