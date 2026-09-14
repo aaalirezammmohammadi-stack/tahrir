@@ -5689,11 +5689,24 @@ function openSafeLink(url, isEitaaLink){
       if(typeof app.openLink === 'function'){ app.openLink(url, { try_browser: true }); return; }
     }catch(e){ console.log("WebApp API Error:", e); }
   }
+
   /* اینجا یعنی خارج از خود ایتا باز شده — مثلاً داخل مرورگر درون‌برنامه‌ای
      تلگرام اندروید یا بله اندروید (window.Eitaa اصلاً وجود ندارد).
-     خیلی از این مرورگرهای محدود، باز شدن تب/پنجرهٔ جدید (کلیک روی <a target=_blank>)
-     را نادیده می‌گیرند یا مسدود می‌کنند؛ اما ناوبری مستقیم صفحه تقریباً همه‌جا
-     (شامل همین اپ‌های اندرویدی) کار می‌کند. */
+     این مرورگرهای محدود معمولاً Android App Links را دنبال نمی‌کنند، یعنی حتی
+     ناوبری مستقیم به eitaa.com هم اپ بومی ایتا را باز نمی‌کند و فقط صفحهٔ وب
+     را (اگر اصلاً چیزی نشان بدهد) داخل همان مرورگر محدود لود می‌کند.
+     راه‌حل قابل‌اعتمادتر برای اندروید: یک Intent صریح که مستقیماً از سیستم‌عامل
+     می‌خواهد اپ ایتا (ir.eitaa.messenger) را باز کند؛ این سازوکار در سطح خود
+     WebView/Chromium پیاده‌سازی شده و بر خلاف App Links، داخل این مرورگرهای
+     درون‌برنامه‌ای هم معمولاً کار می‌کند. اگر ایتا نصب نباشد، به همان لینک وب
+     برمی‌گردد (fallback). */
+  if(isEitaaLink && /Android/i.test(navigator.userAgent)){
+    var withoutScheme = url.replace(/^https?:\/\//, '');
+    window.location.href = 'intent://' + withoutScheme +
+      '#Intent;scheme=https;package=ir.eitaa.messenger;S.browser_fallback_url=' +
+      encodeURIComponent(url) + ';end';
+    return;
+  }
   window.location.href = url;
 }
 
