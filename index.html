@@ -8,27 +8,8 @@
 
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css">
 
-<script>
-  /* بارگذاری SDK: به‌جای حدس‌زدن پلتفرم از روی User-Agent/hash (که برای نسخهٔ وب
-     ایتا هیچ‌وقت درست تشخیص نمی‌داد، چون نه UA و نه hash واقعی نسخهٔ وب ایتا هیچ‌جا
-     شامل کلمهٔ "eitaa" نیست)، SDK ایتا را همیشه و اول از همه لود می‌کنیم تا فرصت
-     کامل و بدون مزاحمت برای initialize شدن داشته باشد. SDK تلگرام را فقط بعد از
-     اتمام لود SDK ایتا و به‌صورت مکمل اضافه می‌کنیم — نه هم‌زمان — تا صرفاً به‌عنوان
-     راه بازکردن لینک وقتی خارج از ایتا (مثلاً تلگرام/بله) هستیم در دسترس باشد،
-     بدون اینکه در initialize شدن SDK ایتا تداخلی ایجاد کند. */
-  (function () {
-    function loadScript(src, onDone){
-      var s = document.createElement('script');
-      s.src = src;
-      s.onload = onDone;
-      s.onerror = onDone;
-      document.head.appendChild(s);
-    }
-    loadScript('https://developer.eitaa.com/eitaa-web-app.js', function(){
-      loadScript('https://telegram.org/js/telegram-web-app.js', function(){});
-    });
-  })();
-</script>
+<!-- کیت توسعه برنامک ایتا -->
+<script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 
 <style>
 /* ============================================================
@@ -5128,7 +5109,6 @@ input[type=number]{-moz-appearance:textfield}
 275,000	یدک مغزی مدادفشنگی
 840,000	یدک مینی لیست سویل8*13
 
-
 </textarea>
 
 <script>
@@ -5136,8 +5116,7 @@ input[type=number]{-moz-appearance:textfield}
    ۰) آداپتور برنامک ایتا و تم
    ============================================================ */
 function getWebApp(){
-  if (typeof window.Eitaa    !== 'undefined' && window.Eitaa.WebApp)    return window.Eitaa.WebApp;
-  if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) return window.Telegram.WebApp;
+  if (typeof window.Eitaa !== 'undefined' && window.Eitaa.WebApp) return window.Eitaa.WebApp;
   return null;
 }
 
@@ -5710,25 +5689,10 @@ function openSafeLink(url, isEitaaLink){
       if(typeof app.openLink === 'function'){ app.openLink(url, { try_browser: true }); return; }
     }catch(e){ console.log("WebApp API Error:", e); }
   }
-
-  /* اینجا یعنی خارج از خود ایتا باز شده — مثلاً داخل مرورگر درون‌برنامه‌ای
-     تلگرام اندروید یا بله اندروید (window.Eitaa اصلاً وجود ندارد).
-     این مرورگرهای محدود معمولاً Android App Links را دنبال نمی‌کنند، یعنی حتی
-     ناوبری مستقیم به eitaa.com هم اپ بومی ایتا را باز نمی‌کند و فقط صفحهٔ وب
-     را (اگر اصلاً چیزی نشان بدهد) داخل همان مرورگر محدود لود می‌کند.
-     راه‌حل قابل‌اعتمادتر برای اندروید: یک Intent صریح که مستقیماً از سیستم‌عامل
-     می‌خواهد اپ ایتا (ir.eitaa.messenger) را باز کند؛ این سازوکار در سطح خود
-     WebView/Chromium پیاده‌سازی شده و بر خلاف App Links، داخل این مرورگرهای
-     درون‌برنامه‌ای هم معمولاً کار می‌کند. اگر ایتا نصب نباشد، به همان لینک وب
-     برمی‌گردد (fallback). */
-  if(isEitaaLink && /Android/i.test(navigator.userAgent)){
-    var withoutScheme = url.replace(/^https?:\/\//, '');
-    window.location.href = 'intent://' + withoutScheme +
-      '#Intent;scheme=https;package=ir.eitaa.messenger;S.browser_fallback_url=' +
-      encodeURIComponent(url) + ';end';
-    return;
-  }
-  window.location.href = url;
+  var a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); }, 100);
 }
 
 function getOrderMessageText(){
