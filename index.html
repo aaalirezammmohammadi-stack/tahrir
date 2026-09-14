@@ -9,7 +9,7 @@
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css">
 
 <!-- کیت توسعه برنامک ایتا -->
-<script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+<script src="https://developer.eitaa.com/eitaa-web-app.js" defer></script>
 
 <style>
 /* ============================================================
@@ -5743,7 +5743,7 @@ function redirectToEitaa(){
 
 function sendOrderTelegram(){
   var text = getOrderMessageText(); if(!text) return;
-  var url = "https://t.me/tahrir_ir?text=" + encodeURIComponent(text);
+  var url = "https://t.me/tahrir_ir_f?text=" + encodeURIComponent(text);
   closeModal('cartModal');
   var a = document.createElement('a');
   a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
