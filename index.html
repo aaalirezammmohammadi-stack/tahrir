@@ -10,6 +10,10 @@
 
 <!-- کیت توسعه برنامک ایتا -->
 <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+<!-- SDK تلگرام: فقط برای اینکه وقتی خارج از ایتا (مثلاً داخل تلگرام/بله) باز می‌شود،
+     window.Telegram.WebApp.openLink() به‌عنوان راه بازکردن لینک در دسترس باشد.
+     هیچ UI یا منطق دیگری از تلگرام استفاده نمی‌شود؛ همه‌چیز همچنان صرفاً بر مبنای ایتاست. -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
 /* ============================================================
@@ -5116,7 +5120,8 @@ input[type=number]{-moz-appearance:textfield}
    ۰) آداپتور برنامک ایتا و تم
    ============================================================ */
 function getWebApp(){
-  if (typeof window.Eitaa !== 'undefined' && window.Eitaa.WebApp) return window.Eitaa.WebApp;
+  if (typeof window.Eitaa    !== 'undefined' && window.Eitaa.WebApp)    return window.Eitaa.WebApp;
+  if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) return window.Telegram.WebApp;
   return null;
 }
 
