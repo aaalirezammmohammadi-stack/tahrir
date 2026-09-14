@@ -277,6 +277,7 @@ input[type=number]{-moz-appearance:textfield}
 .btn-danger{background:rgba(var(--danger-rgb),.1); color:var(--danger); border-color:rgba(var(--danger-rgb),.35)}
 .btn-solid-danger{background:var(--danger); color:#fff}
 .btn-eitaa{background:#E85D04; color:#fff}
+.btn-telegram{background:#229ED9; color:#fff}
 
 /* سبد خرید */
 .cart-list{max-height:44vh; overflow-y:auto; margin:-4px -4px 0; padding:4px}
@@ -385,6 +386,7 @@ input[type=number]{-moz-appearance:textfield}
     </div>
     <div class="sheet-foot">
       <button class="btn btn-eitaa" onclick="sendOrderEitaa()">ارسال سفارش در ایتا</button>
+      <button class="btn btn-telegram" onclick="sendOrderTelegram()">ارسال سفارش در تلگرام</button>
       <button class="btn btn-danger" onclick="openConfirmClearModal()">حذف تمام سفارشات</button>
       <button class="btn btn-ghost" onclick="closeModal('cartModal')">بستن / ادامه خرید</button>
     </div>
@@ -5737,6 +5739,16 @@ function redirectToEitaa(){
   closeModal('eitaaModal');
   closeModal('cartModal');
   openSafeLink("https://eitaa.com/tahrir_ir_f", true);
+}
+
+function sendOrderTelegram(){
+  var text = getOrderMessageText(); if(!text) return;
+  var url = "https://t.me/tahrir_ir?text=" + encodeURIComponent(text);
+  closeModal('cartModal');
+  var a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); }, 100);
 }
 </script>
 </body>
