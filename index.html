@@ -8,12 +8,26 @@
 
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css">
 
-<!-- کیت توسعه برنامک ایتا -->
-<script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
-<!-- SDK تلگرام: فقط برای اینکه وقتی خارج از ایتا (مثلاً داخل تلگرام/بله) باز می‌شود،
-     window.Telegram.WebApp.openLink() به‌عنوان راه بازکردن لینک در دسترس باشد.
-     هیچ UI یا منطق دیگری از تلگرام استفاده نمی‌شود؛ همه‌چیز همچنان صرفاً بر مبنای ایتاست. -->
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  /* بارگذاری SDK متناسب با پلتفرم — فقط یکی از این دو لود می‌شود، هیچ‌وقت هر دو با هم
+     (چون SDK ایتا و تلگرام وقتی هم‌زمان لود بشن با هم تداخل پیدا می‌کنند).
+     از document.write استفاده نمی‌کنیم چون داخل iframe (که مینی‌اپ‌ها معمولاً همونجا
+     میزبانی می‌شن) توسط مرورگر مسدود می‌شه و باعث می‌شد نسخهٔ وب ایتا اصلاً لود نشه
+     و کار به باز شدن لینک در مرورگر گوشی بکشه. به‌جاش از تزریق غیرمسدودکنندهٔ
+     اسکریپت استفاده می‌کنیم که هم داخل iframe درست کار می‌کنه، هم چون هیچ تعاملی
+     از کاربر (کلیک روی دکمه‌ها) قبل از لود کامل این اسکریپت نیاز نیست، مشکلی
+     در تایمینگ ایجاد نمی‌کنه. */
+  (function () {
+    var ua = navigator.userAgent.toLowerCase();
+    var hash = window.location.hash.toLowerCase();
+    var src = (ua.indexOf('eitaa') > -1 || hash.indexOf('eitaa') > -1)
+      ? 'https://developer.eitaa.com/eitaa-web-app.js'
+      : 'https://telegram.org/js/telegram-web-app.js';
+    var s = document.createElement('script');
+    s.src = src;
+    document.head.appendChild(s);
+  })();
+</script>
 
 <style>
 /* ============================================================
