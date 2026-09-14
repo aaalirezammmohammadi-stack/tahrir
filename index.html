@@ -6,7 +6,11 @@
 <meta name="theme-color" content="#ffffff" id="metaThemeColor">
 <title>لیست قیمت و سفارش عمده</title>
 
-<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://developer.eitaa.com">
+<link rel="preload" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" as="style">
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" media="print" onload="this.media='all'">
+<noscript><link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css"></noscript>
 
 <!-- کیت توسعه برنامک ایتا -->
 <script src="https://developer.eitaa.com/eitaa-web-app.js" defer></script>
@@ -5194,7 +5198,9 @@ function readThemeParams(){
 }
 
 var THEME_KEY = 'priceListThemeMode';
-var themeMode = localStorage.getItem(THEME_KEY) || 'auto';   // auto | light | dark
+function safeGetLS(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+function safeSetLS(key, val){ try{ localStorage.setItem(key, val); }catch(e){} }
+var themeMode = safeGetLS(THEME_KEY) || 'auto';   // auto | light | dark
 var PLATFORM_VARS = ['--bg','--surface','--surface-2','--text','--muted','--border',
                      '--accent','--accent-rgb','--accent-contrast','--danger','--danger-rgb'];
 
@@ -5282,7 +5288,7 @@ function renderThemeIcon(){
 }
 function cycleTheme(){
   themeMode = themeMode === 'auto' ? 'light' : (themeMode === 'light' ? 'dark' : 'auto');
-  localStorage.setItem(THEME_KEY, themeMode);
+  safeSetLS(THEME_KEY, themeMode);
   refreshTheme();
   haptic('light');
 }
@@ -5313,7 +5319,7 @@ function haptic(style){
    ۱) داده‌ها و نرمال‌سازی  (بدون تغییر منطقی)
    ============================================================ */
 var allItems = [];
-var cart = JSON.parse(localStorage.getItem('userCart')) || [];
+var cart = (function(){ try{ return JSON.parse(safeGetLS('userCart')) || []; }catch(e){ return []; } })();
 var currentItemName = "";
 var currentItemPrice = 0;
 
@@ -5326,10 +5332,10 @@ function normalize(t){
   return String(t).replace(/[۰-۹٠-٩آأإيكةؤ\u200c]/g, function(w){ return charMap[w] || w; }).toLowerCase();
 }
 
-window.onload = function(){
-  initSliders();
-  setTimeout(processData, 50);
-};
+/* این اسکریپت انتهای body قرار دارد، پس در این نقطه HTML صفحه کامل پارس شده؛
+   دیگر منتظر رویداد window.onload (که تا دانلود کامل فونت و اسکریپت ایتا صبر می‌کند) نمی‌مانیم. */
+initSliders();
+setTimeout(processData, 50);
 
 /* ============================================================
    ۲) اسلایدرهای تگ
@@ -5599,7 +5605,7 @@ function calcTotal(){
 /* ============================================================
    ۶) سبد خرید
    ============================================================ */
-function saveCart(){ localStorage.setItem('userCart', JSON.stringify(cart)); }
+function saveCart(){ safeSetLS('userCart', JSON.stringify(cart)); }
 
 function addToCart(){
   var qty = parseInt(document.getElementById("modalQty").value, 10) || 1;
