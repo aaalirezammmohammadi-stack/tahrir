@@ -5109,7 +5109,6 @@ input[type=number]{-moz-appearance:textfield}
 275,000	یدک مغزی مدادفشنگی
 840,000	یدک مینی لیست سویل8*13
 
-
 </textarea>
 
 <script>
@@ -5690,10 +5689,12 @@ function openSafeLink(url, isEitaaLink){
       if(typeof app.openLink === 'function'){ app.openLink(url, { try_browser: true }); return; }
     }catch(e){ console.log("WebApp API Error:", e); }
   }
-  var a = document.createElement('a');
-  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){ document.body.removeChild(a); }, 100);
+  /* اینجا یعنی خارج از خود ایتا باز شده — مثلاً داخل مرورگر درون‌برنامه‌ای
+     تلگرام اندروید یا بله اندروید (window.Eitaa اصلاً وجود ندارد).
+     خیلی از این مرورگرهای محدود، باز شدن تب/پنجرهٔ جدید (کلیک روی <a target=_blank>)
+     را نادیده می‌گیرند یا مسدود می‌کنند؛ اما ناوبری مستقیم صفحه تقریباً همه‌جا
+     (شامل همین اپ‌های اندرویدی) کار می‌کند. */
+  window.location.href = url;
 }
 
 function getOrderMessageText(){
