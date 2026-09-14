@@ -9,23 +9,24 @@
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css">
 
 <script>
-  /* بارگذاری SDK متناسب با پلتفرم — فقط یکی از این دو لود می‌شود، هیچ‌وقت هر دو با هم
-     (چون SDK ایتا و تلگرام وقتی هم‌زمان لود بشن با هم تداخل پیدا می‌کنند).
-     از document.write استفاده نمی‌کنیم چون داخل iframe (که مینی‌اپ‌ها معمولاً همونجا
-     میزبانی می‌شن) توسط مرورگر مسدود می‌شه و باعث می‌شد نسخهٔ وب ایتا اصلاً لود نشه
-     و کار به باز شدن لینک در مرورگر گوشی بکشه. به‌جاش از تزریق غیرمسدودکنندهٔ
-     اسکریپت استفاده می‌کنیم که هم داخل iframe درست کار می‌کنه، هم چون هیچ تعاملی
-     از کاربر (کلیک روی دکمه‌ها) قبل از لود کامل این اسکریپت نیاز نیست، مشکلی
-     در تایمینگ ایجاد نمی‌کنه. */
+  /* بارگذاری SDK: به‌جای حدس‌زدن پلتفرم از روی User-Agent/hash (که برای نسخهٔ وب
+     ایتا هیچ‌وقت درست تشخیص نمی‌داد، چون نه UA و نه hash واقعی نسخهٔ وب ایتا هیچ‌جا
+     شامل کلمهٔ "eitaa" نیست)، SDK ایتا را همیشه و اول از همه لود می‌کنیم تا فرصت
+     کامل و بدون مزاحمت برای initialize شدن داشته باشد. SDK تلگرام را فقط بعد از
+     اتمام لود SDK ایتا و به‌صورت مکمل اضافه می‌کنیم — نه هم‌زمان — تا صرفاً به‌عنوان
+     راه بازکردن لینک وقتی خارج از ایتا (مثلاً تلگرام/بله) هستیم در دسترس باشد،
+     بدون اینکه در initialize شدن SDK ایتا تداخلی ایجاد کند. */
   (function () {
-    var ua = navigator.userAgent.toLowerCase();
-    var hash = window.location.hash.toLowerCase();
-    var src = (ua.indexOf('eitaa') > -1 || hash.indexOf('eitaa') > -1)
-      ? 'https://developer.eitaa.com/eitaa-web-app.js'
-      : 'https://telegram.org/js/telegram-web-app.js';
-    var s = document.createElement('script');
-    s.src = src;
-    document.head.appendChild(s);
+    function loadScript(src, onDone){
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = onDone;
+      s.onerror = onDone;
+      document.head.appendChild(s);
+    }
+    loadScript('https://developer.eitaa.com/eitaa-web-app.js', function(){
+      loadScript('https://telegram.org/js/telegram-web-app.js', function(){});
+    });
   })();
 </script>
 
