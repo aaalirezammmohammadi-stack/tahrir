@@ -5127,7 +5127,6 @@ input[type=number]{-moz-appearance:textfield}
 530,000	یدک لاک نواری سیکلاس
 275,000	یدک مغزی مدادفشنگی
 840,000	یدک مینی لیست سویل8*13
-
 </textarea>
 
 <script>
@@ -5307,7 +5306,7 @@ function cycleTheme(){
 }
 
 /* راه‌اندازی مینی‌اپ */
-(function initMiniApp(){
+function initMiniApp(){
   var app = getWebApp();
   if(app){
     try{ app.ready  && app.ready();  }catch(e){}
@@ -5319,7 +5318,14 @@ function cycleTheme(){
     (mq.addEventListener ? mq.addEventListener('change', refreshTheme) : mq.addListener(refreshTheme));
   }
   refreshTheme();
-})();
+}
+/* اسکریپت SDK ایتا با defer لود می‌شود، پس تا قبل از DOMContentLoaded ممکن است window.Eitaa هنوز آماده نباشد؛
+   برای همین صبر می‌کنیم تا این رویداد شلیک شود (که خودش منتظر فونت/عکس نمی‌ماند، فقط منتظر اسکریپت‌های defer است) */
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', initMiniApp);
+}else{
+  initMiniApp();
+}
 
 function haptic(style){
   try{
