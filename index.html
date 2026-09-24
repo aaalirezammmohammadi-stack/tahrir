@@ -656,7 +656,7 @@ function normalize(t){
 /* این اسکریپت انتهای body قرار دارد، پس در این نقطه HTML صفحه کامل پارس شده؛
    دیگر منتظر رویداد window.onload (که تا دانلود کامل فونت و اسکریپت ایتا صبر می‌کند) نمی‌مانیم. */
 initSliders();
-loadProducts();
+setTimeout(loadProducts, 0);
 
 /* ============================================================
    ۲) اسلایدرهای تگ
@@ -776,9 +776,9 @@ function toggleClearBtn(){
    - اگر نسخهٔ ذخیره‌شده در مرورگر باشد، همان لحظه نمایش داده می‌شود
    - همزمان فایل از سرور بررسی می‌شود؛ فقط اگر تغییر کرده باشد لیست به‌روز می‌شود
    ============================================================ */
-var PRODUCTS_URL = 'products.txt';
-var PRODUCTS_KEY = 'productsTxtV1';
 function loadProducts(){
+  var PRODUCTS_URL = 'products.txt';
+  var PRODUCTS_KEY = 'productsTxtV1';
   var cached = safeGetLS(PRODUCTS_KEY);
   if(cached) processData(cached);
   fetch(PRODUCTS_URL, { cache: 'no-cache' })
