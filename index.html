@@ -168,13 +168,7 @@ input[type=number]{-moz-appearance:textfield}
   transition:background-color .15s;
 }
 .item:active{background:var(--surface-2)}
-.item-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px}
-.item-name{font-size:var(--fs-base); font-weight:500}
-.item-tag{
-  align-self:flex-start; font-size:11px; color:var(--muted);
-  background:var(--surface-2); border:1px solid var(--border);
-  border-radius:5px; padding:1px 6px;
-}
+.item-name{flex:1; min-width:0; font-size:var(--fs-base); font-weight:500}
 .item-price{
   flex:none; font-size:13.5px; font-weight:700;
   color:var(--accent); background:rgba(var(--accent-rgb),.1);
@@ -647,39 +641,8 @@ function haptic(style){
    ============================================================ */
 var allItems = [];
 var cart = (function(){ try{ return JSON.parse(safeGetLS('userCart')) || []; }catch(e){ return []; } })();
-var currentItemCode = "";
 var currentItemName = "";
 var currentItemPrice = 0;
-var currentItemStep = 0;
-var currentItemMinOrder = 0;
-var currentItemDefaultQty = 1;
-
-/* قوانین تعداد بر اساس کالای در حال سفارش:
-   - تعداد در بسته (step>0): پیش‌فرض و گام = step، عدد دستی به نزدیک‌ترین مضرب گرد می‌شود
-   - کمینه سفارش (minOrder>0, step=0): پیش‌فرض و کف = minOrder، از آن به بعد آزاد و یکی‌یکی
-   - هیچ‌کدام: پیش‌فرض ۱، آزاد و یکی‌یکی */
-function qtyFloor(){
-  if(currentItemStep > 0) return currentItemStep;
-  if(currentItemMinOrder > 0) return currentItemMinOrder;
-  return 1;
-}
-function qtyStepUnit(){ return currentItemStep > 0 ? currentItemStep : 1; }
-function sanitizeQty(raw){
-  var q = parseInt(normalize(raw).replace(/[^0-9]/g,''), 10);   // پشتیبانی از ارقام فارسی/عربی تایپ‌شده
-  if(currentItemStep > 0){
-    if(isNaN(q) || q < currentItemStep) return currentItemStep;
-    var down = Math.floor(q / currentItemStep) * currentItemStep;
-    if(down < currentItemStep) down = currentItemStep;
-    var up = down + currentItemStep;
-    return (q - down <= up - q) ? down : up;   // به نزدیک‌ترین مضرب
-  }
-  if(currentItemMinOrder > 0){
-    if(isNaN(q) || q < currentItemMinOrder) return currentItemMinOrder;
-    return q;
-  }
-  if(isNaN(q) || q <= 0) return 1;
-  return q;
-}
 
 var charMap = {
   '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
@@ -852,40 +815,29 @@ function processData(text){
   var lines = text.split("\n");
   var originalIndex = 0, tempItems = [];
 
-  /* فرمت واقعی خروجی اکسل (۵ ستون، با TAB، به همین ترتیب ستون‌ها):
-     کمینه سفارش  |  تعداد در بسته  |  قیمت  |  نام کالا  |  کد کالا */
   for(var i=0;i<lines.length;i++){
     var line = lines[i].trim();
     if(!line || line.indexOf("!!!") === 0) continue;
 
     var parts = line.split("\t");
-    if(parts.length < 5) continue;   // هر ۵ ستون لازم است (اکسل برای خالی هم 0 می‌گذارد)
-
-    var minOrder = parseInt(normalize(parts[0]).replace(/[^0-9]/g,''), 10);
-    if(isNaN(minOrder) || minOrder < 0) minOrder = 0;
-
-    var step = parseInt(normalize(parts[1]).replace(/[^0-9]/g,''), 10);
-    if(isNaN(step) || step < 0) step = 0;
-
-    var p    = parseInt(parts[2].replace(/,/g,'').replace(/"/g,''), 10);
-    var n    = parts[3].replace(/"/g,'').trim();
-    var code = parts[4].replace(/"/g,'').trim();
-
-    if(!isNaN(p) && n && code){
-      tempItems.push({ id: originalIndex++, code: code, p: p, n: n, step: step, minOrder: minOrder, sn: normalize(n) });
+    if(parts.length < 2){                                  // پشتیبان: فاصله به‌جای TAB
+      var m = line.match(/^([\d۰-۹,\.]+)\s+(.+)$/);
+      if(m) parts = [m[1], m[2]];
+    }
+    if(parts.length >= 2){
+      var p = parseInt(parts[0].replace(/,/g,'').replace(/"/g,''), 10);
+      var n = parts[1].replace(/"/g,'').trim();
+      if(!isNaN(p) && n) tempItems.push({ id: originalIndex++, p: p, n: n, sn: normalize(n) });
     }
   }
   allItems = tempItems;
 
-  /* همگام‌سازی سبد بر اساس کد کالا (نه نام)؛ اگر لیست خالی بود سبد دست‌نخورده می‌ماند */
+  /* همگام‌سازی سبد با قیمت‌های جدید */
   var cartUpdated = false;
-  for(var c=0; allItems.length && c<cart.length; c++){
-    var liveItem = allItems.find(function(item){ return item.code === cart[c].code; });
+  for(var c=0;c<cart.length;c++){
+    var liveItem = allItems.find(function(item){ return item.n === cart[c].name; });
     if(liveItem){
       if(cart[c].price !== liveItem.p){ cart[c].price = liveItem.p; cartUpdated = true; }
-      if(cart[c].name  !== liveItem.n){ cart[c].name  = liveItem.n; cartUpdated = true; }
-      if((cart[c].step||0)     !== (liveItem.step||0)){ cart[c].step = liveItem.step; cartUpdated = true; }
-      if((cart[c].minOrder||0) !== (liveItem.minOrder||0)){ cart[c].minOrder = liveItem.minOrder; cartUpdated = true; }
     }else{
       cart.splice(c,1); c--; cartUpdated = true;
     }
@@ -915,16 +867,9 @@ function showItems(items){
   var limit = Math.min(items.length, 150);
   var html = "";
   for(var i=0;i<limit;i++){
-    var it  = items[i];
-    var tag = "";
-    if(it.step > 0)          tag = '<span class="item-tag">بسته ' + it.step + ' تایی</span>';
-    else if(it.minOrder > 0) tag = '<span class="item-tag">حداقل ' + it.minOrder + ' عدد</span>';
-
-    html += '<div class="item" onclick="openOrderModalByIndex(' + it.id + ')">' +
-              '<div class="item-main">' +
-                '<span class="item-name">' + escapeHTML(it.n) + '</span>' + tag +
-              '</div>' +
-              '<span class="item-price">' + formatToToman(it.p) + '</span>' +
+    html += '<div class="item" onclick="openOrderModalByIndex(' + items[i].id + ')">' +
+              '<span class="item-name">'  + escapeHTML(items[i].n) + '</span>' +
+              '<span class="item-price">' + formatToToman(items[i].p) + '</span>' +
             '</div>';
   }
   listEl.innerHTML = html;
@@ -971,45 +916,27 @@ function syncBackButton(){
 
 function openOrderModalByIndex(id){
   var item = allItems.find(function(x){ return x.id === id; });
-  if(item) openOrderModal(item);
+  if(item) openOrderModal(item.n, item.p);
 }
-function openOrderModal(item){
-  currentItemCode     = item.code;
-  currentItemName     = item.n;
-  currentItemPrice    = parseInt(item.p, 10);
-  currentItemStep     = item.step || 0;
-  currentItemMinOrder = item.minOrder || 0;
-
-  /* اگر این کالا از قبل در سبد است، مودال با همان تعداد باز می‌شود تا کاربر آن را
-     اصلاح کند، نه اینکه دوباره از کف پیش‌فرض شروع شود و روی مقدار قبلی جمع بخورد */
-  var existing = cart.find(function(c){ return c.code === item.code; });
-  currentItemDefaultQty = existing ? existing.qty : qtyFloor();
-
-  var extra = "";
-  if(currentItemStep > 0)          extra = " | فروش بسته‌ای: هر بار " + currentItemStep + " عدد";
-  else if(currentItemMinOrder > 0) extra = " | حداقل سفارش: " + currentItemMinOrder + " عدد";
-
-  document.getElementById("modalItemName").innerText  = item.n;
-  document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(item.p) + extra;
-  document.getElementById("modalQty").value = currentItemDefaultQty;
+function openOrderModal(name, price){
+  currentItemName  = name;
+  currentItemPrice = parseInt(price, 10);
+  document.getElementById("modalItemName").innerText  = name;
+  document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(price);
+  document.getElementById("modalQty").value = 1;
   calcTotal();
   openModal("orderModal");
   haptic('light');
 }
 
-function clearInputOnFocus(input){ if(input.value === String(currentItemDefaultQty)) input.value = ""; }
+function clearInputOnFocus(input){ if(input.value === "1") input.value = ""; }
 function restoreInputOnBlur(input){
-  input.value = sanitizeQty(input.value);
-  calcTotal();
+  if(input.value.trim() === "" || parseInt(input.value,10) <= 0){ input.value = "1"; calcTotal(); }
 }
 function changeQty(amount){
   var input = document.getElementById("modalQty");
-  var unit  = qtyStepUnit();
-  var floor = qtyFloor();
-  var cur   = parseInt(normalize(input.value).replace(/[^0-9]/g,''), 10);
-  if(isNaN(cur)) cur = floor;
-  var newVal = cur + amount * unit;
-  if(newVal >= floor){ input.value = newVal; calcTotal(); haptic('light'); }
+  var newVal = (parseInt(input.value,10) || 0) + amount;
+  if(newVal >= 1){ input.value = newVal; calcTotal(); haptic('light'); }
 }
 function calcTotal(){
   var qty = parseInt(document.getElementById("modalQty").value, 10) || 0;
@@ -1022,17 +949,10 @@ function calcTotal(){
 function saveCart(){ safeSetLS('userCart', JSON.stringify(cart)); }
 
 function addToCart(){
-  var qty = sanitizeQty(document.getElementById("modalQty").value);
-  var idx = cart.findIndex(function(item){ return item.code === currentItemCode; });
-  if(idx !== -1){
-    /* مودال مقدار فعلیِ همین کالا در سبد را نشان می‌داد، پس اینجا جایگزین می‌کنیم نه جمع */
-    cart[idx].qty  = qty;
-    cart[idx].name = currentItemName; cart[idx].price = currentItemPrice;
-    cart[idx].step = currentItemStep; cart[idx].minOrder = currentItemMinOrder;
-  }else{
-    cart.push({ code: currentItemCode, name: currentItemName, price: currentItemPrice, qty: qty,
-                step: currentItemStep, minOrder: currentItemMinOrder });
-  }
+  var qty = parseInt(document.getElementById("modalQty").value, 10) || 1;
+  var idx = cart.findIndex(function(item){ return item.name === currentItemName; });
+  if(idx !== -1) cart[idx].qty += qty;
+  else cart.push({ name: currentItemName, price: currentItemPrice, qty: qty });
 
   saveCart();
   updateCartUI();
@@ -1046,11 +966,8 @@ function removeFromCart(index){
   if(cart.length === 0) closeModal('cartModal');
 }
 function updateCartQty(index, change){
-  var item  = cart[index];
-  var unit  = item.step > 0 ? item.step : 1;
-  var floor = item.step > 0 ? item.step : (item.minOrder > 0 ? item.minOrder : 1);
-  item.qty += change * unit;
-  if(item.qty < floor) cart.splice(index, 1);
+  cart[index].qty += change;
+  if(cart[index].qty <= 0) cart.splice(index, 1);
   saveCart(); updateCartUI(); renderCartList();
   if(cart.length === 0) closeModal('cartModal');
 }
