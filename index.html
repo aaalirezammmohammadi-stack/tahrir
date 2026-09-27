@@ -166,7 +166,9 @@ input[type=number]{-moz-appearance:textfield}
   border:1px solid var(--border); border-radius:var(--r-md);
   padding:11px 14px; cursor:pointer;
   transition:background-color .15s;
+  position:relative; touch-action:pan-y; will-change:transform;
 }
+.item.swipe-snap{ transition:background-color .15s, transform .22s cubic-bezier(.16,1,.3,1); }
 .item:active{background:var(--surface-2)}
 .item-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px}
 .item-name-row{display:flex; align-items:center; gap:5px; min-width:0}
@@ -995,7 +997,7 @@ function showItems(items){
                it.code.replace(/'/g,"") + '\')">📷</button>';
     }
 
-    html += '<div class="item" onclick="openOrderModalByIndex(' + it.id + ')">' +
+    html += '<div class="item" data-id="' + it.id + '" data-code="' + it.code.replace(/"/g,"") + '" onclick="openOrderModalByIndex(' + it.id + ')">' +
               '<div class="item-main">' +
                 '<span class="item-name-row">' +
                   '<span class="item-name">' + escapeHTML(it.n) + '</span>' + imgBtn +
@@ -1007,6 +1009,61 @@ function showItems(items){
   listEl.innerHTML = html;
   statusEl.innerText = "نمایش " + limit + " مورد از " + items.length + " کالا (برای سفارش کلیک کنید)";
 }
+
+/* ============================================================
+   حرکت کشیدنی رو هر ردیف (مثل چت‌های تلگرام):
+   - کشیدن به چپ  = باز شدن صفحهٔ تعداد (همون کاری که کلیک می‌کند)
+   - کشیدن به راست = باز شدن عکس کالا (فقط اگر عکس داشته باشد)
+   با delegation روی خود لیست، چون ردیف‌ها هر بار از نو ساخته می‌شوند.
+   ============================================================ */
+(function(){
+  var SWIPE_THRESHOLD = 60;   // پیکسل، برای قطعی شدن حرکت
+  var MAX_DRAG = 90;          // بیشتر از این کشیده نمی‌شود (حس فنری)
+  var el = null, startX = 0, startY = 0, dx = 0, dragging = false, decided = false;
+
+  function onStart(e){
+    var t = e.target.closest && e.target.closest('.item');
+    if(!t) return;
+    el = t; dx = 0; dragging = false; decided = false;
+    var touch = e.touches[0];
+    startX = touch.clientX; startY = touch.clientY;
+    el.classList.remove('swipe-snap');
+  }
+  function onMove(e){
+    if(!el) return;
+    var touch = e.touches[0];
+    var moveX = touch.clientX - startX;
+    var moveY = touch.clientY - startY;
+    if(!decided){
+      if(Math.abs(moveX) < 8 && Math.abs(moveY) < 8) return;     // هنوز مشخص نیست قصد کاربر چیست
+      decided = true;
+      dragging = Math.abs(moveX) > Math.abs(moveY);              // افقی بودن حرکت تشخیص داده شد
+      if(!dragging){ el = null; return; }                        // حرکت عمودی -> اسکرول عادی، دست نمی‌زنیم
+    }
+    if(!dragging) return;
+    e.preventDefault();
+    dx = Math.max(-MAX_DRAG, Math.min(MAX_DRAG, moveX));
+    el.style.transform = 'translateX(' + dx + 'px)';
+  }
+  function onEnd(){
+    if(!el || !dragging){ el = null; return; }
+    var target = el, finalDx = dx, code = target.getAttribute('data-code');
+    target.classList.add('swipe-snap');
+    target.style.transform = 'translateX(0px)';
+    if(finalDx <= -SWIPE_THRESHOLD){
+      openOrderModalByIndex(parseInt(target.getAttribute('data-id'), 10));
+    }else if(finalDx >= SWIPE_THRESHOLD && itemsWithImage[code]){
+      openProductImage(code);
+    }
+    el = null; dragging = false; decided = false;
+  }
+
+  var list = document.getElementById('itemList');
+  list.addEventListener('touchstart', onStart, { passive:true });
+  list.addEventListener('touchmove', onMove, { passive:false });
+  list.addEventListener('touchend', onEnd);
+  list.addEventListener('touchcancel', onEnd);
+})();
 
 function formatToToman(n){
   var num = parseInt(n, 10);
