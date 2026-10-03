@@ -218,9 +218,9 @@ input[type=number]{-moz-appearance:textfield}
 }
 @keyframes pop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
 @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-@media (max-width:430px){
+@media (max-width:600px), (pointer:coarse) and (max-width:900px){
   .modal{padding:0; align-items:flex-end}
-  .sheet{max-width:none; max-height:92vh; border-radius:var(--r-xl) var(--r-xl) 0 0; border-bottom:none; animation:slideUp .24s ease-out}
+  .sheet{max-width:none; max-height:92vh; max-height:92dvh; border-radius:var(--r-xl) var(--r-xl) 0 0; border-bottom:none; animation:slideUp .24s ease-out}
 }
 
 .sheet-head{
