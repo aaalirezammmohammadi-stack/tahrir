@@ -367,8 +367,8 @@ input[type=number]{-moz-appearance:textfield}
       <span class="meta-pill" id="modalItemPrice">قیمت واحد: ۰ تومان</span>
       <div class="qty">
         <button onclick="changeQty(1)" aria-label="افزایش">+</button>
-        <input type="number" inputmode="numeric" id="modalQty" value="1" min="1"
-               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="calcTotal()">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="modalQty" value="1"
+               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="normalizeQtyInput(this); calcTotal()">
         <button onclick="changeQty(-1)" aria-label="کاهش">−</button>
       </div>
       <div class="total-line" id="modalTotal">جمع کل: ۰ تومان</div>
@@ -5673,6 +5673,14 @@ function openOrderModal(name, price){
   haptic('light');
 }
 
+/* تبدیل ارقام فارسی/عربی به انگلیسی و حذف هر کاراکتر غیرعددی (کیبورد فارسی آیفون) */
+function normalizeQtyInput(input){
+  var v = input.value
+    .replace(/[\u06F0-\u06F9]/g, function(d){ return String(d.charCodeAt(0) - 0x06F0); })
+    .replace(/[\u0660-\u0669]/g, function(d){ return String(d.charCodeAt(0) - 0x0660); })
+    .replace(/[^0-9]/g, '');
+  if(v !== input.value) input.value = v;
+}
 function clearInputOnFocus(input){ if(input.value === "1") input.value = ""; }
 function restoreInputOnBlur(input){
   if(input.value.trim() === "" || parseInt(input.value,10) <= 0){ input.value = "1"; calcTotal(); }
