@@ -125,16 +125,13 @@ input[type=number]{-moz-appearance:textfield}
 }
 .icon-btn:active{background:var(--border)}
 
-/* ردیف‌های تگ (اسلایدر بی‌نهایت) */
-.chips{display:flex; flex-direction:column; gap:6px}
-.marquee{
-  display:flex; overflow-x:auto; width:100%;
-  user-select:none; scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;
-  will-change:scroll-position; transform:translateZ(0);
+/* دکمهٔ دسته‌ها و برندها */
+.tags-btn{position:relative}
+.tags-btn.has-filter::after{
+  content:""; position:absolute; top:6px; right:6px;
+  width:8px; height:8px; border-radius:50%;
+  background:var(--accent); border:2px solid var(--surface-2); box-sizing:content-box;
 }
-.marquee::-webkit-scrollbar{display:none}
-.marquee-content{display:flex; flex-shrink:0; gap:6px; padding-right:6px}
 .chip{
   padding:5px 12px;
   border:1px solid var(--border); border-radius:var(--r-sm);
@@ -312,6 +309,42 @@ input[type=number]{-moz-appearance:textfield}
 }
 .note{font-size:13.5px; line-height:1.9; color:var(--text); text-align:center}
 .note b{color:var(--success)}
+
+/* پنجرهٔ دسته‌ها و برندها */
+.tags-sheet{height:min(80vh,560px); height:min(80dvh,560px)}
+@media (max-width:600px), (pointer:coarse) and (max-width:900px){
+  .tags-sheet{height:82vh; height:82dvh}
+}
+.tags-tabs{
+  display:flex; gap:4px; margin:12px 16px 0; padding:4px;
+  background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-md);
+}
+.tags-tab{
+  flex:1; height:36px; border:none; border-radius:var(--r-sm);
+  background:transparent; color:var(--muted);
+  font-size:var(--fs-base); font-weight:700; cursor:pointer;
+  transition:background-color .15s, color .15s;
+}
+.tags-tab.active{background:var(--accent); color:var(--accent-contrast)}
+.tags-filter{margin:10px 16px 0; position:relative}
+.tags-filter input{
+  width:100%; height:40px; padding:0 14px;
+  border:1px solid var(--border); border-radius:var(--r-md);
+  background:var(--surface-2); color:var(--text); font-size:var(--fs-base);
+  outline:none; transition:border-color .15s, box-shadow .15s;
+}
+.tags-filter input::placeholder{color:var(--muted)}
+.tags-filter input:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.16)}
+.tags-body{flex:1; min-height:0; overflow-y:auto; padding:12px 16px; -webkit-overflow-scrolling:touch}
+.tags-grid{display:flex; flex-wrap:wrap; gap:8px}
+.tags-grid .chip{padding:8px 14px; font-size:var(--fs-base)}
+.tags-grid .chip.selected{background:var(--accent); color:var(--accent-contrast); border-color:var(--accent)}
+.tags-empty{text-align:center; color:var(--muted); font-size:var(--fs-sm); padding:24px 0}
+.tags-foot{
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--border); display:flex; gap:8px;
+}
+.tags-foot .btn{flex:1}
 </style>
 </head>
 <body>
@@ -330,18 +363,10 @@ input[type=number]{-moz-appearance:textfield}
       </button>
     </div>
 
+    <button class="icon-btn tags-btn" id="tagsBtn" onclick="openTagsModal()" aria-label="دسته‌بندی و برند">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4.2a2 2 0 0 1 1.5.7L12 7h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+    </button>
     <button class="icon-btn" id="themeBtn" onclick="cycleTheme()" aria-label="تغییر تم"></button>
-  </div>
-
-  <div class="chips">
-    <div class="marquee" id="marquee-cats">
-      <div class="marquee-content" id="cat-content-1"></div>
-      <div class="marquee-content" id="cat-content-2"></div>
-    </div>
-    <div class="marquee" id="marquee-brands">
-      <div class="marquee-content" id="brand-content-1"></div>
-      <div class="marquee-content" id="brand-content-2"></div>
-    </div>
   </div>
 
 </div>
@@ -359,6 +384,25 @@ input[type=number]{-moz-appearance:textfield}
   <span class="fab-badge" id="cartBadge">0</span>
 </button>
 
+<!-- ================= مودال دسته‌ها و برندها ================= -->
+<div id="tagsModal" class="modal" onclick="closeModalOnBG(event,'tagsModal')">
+  <div class="sheet tags-sheet">
+    <div class="sheet-head">دسته‌بندی و برند</div>
+    <div class="tags-tabs">
+      <button class="tags-tab active" id="tabCats" onclick="switchTagsTab('cats')">دسته‌بندی</button>
+      <button class="tags-tab" id="tabBrands" onclick="switchTagsTab('brands')">برند</button>
+    </div>
+    <div class="tags-filter">
+      <input type="text" id="tagsFilter" oninput="renderTags()" placeholder="جستجو در لیست..." autocomplete="off">
+    </div>
+    <div class="tags-body"><div class="tags-grid" id="tagsGrid"></div></div>
+    <div class="tags-foot">
+      <button class="btn btn-ghost" onclick="clearTagFilter()">نمایش همه کالاها</button>
+      <button class="btn btn-ghost" onclick="closeModal('tagsModal')">بستن</button>
+    </div>
+  </div>
+</div>
+
 <!-- ================= مودال سفارش ================= -->
 <div id="orderModal" class="modal" onclick="closeModalOnBG(event,'orderModal')">
   <div class="sheet">
@@ -433,6 +477,7 @@ input[type=number]{-moz-appearance:textfield}
 1,750,000	آبرنگ 12رنگ طلقی فاتح
 1,654,400	آبرنگ آریا12رنگ
 1,900,000	آبرنگ آریا6رنگ
+2,890,000	آبرنگ آریاحرفه ای12رنگ
 1,350,000	آبرنگ اس اف 12رنگ
 9,250,000	آبرنگ افرا36رنگ مقوا
 1,699,000	آبرنگ پالمو12رنگ
@@ -446,7 +491,6 @@ input[type=number]{-moz-appearance:textfield}
 3,000,000	آدمک چوبی20سانت
 4,920,000	آدمک چوبی30سانت
 3,200,000	آسان ضرب ایلار
-2,890,000	آلبوم چک یوف
 2,300,000	آلبوم کارت ویزیت 300تایی
 1,800,000	آلبوم کارت ویزیت 240تایی
 1,600,000	آلبوم کارت ویزیت 180تایی
@@ -545,7 +589,7 @@ input[type=number]{-moz-appearance:textfield}
 730,000	اتودکرونا5010
 935,000	اتودکرونا7010
 1,160,000	اتودکرونا9010
-890,000	اتودکرون کلاس میت
+890,000	اتودکرون3324
 750,000	اتودکرون  107شانلی
 350,000	اتودکومونو
 1,245,800	اتودکویلو110
@@ -658,7 +702,7 @@ input[type=number]{-moz-appearance:textfield}
 735,000	بازی آرمانM16اکونومی سلفونی
 5,078,700	بازی ادابازی
 278,200	بازی اسلایم
-3,400,000	بازی الفباتوتک
+4,500,000	بازی الفباتوتک
 3,040,400	بازی الفبا
 4,779,500	بازی اموزشی الفبازی
 638,000	بازی بامبو
@@ -667,7 +711,7 @@ input[type=number]{-moz-appearance:textfield}
 5,390,000	بازی بوم بوم بالن ارمان
 1,460,000	بازی بیگ بلوک 34قطعه سلفونی
 4,150,000	بازی بینگودبرناکیفی
-2,980,000	بازی پازل1000تکه
+6,500,000	بازی پازل1000تکه
 1,520,000	بازی پازل150تکه ام دی اف استار
 1,500,000	بازی پازل آموزشی ایرانی فنسی40تکه
 4,763,000	بازی پازل بزرگ حیوانات مزرعه
@@ -680,10 +724,10 @@ input[type=number]{-moz-appearance:textfield}
 230,000	بازی پازل چوبی15*15
 165,000	بازی پازل چوبی کوچک
 550,000	بازی پازل رویش مقوایی رحلی
-6,100,000	بازی پازل رینگ 1000تکه
-2,205,000	بازی پازل رینگ 300تکه
-4,500,000	بازی پازل رینگ 600قطعه
-1,838,000	بازی پازل رینگ 150تکه
+6,500,000	بازی پازل رینگ 1000تکه
+3,600,000	بازی پازل رینگ 300تکه
+5,300,000	بازی پازل رینگ 600قطعه
+3,150,000	بازی پازل رینگ 150تکه
 6,450,000	بازی پازل کیوب بزرگ توری
 840,000	بازی پازل کیوب )2(توری
 110,000	بازی پازل مذهبی مقوایی
@@ -756,10 +800,10 @@ input[type=number]{-moz-appearance:textfield}
 3,749,900	بازی فرزست
 170,000	بازی فرفره تورنادو
 980,000	بازی فکری ارشیا جور
-3,948,000	بازی فکری اونو120کارت 97002
-2,730,000	بازی فکری اونو120کارت 4004
-2,583,000	بازی فکری اونو60کارت 4005
-1,639,000	بازی فکری اونو 60کارت 4003
+4,550,000	بازی فکری اونو120کارت 97002
+3,210,000	بازی فکری اونو120کارت 4004
+3,050,000	بازی فکری اونو60کارت 4005
+1,850,000	بازی فکری اونو 60کارت 4003
 980,000	بازی فکری کیفی
 3,980,000	بازی فکری مونوپولی فاخته
 3,525,500	بازی فوتبال گیم
@@ -822,7 +866,6 @@ input[type=number]{-moz-appearance:textfield}
 687,500	باطری دزدگیرهکتو27A
 1,078,000	باطری سکه کملیون2032
 1,078,000	باطری سکه کملیون2025
-1,078,000	باطری سکه کملیون2016
 270,000	باطری سکه گیگاسل2016
 887,000	باطری سکه موربیت 2032
 887,000	باطری سکه موربیت 2025
@@ -851,7 +894,7 @@ input[type=number]{-moz-appearance:textfield}
 279,000	باطری موربیت نیم قلم سوپرهوی دیوتی
 317,000	باطری موربیت نیم قلم شرینگ
 450,000	باطری نیم قلم کملیون
-210,000	باطری نیم قلم شارپ
+320,000	باطری نیم قلم شارپ
 3,410,000	باطری ولف بزرگ
 2,550,000	باکس کشدارفانتزی میکروـکلیپس
 250,000	برچسب آموزشی گلاسه
@@ -879,7 +922,6 @@ input[type=number]{-moz-appearance:textfield}
 3,800,000	بوم اعلا80*40
 1,590,800	بوم اعلا24*30
 1,244,300	بوم اعلا24*18
-1,632,800	بوم اعلا35*25
 945,000	بوم اعلا18*13
 3,900,000	بوم اعلاهشت ضلعی سایز40
 3,700,000	بوم اعلاهشت ضلعی سایز50
@@ -1089,7 +1131,6 @@ input[type=number]{-moz-appearance:textfield}
 4,200,000	پایه چسب کرونا950
 1,988,000	پایه چسب نوآوران1000
 958,000	پایه چسب نوآوران500
-2,767,500	پایه چسب نوین1000
 1,980,000	پایه چسب نوین2000
 2,800,000	پایه چسب نوین3000
 4,200,000	پایه چسب نوین4000
@@ -1118,11 +1159,11 @@ input[type=number]{-moz-appearance:textfield}
 2,079,000	پرگاربرسا30021
 2,079,000	پرگاربرسا12902
 2,079,000	پرگاربرسا12803
-330,000	پرگارتوکاچی پلاستیکی
+520,000	پرگارتوکاچی پلاستیکی
 580,000	پرگارصریرپلاستیکی
-325,000	پرگارفلزی مدادخور
+620,000	پرگارفلزی مدادخور
 4,500,000	پرگارمهندسی8004
-330,000	پرگاروطن سرقلم دارفلزی
+620,000	پرگاروطن سرقلم دارفلزی
 1,265,000	پست ایت 421پیداکس 5تکه
 1,078,000	پست ایت 432پیداکس ممو3تکه
 298,000	پست ایت 55023
@@ -1271,7 +1312,7 @@ input[type=number]{-moz-appearance:textfield}
 585,600	پوشه دکمه دارA3پاپکو
 230,000	پوشه دکمه دار200A4میکرون
 800,000	پوشه دکمه دارA4همه کاره جودون
-198,000	پوشه دکمه دارA4
+220,000	پوشه دکمه دارA4
 140,000	پوشه دکمه دارA5
 375,000	پوشه دواراعلا
 785,000	پوشه دوارسهندطلقی
@@ -1279,7 +1320,7 @@ input[type=number]{-moz-appearance:textfield}
 880,000	پوشه زیپ کیپ اکلیلیA4
 650,000	پوشه زیپ کیپ فانتزی اکواریومیA6
 690,000	پوشه زیپ کیپ فانتزی عطف دارA4
-698,000	پوشه زیپ کیپ فانتزیA4
+850,000	پوشه زیپ کیپ فانتزیA4
 670,000	پوشه زیپ کیپ متالیک A4
 504,000	پوشه سمیناری سوپرباند
 332,400	پوشه سهندگیره دار308
@@ -1316,7 +1357,7 @@ input[type=number]{-moz-appearance:textfield}
 1,480,000	تخته جادویی قطار8512
 2,550,000	تخته جادویی کلبه8513
 2,541,000	تخته جادویی کوچک بردیا
-3,696,000	تخته جادویی گاو
+4,200,000	تخته جادویی گاو
 5,665,000	تخته جادویی موزیکال
 1,150,000	تخته دوردوخت بزرگ
 22,200,000	تخته رسم فابل باپایه وگونیاA3
@@ -1325,7 +1366,7 @@ input[type=number]{-moz-appearance:textfield}
 1,450,000	تخته سیاه ووایت کاما24*17
 16,984,000	تخته سیاه ووایت نیوتویزپایه دار
 1,380,000	تخته شاسی احمدسورناA3
-780,000	تخته شاسی احمدسورناA4
+850,000	تخته شاسی احمدسورناA4
 4,800,000	تخته شاسی ام دی اف A2
 1,150,000	تخته شاسی ام دی اف A4طرحدارنگار
 1,750,000	تخته شاسی ام دی اف A3
@@ -1361,6 +1402,7 @@ input[type=number]{-moz-appearance:textfield}
 29,900,000	تخته وایت برد80*100نمونه
 76,000,000	تخته وایت بردتاباشیدکو150*90
 4,400,000	تخته وایت برددلتاشیدکو30*20
+6,600,000	تخته وایت برددلتاشیدکو40*30
 8,800,000	تخته وایت برددلتاشیدکو60*40
 11,000,000	تخته وایت برددلتاشیدکو70*50
 13,500,000	تخته وایت برد 200* 100شیدکو
@@ -1370,11 +1412,9 @@ input[type=number]{-moz-appearance:textfield}
 850,000	تخته وایت دوروام دی اف 30*30
 1,480,000	تخته وایت دورونیکا30*20
 2,650,000	تخته وایت دورونیکا40*30
-4,200,000	تخته وایت سویلA3
 1,500,000	تخته وایت مادر30*20
 5,000,000	تخته وایت مادر40*20
 26,040,000	تخته وایت مغناطیسی الفا70*100
-7,560,000	تخته وایت مغناطیسی بتا40*30
 12,720,000	تخته وایت مغناطیسی بتا70*50
 450,000	تخته وایت مقوایی کوچک
 1,180,000	تخته وایت یخچالی کینگ
@@ -1579,7 +1619,6 @@ input[type=number]{-moz-appearance:textfield}
 450,000	جاسوئیچی2حلقه کمری
 75,000	جاسوئیچی ام دی اف مذهبی
 187,000	جاسوئیچی پازلی
-1,812,500	جاسوئیچی جاکارتی سیلیکونی
 350,000	جاسوئیچی چرم2دکمه
 680,000	جاسوئیچی سیلیکونی کوچک
 656,100	جاسوئیچی شانسی لبوبو
@@ -1793,6 +1832,7 @@ input[type=number]{-moz-appearance:textfield}
 1,128,000	جامدادی نیکو412
 1,350,000	جامدادی نیکو2زیپ عروسکی626114
 1,680,000	جامدادی نیکو408
+3,968,000	جامدادی وحدت 850
 4,128,000	جامدادی وحدت 802
 4,128,000	جامدادی وحدت )14(812
 3,968,000	جامدادی وحدت 852
@@ -1805,11 +1845,13 @@ input[type=number]{-moz-appearance:textfield}
 3,968,000	جامدادی وحدت 835
 4,768,000	جامدادی وحدت 836
 3,720,000	جامدادی وحدت )16(846
+420,000	جامدادی وحدت 808
 3,968,000	جامدادی وحدت )16(848
 4,320,000	جامدادی وحدت )16(858
 4,768,000	جامدادی وحدت 839
 3,968,000	جامدادی وحدت 849
 4,608,000	جامدادی وحدت )16(859
+3,720,000	جامدادی وحدت ادم فضایی)16(833
 4,752,000	جامدادی وحدت پولیشی)13(851
 4,470,000	جامدادی وحدت تبلت بزرگ )16(826
 4,128,000	جامدادی وحدت تبلت کوچک )20(818
@@ -1828,6 +1870,7 @@ input[type=number]{-moz-appearance:textfield}
 1,300,000	جایادداشت 10*10شهاب طلقی2011
 1,904,000	جایادداشت 10*10فلزی مشکی
 1,904,000	جایادداشت 10*10فلزی وتوری
+1,650,000	جایادداشت الیساته رنگ 10*10
 250,000	جدول ضرب بدر
 720,000	جدول ضرب چرخشی تراش داراستوانه
 1,155,000	جدول ضرب کاراکووایت برد
@@ -1853,7 +1896,7 @@ input[type=number]{-moz-appearance:textfield}
 350,000	جلدشناسنامه وگذرنامه کوچک اعلا
 150,000	جلدمدارک ساده نرم
 3,000,000	جمدادی مگنتی533
-457,500	جوهراستامپ پلیکان
+650,000	جوهراستامپ پلیکان
 250,000	جوهراستامپ پیوند
 1,512,000	جوهراستامپ کورس
 500,000	جوهراستامپ کورش
@@ -1864,8 +1907,8 @@ input[type=number]{-moz-appearance:textfield}
 1,450,000	جوهرخودنویس اعتدال
 2,900,000	جوهرخودنویس پلیکان
 290,000	جوهرخودنویس یوروپن6عددی
-651,700	جوهرماژیک اعتدال
-634,800	جوهرماژیک وایت برداعتدال
+720,000	جوهرماژیک اعتدال
+750,000	جوهرماژیک وایت برداعتدال
 950,000	چترخلالی خارجی
 2,800,000	چترفانتزی سوت دار
 5,800,000	چراغ قوه شارژی چندمنظوره
@@ -1902,11 +1945,11 @@ input[type=number]{-moz-appearance:textfield}
 240,000	چرخونک ضرب وتقسیم
 1,988,000	چسب 123بزرگ 400میل اتافیکس
 3,800,000	چسب 123بزرگ دیبا400میل
-1,225,000	چسب 123کوچک سولجر
-1,750,000	چسب 123کوچک ولفیکس
+1,862,500	چسب 123کوچک سولجر
+1,862,500	چسب 123کوچک ولفیکس
 2,580,000	چسب 5سانت 90یارد دیبا
 3,700,000	چسب 5سانت 90یارد کیکو
-2,499,000	چسب 5سانت اتافیکس 90
+2,650,000	چسب 5سانت اتافیکس 90
 2,358,000	چسب 5سانت ار ام
 2,500,000	چسب 5سانت الماس
 1,987,500	چسب 5سانت ایران چسب
@@ -1962,6 +2005,7 @@ input[type=number]{-moz-appearance:textfield}
 2,600,000	چسب کاغذی5سانت دیبا
 661,000	چسب کاغذی استورم پهن رنگی18یارد
 550,000	چسب کاغذی باریک 16یارد کویلو
+650,000	چسب کاغذی رنگی کایزر
 2,500,000	چسب کش آلپرکد100
 9,500,000	چسب کش اتومات بای لیدا20099
 3,500,000	چسب کش پارسا
@@ -2040,8 +2084,8 @@ input[type=number]{-moz-appearance:textfield}
 200,000	چوب بستنی الف پروانه ای
 200,000	چوب بستنی الف قهوه ای مشکی باریک
 480,000	چوب بستنی الف گردرنگی
-182,000	چوب بستنی پهن رنگی
-158,000	چوب بستنی پهن
+195,000	چوب بستنی پهن رنگی
+185,000	چوب بستنی پهن
 160,000	چوب بستنی رنگی
 125,000	چوب بستنی ساده
 750,000	چوب خط آوای باران
@@ -2321,6 +2365,7 @@ input[type=number]{-moz-appearance:textfield}
 950,000	دفتر3و4خط سهند 60برگ
 3,800,000	دفترآبرنگ سخن وکالجA4
 680,000	دفترآپاداناسیمی طلقی50برگ
+1,100,000	دفترآپاداناسیمی طلقی80برگ
 1,520,000	دفترآپادانامجلد100برگ
 1,320,000	دفترآپادانامجلد80برگ
 340,000	دفترآرتمیس نقاشی دسته دار
@@ -2688,7 +2733,6 @@ input[type=number]{-moz-appearance:textfield}
 1,600,000	دفترفیلی سیمی20برگ
 950,000	دفترقادری مشق50برگ
 1,400,000	دفترقلمدانی خطی80برگ
-1,990,000	دفترقلمدانی راهنما80برگ
 550,000	دفترقهرمان من نقاشی منگنه
 1,650,000	دفترکاج املاسیمی
 1,150,000	دفترکاج ته چسب 100برگ
@@ -2702,8 +2746,8 @@ input[type=number]{-moz-appearance:textfield}
 1,320,000	دفترکاج مجلد80برگ
 450,000	دفترکاج نقاشی ته چسب 50برگ
 720,000	دفترکاج نقاشی طلقی50برگ
-1,450,000	دفترکاجVIPسیمی طلقی80برگ
-1,000,000	دفترکاجvipسیمی طلقی50برگ
+1,750,000	دفترکاجVIPسیمی طلقی80برگ
+1,200,000	دفترکاجvipسیمی طلقی50برگ
 850,000	دفترکاجvipلاتین3و4خط سیمی50برگ
 895,000	دفترکاغذ رنگی پرفراژدار
 650,000	دفترکاماقهرمان من سیمی50برگ
@@ -2752,7 +2796,6 @@ input[type=number]{-moz-appearance:textfield}
 5,371,000	دفترکلاسوری عرش 100کد61A
 5,371,000	دفترکلاسوری عرش 100کد61B
 3,500,000	دفترکلاسوری فطرس 200برگ
-2,500,000	دفترکلاسوری فطرس خشتی
 2,800,000	دفترکلاسوری فطرس مینیمال26حلقه
 5,100,000	دفترکلاسوری فلزمیکروگراف 100برگ
 3,900,000	دفترکلاسوری کاج پلاستیک 100برگ
@@ -2920,7 +2963,6 @@ input[type=number]{-moz-appearance:textfield}
 850,000	دفتریکشین نقاشی سیمی طلقی50برگ
 1,250,000	دفتریکشین نقاشی سیمی طلقی80برگ
 450,000	دفتر خوشنویسی مارلو
-450,000	دفتر شطرنجی32برگ منگنه
 3,500,000	دفتر کلاسوری100الیپون
 3,350,000	دفتر کلاسوری100فلزی پارس مهر
 3,300,000	دفتر کلاسوری100کیانی
@@ -3086,7 +3128,7 @@ input[type=number]{-moz-appearance:textfield}
 980,000	رنگ روغن پارس آرتیست 50میل
 750,000	رنگ روغن پارس آرتیست 37میل
 1,400,000	رنگ روغن ماریس 50میل
-4,180,000	رنگ ویترای ترمه6رنگ
+4,800,000	رنگ ویترای ترمه6رنگ
 1,166,000	رنگ ویترای ترمه باران
 400,000	رنگ ویترای شیشه کرو30میل
 800,000	رنگ ویترای ورسای75میل
@@ -3183,9 +3225,9 @@ input[type=number]{-moz-appearance:textfield}
 2,000,000	زغال طراحی کامران
 3,865,000	زغال فشرده
 1,500,000	زونکن ایرانی بزرگ 4سانتی
-1,800,000	زونکن ایرانی بزرگ اعلا
+2,000,000	زونکن ایرانی بزرگ اعلا
 850,000	زونکن ایرانی ساده3گوش
-1,752,000	زونکن ایرانی کوچک
+1,950,000	زونکن ایرانی کوچک
 2,900,000	زونکن ایرانی لب فلزبزرگ
 1,980,000	زونکن ایرانی لبه فلزکوچک
 2,700,700	زونکن پارسیکار1004
@@ -3316,7 +3358,7 @@ input[type=number]{-moz-appearance:textfield}
 21,000,000	ست رومیزی اداریWA7
 44,250,000	ست رومیزی اداری چوب فلز13تکه شهاب
 24,420,000	ست رومیزی اداری کرونافلزی6تکه
-13,500,000	ست رومیزی اداریW5
+16,500,000	ست رومیزی اداریW5
 21,500,000	ست رومیزی اداریWA8
 23,000,000	ست رومیزی شهاب 8تکه
 4,750,000	ست رومیزی کارا3000
@@ -3458,7 +3500,6 @@ input[type=number]{-moz-appearance:textfield}
 180,000	سوزن نووس 24.6
 470,000	سیخ چوبی بلند
 420,000	سیخ فلزی کاغذ
-2,062,500	سیلیکونی کیف ایرپاد
 100,000	سیم کاردستی1متری
 850,000	شابلون اشکال هندسی پارس رسام
 850,000	شابلون اشکال هندسی شاپرک کوچک
@@ -3520,12 +3561,11 @@ input[type=number]{-moz-appearance:textfield}
 350,000	صلوات شمار
 255,000	ضرب چرخان بلبل
 375,000	طلق400میکرون71*51
-3,000,000	طلق پرس 10*7میکرون150
 58,750,000	طلق پرس A3
-25,000,000	طلق پرس A4
+29,000,000	طلق پرس A4
 13,125,000	طلق پرس A5
 980,000	طلق پوشه حمید
-5,000,000	طلق رولی عرض 90
+6,000,000	طلق رولی عرض 90
 1,050,000	طلق سمیناری20*10
 1,500,000	طلق سمیناری30*40
 950,000	طلق سمیناری15*10
@@ -3588,7 +3628,7 @@ input[type=number]{-moz-appearance:textfield}
 2,200,000	فاکتوربلند30شمارخارجی
 750,000	فاکتورتک برگ کوچک
 937,500	فاکتورتک برگ متوسط
-1,400,000	فاکتورکاربن داربزرگ
+1,650,000	فاکتورکاربن داربزرگ
 936,000	فاکتورکاربن دارکوچک
 1,200,000	فاکتورکاربن دارمتوسط
 1,788,000	فایل باکس تک خانه سهند
@@ -3964,7 +4004,6 @@ input[type=number]{-moz-appearance:textfield}
 3,948,000	قمقمه550میلی2235
 4,250,400	قمقمه550میل شفاف بنددار9308
 3,825,400	قمقمه650میل شفاف 9306
-5,390,000	قمقمه611مربعی
 4,702,500	قمقمه7951
 5,135,000	قمقمه2681
 3,409,000	قمقمه2691
@@ -4052,6 +4091,7 @@ input[type=number]{-moz-appearance:textfield}
 800,000	قمقمه نکست
 820,000	قمقمه نی دارکلاهدار
 9,500,000	قمقمه فلاکسی1234
+8,500,000	قمقمه  8009سویل
 7,900,000	قمقمهH20-4
 6,785,000	قمقمه14-6
 6,785,000	قمقمهH208
@@ -4133,7 +4173,7 @@ input[type=number]{-moz-appearance:textfield}
 980,000	کارت بازی اونو  52کارت
 3,000,000	کارت بازی تاپ
 5,500,000	کارت بازی توپچی
-2,600,000	کارت بازی سنگ کاغذقیچی100عددی
+2,950,000	کارت بازی سنگ کاغذقیچی100عددی
 2,600,000	کارت بازی سنگ کاغذقیچی40ـ100
 3,600,000	کارت بازی کیمچی
 5,500,000	کارت بازی مانکرافت
@@ -4216,8 +4256,8 @@ input[type=number]{-moz-appearance:textfield}
 507,500	کاغذیادداشت طرح دارB6
 2,980,000	کاغذ خطدار100 A4برگی نوین
 850,000	کاغذ شطرنجی بسته50تایی
-10,500,000	کاغذA4کپی مکس 80گرم فیروزه ای
-8,800,000	کاغذa4جعبه دار80گرمomniaنقدی
+12,000,000	کاغذA4کپی مکس 80گرم فیروزه ای
+12,000,000	کاغذa4جعبه دار80گرمomniaنقدی
 225,000	کاموا6رنگ
 4,000,000	کاورزاگرس  A4
 4,125,000	کاورسوپرباند40میکرونA4
@@ -4241,6 +4281,7 @@ input[type=number]{-moz-appearance:textfield}
 7,500,000	کاور  ال دی
 8,125,000	کاورA3
 5,500,000	کاورA4پاپکو
+5,200,000	کاورA4کلیپس 100برگ
 1,100,000	کاورA4کلیپس 20برگ
 2,600,000	کاورA4کلیپس 50برگ
 2,800,000	کاورA5پاپکو
@@ -4274,12 +4315,12 @@ input[type=number]{-moz-appearance:textfield}
 3,295,200	کلاسورپاپکو4حلقه
 4,252,500	کلاسورپاپکوکاوردار60برگ A5
 9,556,800	کلاسورپاپکوکاوردارA3
-2,350,000	کلاسورپرگه اعلا4حلقه
+2,850,000	کلاسورپرگه اعلا4حلقه
 5,650,000	کلاسورچرم26فلزحسام
 4,450,000	کلاسورچرم طرح دارفانتزی فلز
 7,480,000	کلاسورسویل شفاف قفل فلز6حلقه
-2,400,000	کلاسورسهند2حلقه
-2,500,000	کلاسورسهند4حلقه
+2,800,000	کلاسورسهند2حلقه
+3,000,000	کلاسورسهند4حلقه
 3,750,000	کلاسورسهند4حلقهA3
 4,650,000	کلاسورطلقی کلیپس 100برگ فلز
 4,290,000	کلاسورکاج100برگ فانتزی قفل پلاستیک
@@ -4493,7 +4534,7 @@ input[type=number]{-moz-appearance:textfield}
 650,000	لیوان کارافانتزیK40
 650,000	لیوان کارانی دارسگهای نگهبان
 495,000	لیوان کارانی داریونیک وسگ نگهبان
-880,000	لیوان ماگ درب دار کارا
+1,050,000	لیوان ماگ درب دار کارا
 200,000	لیوان نی دارمینیون
 750,000	لیوان نیدارمیکی موس  بزرگ
 600,000	لیوان نیدارمیکی موس  متوسط
@@ -4515,12 +4556,12 @@ input[type=number]{-moz-appearance:textfield}
 3,500,000	ماژیک پیداکس اکرولیک 12رنگ 612
 2,860,000	ماژیک پیداکس اکرولیک 12رنگ 615
 6,700,000	ماژیک پیداکس اکرولیک 24رنگ 624
-5,800,000	ماژیک تاچ12رنگ پیداکس
+10,184,400	ماژیک تاچ12رنگ پیداکس
 2,500,000	ماژیک تاچ2سر
-11,600,000	ماژیک تاچ24رنگ پیداکس
-17,400,000	ماژیک تاچ36رنگ پیداکس
-23,200,000	ماژیک تاچ48رنگ پیداکس
-640,000	ماژیک تاچ الیزا
+20,368,000	ماژیک تاچ24رنگ پیداکس
+30,553,200	ماژیک تاچ36رنگ پیداکس
+40,737,600	ماژیک تاچ48رنگ پیداکس
+960,000	ماژیک تاچ الیزا
 1,890,000	ماژیک جادویی10رنگ 1139پیداکس
 1,390,000	ماژیک جادویی7رنگ 1136پیداکس
 7,200,000	ماژیک سروش 600
@@ -4609,6 +4650,7 @@ input[type=number]{-moz-appearance:textfield}
 14,300,000	ماژیک معمولی لاکسر810
 10,200,000	ماژیک معمولی لاکسر12تایی510
 7,680,000	ماژیک معمولی لاکسرآبی گرد
+7,000,000	ماژیک معمولی یوشیدا ماروی
 2,980,000	ماژیک معمولی یونی وال
 110,000	ماژیک معمولی
 2,404,500	ماژیک نقاشی12رنگ بنیتو
@@ -4647,6 +4689,7 @@ input[type=number]{-moz-appearance:textfield}
 5,490,000	ماژیک وایت بردبنیتوتخت وگرد
 3,995,000	ماژیک وایت بردبیفا
 4,000,000	ماژیک وایت بردبیک
+4,350,000	ماژیک وایت بردپرشیا
 2,900,000	ماژیک وایت بردپلیکان آبی گرد
 1,570,000	ماژیک وایت بردجکسین
 5,490,000	ماژیک وایت بردشارژی بنیتوآبی
@@ -4679,7 +4722,6 @@ input[type=number]{-moz-appearance:textfield}
 530,000	ماژیک یالونگ 10رنگ
 110,000	ماژیک
 4,560,000	ماشین حساب 2200
-4,500,000	ماشین حساب 2210
 5,040,000	ماشین حساب 2810
 4,672,800	ماشین حساب 2220
 6,000,000	ماشین حساب 816
@@ -4696,7 +4738,7 @@ input[type=number]{-moz-appearance:textfield}
 920,000	ماشین حساب جونیوس 320
 4,375,000	ماشین حساب سیتی512
 7,870,000	ماشین حساب سی کلاس 118C
-16,500,000	ماشین حساب شارپ2130
+18,500,000	ماشین حساب شارپ2130
 2,860,000	ماشین حساب شفاف طلقی کرومی
 3,770,000	ماشین حساب فانتزی2889
 5,000,000	ماشین حساب کارسهJ21
@@ -4786,6 +4828,7 @@ input[type=number]{-moz-appearance:textfield}
 2,915,000	مدادرنگی ام کیوآرتیست مقوا12رنگ
 5,830,000	مدادرنگی ام کیوآرتیست مقوا24رنگ
 8,574,500	مدادرنگی ام کیوآرتیست مقوا36رنگ
+12,800,000	مدادرنگی ام کیوآرتیست مقوا48رنگ
 10,450,000	مدادرنگی ام کیوتخت 36رنگ
 10,450,000	مدادرنگی ام کیولوله36رنگ
 2,450,000	مدادرنگی ام کیومقوا12رنگ
@@ -4891,7 +4934,8 @@ input[type=number]{-moz-appearance:textfield}
 2,230,000	مدادطراحی اپولو
 3,400,000	مدادطراحی اریا
 2,800,000	مدادطراحی استدلر
-3,950,000	مدادطراحی اسکول مکس B10
+4,200,000	مدادطراحی اسکول مکس
+4,600,000	مدادطراحی اسکول مکس B10
 4,560,000	مدادطراحی ام کیوB12
 2,940,000	مدادطراحی ام کیوB5تاB6
 4,000,000	مدادطراحی ام کیوB16ـB14
@@ -5012,12 +5056,12 @@ input[type=number]{-moz-appearance:textfield}
 1,800,000	مدادمشکی هیرو1016
 50,000	مدادمشکی
 160,000	مدادوسرمدادی پاکن
-65,000	مدادوسرمدادی نمدی
+75,000	مدادوسرمدادی نمدی
 360,000	مداد مشکی بینهایت
 1,800,000	مداد مشکی هدهدک
 1,400,000	مدیوم وستا125میل
 550,000	مرکب اعتدال رنگی60میل
-365,000	مرکب خوشنویسی اعتدال
+450,000	مرکب خوشنویسی اعتدال
 6,500,000	مغاردسته پلاستیکی5عددی
 1,500,000	مغزی تقویم منشی
 120,000	مقوا50*35پشت طوسی
@@ -5099,7 +5143,7 @@ input[type=number]{-moz-appearance:textfield}
 850,000	نوت بوم پاییزان
 2,910,000	نوت رینگ سویل1328
 8,400,000	نوک 42تایی بدنه رنگی9952
-506,200	نوک 2میل پارسیکار
+920,000	نوک 2میل پارسیکار
 1,100,000	نوک 2میل کریتورکالر
 335,000	نوک 2میل867SF
 1,800,000	نوک 5میل تکنیکال
@@ -5155,7 +5199,6 @@ input[type=number]{-moz-appearance:textfield}
 25,000	هزینه چاپ
 1,364,000	هفت تیرترقه ای اسمیت سوپرآرمان
 285,000	یادداشت 1/8طلقی میعاد
-1,100,000	یادداشت الیساته رنگ 10*10
 300,000	یادداشت بالکی10*10
 1,250,000	یادداشت حاشیه دار14*10سویل
 300,000	یادداشت رنگی
@@ -5183,7 +5226,7 @@ input[type=number]{-moz-appearance:textfield}
 2,250,000	یدک کلاسور30سوراخ پاپکو
 2,062,500	یدک کلاسور26سوراخ ارمان حاشیه دار
 1,798,000	یدک کلاسور26سوراخ ارمان
-1,390,000	یدک کلاسور26سوراخ پارس مهر
+1,750,000	یدک کلاسور26سوراخ پارس مهر
 1,890,000	یدک کلاسور26سوراخ سهند
 1,950,000	یدک کلاسور26سوراخ کلیپس
 1,863,000	یدک کلاسور26سوراخ نوین
@@ -5417,6 +5460,8 @@ var cart = (function(){ try{ return JSON.parse(safeGetLS('userCart')) || []; }ca
 var currentItemName = "";
 var currentItemPrice = 0;
 
+var tagLists = {cats:[], brands:[]};
+var activeTagsTab = 'cats';
 var charMap = {
   '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
   '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
@@ -5451,75 +5496,56 @@ function initSliders(){
     "پاک کن","راپید","بوم","پرگار","چسب ماتیکی","چراغ مطالعه","روان","مداد طراحی","قلمو","کاغذ نقدی"
   ])));
 
-  function createChipsHTML(items){
-    return items.map(function(item){
-      return '<div class="chip" onclick="setQuickSearch(\'' + item + '\')">' + item + '</div>';
-    }).join('');
-  }
-
-  document.getElementById('cat-content-1').innerHTML = createChipsHTML(categoriesList);
-  document.getElementById('cat-content-2').innerHTML = createChipsHTML(categoriesList);
-  document.getElementById('brand-content-1').innerHTML = createChipsHTML(brandsList);
-  document.getElementById('brand-content-2').innerHTML = createChipsHTML(brandsList);
-
-  setupMarqueeTouchAndAuto('marquee-cats',  -0.3);
-  setupMarqueeTouchAndAuto('marquee-brands', 0.3);
+  tagLists.cats = categoriesList;
+  tagLists.brands = brandsList;
 }
 
-/* اسکرول بی‌نهایت مبتنی بر Delta Time (عیناً مثل نسخه قبل) */
-function setupMarqueeTouchAndAuto(elementId, speed){
-  var el = document.getElementById(elementId);
-  if(!el) return;
-  el.dir = "ltr";
-
-  var isInteracting = false, timeoutId = null, exactScroll = 0, lastTimestamp = null;
-
-  setTimeout(function(){
-    var halfWidth = el.scrollWidth / 2;
-    exactScroll = (speed < 0) ? halfWidth : 0;
-    el.scrollLeft = exactScroll;
-
-    function checkWrap(){
-      halfWidth = el.scrollWidth / 2;
-      if(speed > 0){
-        if(exactScroll >= halfWidth) exactScroll -= halfWidth;
-        else if(exactScroll <= 0)    exactScroll += halfWidth;
-      }else{
-        if(exactScroll <= 0)         exactScroll += halfWidth;
-        else if(exactScroll >= halfWidth) exactScroll -= halfWidth;
-      }
-    }
-
-    function scrollLoop(timestamp){
-      if(!lastTimestamp) lastTimestamp = timestamp;
-      var deltaTime = timestamp - lastTimestamp;
-      lastTimestamp = timestamp;
-      if(deltaTime > 100) deltaTime = 16.66;
-
-      if(!isInteracting){
-        exactScroll += speed * (deltaTime / 16.66);
-        checkWrap();
-        el.scrollLeft = exactScroll;
-      }else{
-        exactScroll = el.scrollLeft;
-      }
-      requestAnimationFrame(scrollLoop);
-    }
-
-    el.addEventListener('scroll', function(){ if(isInteracting) checkWrap(); }, {passive:true});
-
-    function startInteract(){ isInteracting = true; clearTimeout(timeoutId); }
-    function endInteract(){
-      timeoutId = setTimeout(function(){ isInteracting = false; lastTimestamp = null; }, 1500);
-    }
-    el.addEventListener('touchstart', startInteract, {passive:true});
-    el.addEventListener('touchend',   endInteract,   {passive:true});
-    el.addEventListener('mousedown',  startInteract);
-    el.addEventListener('mouseup',    endInteract);
-    el.addEventListener('mouseleave', endInteract);
-
-    requestAnimationFrame(scrollLoop);
-  }, 150);
+/* پنجرهٔ دسته‌ها و برندها */
+function openTagsModal(){
+  document.getElementById('tagsFilter').value = '';
+  renderTags();
+  openModal('tagsModal');
+}
+function switchTagsTab(tab){
+  activeTagsTab = tab;
+  document.getElementById('tabCats').classList.toggle('active', tab === 'cats');
+  document.getElementById('tabBrands').classList.toggle('active', tab === 'brands');
+  document.getElementById('tagsFilter').value = '';
+  renderTags();
+  document.querySelector('#tagsModal .tags-body').scrollTop = 0;
+}
+function renderTags(){
+  var q = normalize(document.getElementById('tagsFilter').value.trim());
+  var current = normalize(document.getElementById('myInput').value.trim());
+  var list = tagLists[activeTagsTab].filter(function(t){ return !q || normalize(t).indexOf(q) !== -1; });
+  var grid = document.getElementById('tagsGrid');
+  if(!list.length){ grid.innerHTML = '<div class="tags-empty">موردی پیدا نشد</div>'; return; }
+  grid.innerHTML = '';
+  list.forEach(function(t){
+    var d = document.createElement('div');
+    d.className = 'chip' + (current && normalize(t) === current ? ' selected' : '');
+    d.textContent = t;
+    d.onclick = function(){ closeModal('tagsModal'); setQuickSearch(t); };
+    grid.appendChild(d);
+  });
+}
+function clearTagFilter(){
+  closeModal('tagsModal');
+  document.getElementById('myInput').value = '';
+  toggleClearBtn();
+  doSearch();
+}
+function updateTagsBtnState(){
+  var btn = document.getElementById('tagsBtn');
+  if(!btn) return;
+  var v = normalize(document.getElementById('myInput').value.trim());
+  var on = false;
+  if(v){
+    ['cats','brands'].forEach(function(k){
+      tagLists[k].forEach(function(t){ if(normalize(t) === v) on = true; });
+    });
+  }
+  btn.classList.toggle('has-filter', on);
 }
 
 /* ============================================================
@@ -5551,6 +5577,7 @@ function debouncedSearch(){
   searchTimeout = setTimeout(doSearch, 300);
 }
 function doSearch(){
+  updateTagsBtnState();
   var val = normalize(document.getElementById("myInput").value).trim();
   if(!val){ showItems(allItems); return; }
   var words = val.split(/\s+/);
