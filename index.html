@@ -662,7 +662,35 @@ function haptic(style){
    ۱) داده‌ها و نرمال‌سازی  (بدون تغییر منطقی)
    ============================================================ */
 var allItems = [];
-var cart = (function(){ try{ return JSON.parse(safeGetLS('userCart')) || []; }catch(e){ return []; } })();
+var STORAGE_OK = (function(){ try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }catch(e){ return false; } })();
+var lastCartRaw = safeGetLS('userCart');
+var cart = (function(){ try{ var c = JSON.parse(lastCartRaw); return Array.isArray(c) ? c : []; }catch(e){ return []; } })();
+
+/* هر صفحهٔ مینی‌اپ نسخهٔ خودش از سبد را در حافظه دارد؛ برای اینکه صفحه‌های قدیمی‌تر سبد کهنه نشان ندهند
+   (و موقع ذخیره، کالاهای صفحه‌های دیگر را پاک نکنند)، حافظهٔ گوشی را منبع اصلی می‌گیریم:
+   قبل از هر خواندن یا تغییر سبد، آخرین نسخه از حافظه دوباره خوانده می‌شود. */
+function reloadCart(){
+  if(!STORAGE_OK) return;
+  var raw = safeGetLS('userCart');
+  lastCartRaw = raw;
+  try{ var c = JSON.parse(raw); cart = Array.isArray(c) ? c : []; }catch(e){ cart = []; }
+}
+function refreshCartViews(){
+  reloadCart();
+  updateCartUI();
+  if(openModals.indexOf('cartModal') !== -1){
+    if(cart.length === 0) closeModal('cartModal'); else renderCartList();
+  }
+}
+function cartChangedElsewhere(){
+  if(!STORAGE_OK) return;
+  if(safeGetLS('userCart') !== lastCartRaw) refreshCartViews();
+}
+window.addEventListener('storage', function(e){ if(e.key === 'userCart' || e.key === null) refreshCartViews(); });
+window.addEventListener('focus', cartChangedElsewhere);
+window.addEventListener('pageshow', cartChangedElsewhere);
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) cartChangedElsewhere(); });
+setInterval(function(){ if(!document.hidden) cartChangedElsewhere(); }, 1500);   // پشتیبان برای وب‌ویوهایی که رویدادها را نمی‌فرستند
 var currentItemCode = "";
 var currentItemName = "";
 var currentItemPrice = 0;
@@ -670,31 +698,30 @@ var currentItemStep = 0;
 var currentItemMinOrder = 0;
 var currentItemDefaultQty = 1;
 
-/* قوانین تعداد بر اساس کالای در حال سفارش:
-   - تعداد در بسته (step>0): پیش‌فرض و گام = step، عدد دستی به نزدیک‌ترین مضرب گرد می‌شود
-   - کمینه سفارش (minOrder>0, step=0): پیش‌فرض و کف = minOrder، از آن به بعد آزاد و یکی‌یکی
-   - هیچ‌کدام: پیش‌فرض ۱، آزاد و یکی‌یکی */
-function qtyFloor(){
-  if(currentItemStep > 0) return currentItemStep;
-  if(currentItemMinOrder > 0) return currentItemMinOrder;
+/* قوانین تعداد (تعداد در بسته = step، حداقل سفارش = minOrder):
+   - هر دو:        کمترین = حداقل سفارش؛ بعد از آن هر بار به اندازهٔ یک بسته اضافه می‌شود (مثلاً 60، 72، 84 ...)
+   - فقط حداقل:    کمترین = حداقل سفارش؛ بعد از آن یکی‌یکی
+   - فقط بسته:     کمترین = یک بسته؛ بعد هر بار یک بسته
+   - هیچ‌کدام:     کمترین 1؛ یکی‌یکی
+   عدد دستی همیشه به نزدیک‌ترین عدد مجازِ بالاتر گرد می‌شود. */
+function qtyFloorOf(step, minOrder){
+  step = step || 0; minOrder = minOrder || 0;
+  if(minOrder > 0) return minOrder;
+  if(step > 0) return step;
   return 1;
 }
-function qtyStepUnit(){ return currentItemStep > 0 ? currentItemStep : 1; }
+function qtyUnitOf(step){ return step > 0 ? step : 1; }
+function roundUpQty(q, step, minOrder){
+  var floor = qtyFloorOf(step, minOrder), unit = qtyUnitOf(step);
+  if(isNaN(q) || q < floor) return floor;
+  if(unit === 1) return q;
+  return floor + Math.ceil((q - floor) / unit) * unit;
+}
+function qtyFloor(){ return qtyFloorOf(currentItemStep, currentItemMinOrder); }
+function qtyStepUnit(){ return qtyUnitOf(currentItemStep); }
 function sanitizeQty(raw){
   var q = parseInt(normalize(raw).replace(/[^0-9]/g,''), 10);   // پشتیبانی از ارقام فارسی/عربی تایپ‌شده
-  if(currentItemStep > 0){
-    if(isNaN(q) || q < currentItemStep) return currentItemStep;
-    var down = Math.floor(q / currentItemStep) * currentItemStep;
-    if(down < currentItemStep) down = currentItemStep;
-    var up = down + currentItemStep;
-    return (q - down <= up - q) ? down : up;   // به نزدیک‌ترین مضرب
-  }
-  if(currentItemMinOrder > 0){
-    if(isNaN(q) || q < currentItemMinOrder) return currentItemMinOrder;
-    return q;
-  }
-  if(isNaN(q) || q <= 0) return 1;
-  return q;
+  return roundUpQty(q, currentItemStep, currentItemMinOrder);
 }
 
 var charMap = {
@@ -951,6 +978,7 @@ function processData(text){
   allItems = tempItems;
 
   /* همگام‌سازی سبد بر اساس کد کالا (نه نام)؛ اگر لیست خالی بود سبد دست‌نخورده می‌ماند */
+  reloadCart();
   var cartUpdated = false;
   for(var c=0; allItems.length && c<cart.length; c++){
     var liveItem = allItems.find(function(item){ return item.code === cart[c].code; });
@@ -959,6 +987,8 @@ function processData(text){
       if(cart[c].name  !== liveItem.n){ cart[c].name  = liveItem.n; cartUpdated = true; }
       if((cart[c].step||0)     !== (liveItem.step||0)){ cart[c].step = liveItem.step; cartUpdated = true; }
       if((cart[c].minOrder||0) !== (liveItem.minOrder||0)){ cart[c].minOrder = liveItem.minOrder; cartUpdated = true; }
+      var okQty = roundUpQty(cart[c].qty, liveItem.step, liveItem.minOrder);   // تعداد قدیمی با قانون فعلی کالا هماهنگ شود
+      if(cart[c].qty !== okQty){ cart[c].qty = okQty; cartUpdated = true; }
     }else{
       cart.splice(c,1); c--; cartUpdated = true;
     }
@@ -990,8 +1020,9 @@ function showItems(items){
   for(var i=0;i<limit;i++){
     var it  = items[i];
     var tag = "";
-    if(it.step > 0)          tag = '<span class="item-tag">بسته ' + it.step + ' تایی</span>';
-    else if(it.minOrder > 0) tag = '<span class="item-tag">حداقل ' + it.minOrder + ' عدد</span>';
+    if(it.step > 0 && it.minOrder > 0) tag = '<span class="item-tag">بسته ' + it.step + ' تایی | حداقل ' + it.minOrder + '</span>';
+    else if(it.step > 0)               tag = '<span class="item-tag">بسته ' + it.step + ' تایی</span>';
+    else if(it.minOrder > 0)           tag = '<span class="item-tag">حداقل ' + it.minOrder + ' عدد</span>';
 
     html += '<div class="item" onclick="openOrderModalByIndex(' + it.id + ')">' +
               '<div class="item-main">' +
@@ -1047,6 +1078,7 @@ function openOrderModalByIndex(id){
   if(item) openOrderModal(item);
 }
 function openOrderModal(item){
+  reloadCart();
   currentItemCode     = item.code;
   currentItemName     = item.n;
   currentItemPrice    = parseInt(item.p, 10);
@@ -1059,8 +1091,9 @@ function openOrderModal(item){
   currentItemDefaultQty = existing ? existing.qty : qtyFloor();
 
   var extra = "";
-  if(currentItemStep > 0)          extra = " | فروش بسته‌ای: هر بار " + currentItemStep + " عدد";
-  else if(currentItemMinOrder > 0) extra = " | حداقل سفارش: " + currentItemMinOrder + " عدد";
+  if(currentItemStep > 0 && currentItemMinOrder > 0) extra = " | حداقل سفارش: " + currentItemMinOrder + " عدد، سپس هر بار " + currentItemStep + " عدد";
+  else if(currentItemStep > 0)                       extra = " | فروش بسته‌ای: هر بار " + currentItemStep + " عدد";
+  else if(currentItemMinOrder > 0)                   extra = " | حداقل سفارش: " + currentItemMinOrder + " عدد";
 
   document.getElementById("modalItemName").innerText  = item.n;
   document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(item.p) + extra;
@@ -1079,8 +1112,7 @@ function changeQty(amount){
   var input = document.getElementById("modalQty");
   var unit  = qtyStepUnit();
   var floor = qtyFloor();
-  var cur   = parseInt(normalize(input.value).replace(/[^0-9]/g,''), 10);
-  if(isNaN(cur)) cur = floor;
+  var cur   = sanitizeQty(input.value);   // اگر عدد دستی هنوز گرد نشده، اول به عدد مجاز تبدیل می‌شود
   var newVal = cur + amount * unit;
   if(newVal >= floor){ input.value = newVal; calcTotal(); haptic('light'); }
 }
@@ -1092,9 +1124,10 @@ function calcTotal(){
 /* ============================================================
    ۶) سبد خرید
    ============================================================ */
-function saveCart(){ safeSetLS('userCart', JSON.stringify(cart)); }
+function saveCart(){ var raw = JSON.stringify(cart); lastCartRaw = raw; safeSetLS('userCart', raw); }
 
 function addToCart(){
+  reloadCart();
   var qty = sanitizeQty(document.getElementById("modalQty").value);
   var idx = cart.findIndex(function(item){ return item.code === currentItemCode; });
   if(idx !== -1){
@@ -1113,17 +1146,23 @@ function addToCart(){
   haptic('medium');
 }
 
-function removeFromCart(index){
+function removeFromCart(code){
+  reloadCart();
+  var index = cart.findIndex(function(c){ return c.code === code; });
+  if(index === -1){ updateCartUI(); renderCartList(); if(cart.length === 0) closeModal('cartModal'); return; }
   cart.splice(index, 1);
   saveCart(); updateCartUI(); renderCartList();
   if(cart.length === 0) closeModal('cartModal');
 }
-function updateCartQty(index, change){
+function updateCartQty(code, change){
+  reloadCart();
+  var index = cart.findIndex(function(c){ return c.code === code; });
+  if(index === -1){ updateCartUI(); renderCartList(); if(cart.length === 0) closeModal('cartModal'); return; }
   var item  = cart[index];
-  var unit  = item.step > 0 ? item.step : 1;
-  var floor = item.step > 0 ? item.step : (item.minOrder > 0 ? item.minOrder : 1);
-  item.qty += change * unit;
-  if(item.qty < floor) cart.splice(index, 1);
+  var unit  = qtyUnitOf(item.step);
+  var floor = qtyFloorOf(item.step, item.minOrder);
+  item.qty = roundUpQty(item.qty, item.step, item.minOrder) + change * unit;
+  if(item.qty < floor) cart.splice(index, 1);   // کمتر از حداقل = حذف از سبد
   saveCart(); updateCartUI(); renderCartList();
   if(cart.length === 0) closeModal('cartModal');
 }
@@ -1134,6 +1173,7 @@ function updateCartUI(){
   else fab.style.display = "none";
 }
 function openCartModal(){
+  reloadCart(); updateCartUI();
   if(cart.length === 0) return;
   renderCartList();
   openModal("cartModal");
@@ -1162,14 +1202,14 @@ function renderCartList(){
           '<div class="cart-name">' + escapeHTML(item.name) + '</div>' +
           '<div class="cart-row">' +
             '<div class="cart-qty">' +
-              '<button onclick="updateCartQty(' + i + ', 1)">+</button>' +
+              '<button data-code="' + escapeHTML(item.code) + '" onclick="updateCartQty(this.dataset.code, 1)">+</button>' +
               '<span>' + item.qty + '</span>' +
-              '<button onclick="updateCartQty(' + i + ', -1)">−</button>' +
+              '<button data-code="' + escapeHTML(item.code) + '" onclick="updateCartQty(this.dataset.code, -1)">−</button>' +
             '</div>' +
             '<div class="cart-calc">' + formatToToman(rowTotal) + '</div>' +
           '</div>' +
         '</div>' +
-        '<button class="cart-del" onclick="removeFromCart(' + i + ')" aria-label="حذف">✕</button>' +
+        '<button class="cart-del" data-code="' + escapeHTML(item.code) + '" onclick="removeFromCart(this.dataset.code)" aria-label="حذف">✕</button>' +
       '</div>';
   }
   listContainer.innerHTML = html;
@@ -1201,6 +1241,7 @@ function openSafeLink(url, isEitaaLink){
 }
 
 function getOrderMessageText(){
+  reloadCart();
   if(cart.length === 0) return "";
   var message = "📋 سلام، درخواست سفارش جدید:\n\n";
   var finalSum = 0;
