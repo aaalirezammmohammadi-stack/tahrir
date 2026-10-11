@@ -891,7 +891,10 @@ function getStartCode(){
   }
   if(!raw) return '';
   try{ raw = decodeURIComponent(raw.replace(/\+/g, ' ')); }catch(e){}
-  return raw.trim();
+  raw = raw.trim();
+  /* استثنا: کد «1» در لینک‌های قدیمیِ دکمه‌های شیشه‌ای فقط برای اجرای startapp بوده؛ مینی‌اپ عادی باز می‌شود، نه «کالا یافت نشد» */
+  if(toLatinDigits(raw) === '1') return '';
+  return raw;
 }
 function tryOpenStartCode(final){
   try{
