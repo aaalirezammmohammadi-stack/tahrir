@@ -226,7 +226,7 @@ input[type=number]{-moz-appearance:textfield}
 }
 @keyframes pop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
 @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-@media (max-width:430px){
+@media (max-width:600px){   /* گوشی‌های عریض (مثل پرو مکس) هم از پایین باز شوند */
   .modal{padding:0; align-items:flex-end}
   .sheet{max-width:none; max-height:92vh; border-radius:var(--r-xl) var(--r-xl) 0 0; border-bottom:none; animation:slideUp .24s ease-out}
 }
@@ -618,7 +618,8 @@ function initMiniApp(){
   var app = getWebApp();
   if(app){
     try{ app.ready  && app.ready();  }catch(e){}
-    try{ app.expand && app.expand(); }catch(e){}
+    /* اگر مینی‌اپ از لینک یک کالا باز شده باشد، تمام‌صفحه‌اش نمی‌کنیم تا نیم‌صفحه بماند */
+    try{ if(app.expand && !getStartCode()) app.expand(); }catch(e){}
     try{ app.onEvent && app.onEvent('themeChanged', refreshTheme); }catch(e){}
   }
   if(window.matchMedia){
