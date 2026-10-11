@@ -372,14 +372,14 @@ input[type=number]{-moz-appearance:textfield}
   <div class="sheet">
     <div class="sheet-head" id="modalItemName">نام کالا</div>
     <div class="sheet-body">
-      <span class="meta-pill" id="modalItemPrice">قیمت واحد: ۰ تومان</span>
+      <span class="meta-pill" id="modalItemPrice">قیمت واحد: 0 تومان</span>
       <div class="qty">
         <button onclick="changeQty(1)" aria-label="افزایش">+</button>
         <input type="number" inputmode="numeric" id="modalQty" value="1" min="1"
                onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="calcTotal()">
         <button onclick="changeQty(-1)" aria-label="کاهش">−</button>
       </div>
-      <div class="total-line" id="modalTotal">جمع کل: ۰ تومان</div>
+      <div class="total-line" id="modalTotal">جمع کل: 0 تومان</div>
     </div>
     <div class="sheet-foot">
       <button class="btn btn-primary" onclick="addToCart()">افزودن به سبد سفارش</button>
@@ -394,7 +394,7 @@ input[type=number]{-moz-appearance:textfield}
     <div class="sheet-head">پیش‌فاکتور شما</div>
     <div class="sheet-body">
       <div id="cartItemsList" class="cart-list"></div>
-      <div class="total-line" id="cartSumTotal">جمع کل: ۰ تومان</div>
+      <div class="total-line" id="cartSumTotal">جمع کل: 0 تومان</div>
     </div>
     <div class="sheet-foot">
       <button class="btn btn-eitaa" onclick="sendOrderEitaa()">ارسال سفارش در ایتا</button>
@@ -415,6 +415,22 @@ input[type=number]{-moz-appearance:textfield}
     <div class="sheet-foot">
       <button class="btn btn-solid-danger" onclick="confirmClearCart()">بله، حذف کن</button>
       <button class="btn btn-ghost" onclick="closeModal('confirmClearModal')">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= مودال کالای یافت‌نشد ================= -->
+<div id="notFoundModal" class="modal" onclick="closeModalOnBG(event,'notFoundModal')">
+  <div class="sheet">
+    <div class="sheet-head"><b style="color:var(--danger)">کالای مورد نظر یافت نشد</b></div>
+    <div class="sheet-body">
+      <div class="note">
+        این کالا فعلاً در لیست موجود نیست.<br>
+        <span id="notFoundCode" dir="ltr" style="display:inline-block;margin-top:6px;color:var(--muted)"></span>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-primary" onclick="closeModal('notFoundModal')">مشاهده لیست کالاها</button>
     </div>
   </div>
 </div>
@@ -618,8 +634,7 @@ function initMiniApp(){
   var app = getWebApp();
   if(app){
     try{ app.ready  && app.ready();  }catch(e){}
-    /* اگر مینی‌اپ از لینک یک کالا باز شده باشد، تمام‌صفحه‌اش نمی‌کنیم تا نیم‌صفحه بماند */
-    try{ if(app.expand && !getStartCode()) app.expand(); }catch(e){}
+    try{ app.expand && app.expand(); }catch(e){}
     try{ app.onEvent && app.onEvent('themeChanged', refreshTheme); }catch(e){}
   }
   if(window.matchMedia){
@@ -687,6 +702,10 @@ var charMap = {
   '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
   'آ':'ا','أ':'ا','إ':'ا','ي':'ی','ك':'ک','ة':'ه','ؤ':'و','\u200c':''
 };
+/* همهٔ اعداد نمایشی (از جمله داخل نام کالاها) انگلیسی نمایش داده می‌شوند */
+function toLatinDigits(t){
+  return String(t).replace(/[۰-۹٠-٩]/g, function(d){ return charMap[d]; });
+}
 function normalize(t){
   return String(t).replace(/[۰-۹٠-٩آأإيكةؤ\u200c]/g, function(w){ return charMap[w] || w; }).toLowerCase();
 }
@@ -854,7 +873,15 @@ function tryOpenStartCode(final){
     var want = normalize(pendingStartCode).trim();
     var item = allItems.find(function(x){ return normalize(x.code).trim() === want; });
     if(item){ pendingStartCode = ''; openOrderModal(item); }
-    else if(final){ pendingStartCode = ''; }   // کد در لیست نیست: مینی‌اپ عادی
+    else if(final){
+      /* کد در لیست نیست (کالا تمام شده): پیام «یافت نشد» نشان بده؛ فقط وقتی که لیست واقعاً بارگذاری شده باشد */
+      var missing = pendingStartCode;
+      pendingStartCode = '';
+      if(allItems.length){
+        document.getElementById('notFoundCode').textContent = 'کد کالا: ' + toLatinDigits(missing);
+        openModal('notFoundModal');
+      }
+    }
   }catch(e){}
 }
 
@@ -914,7 +941,7 @@ function processData(text){
     if(isNaN(step) || step < 0) step = 0;
 
     var p    = parseInt(parts[2].replace(/,/g,'').replace(/"/g,''), 10);
-    var n    = parts[3].replace(/"/g,'').trim();
+    var n    = toLatinDigits(parts[3].replace(/"/g,'').trim());
     var code = parts[4].replace(/"/g,'').trim();
 
     if(!isNaN(p) && n && code){
