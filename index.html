@@ -1,1302 +1,191 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" data-theme="light">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#ffffff" id="metaThemeColor">
-<title>لیست قیمت و سفارش عمده</title>
-
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link rel="preconnect" href="https://developer.eitaa.com">
-<link rel="preload" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" as="style">
-<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" media="print" onload="this.media='all'">
-<noscript><link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css"></noscript>
-
-<link rel="preload" href="products.txt" as="fetch" crossorigin>
-
-<!-- کیت توسعه برنامک ایتا -->
-<script src="https://developer.eitaa.com/eitaa-web-app.js" defer></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>در حال بروزرسانی</title>
 <style>
-/* ============================================================
-   لایه ۱ — توکن‌های طراحی (بقیه CSS فقط از این‌ها استفاده می‌کند)
-   ============================================================ */
-:root{
-  --r-sm:8px; --r-md:10px; --r-lg:14px; --r-xl:16px;
-  --fs-sm:12.5px; --fs-base:14px; --fs-lg:15px;
-  --sp:12px;
-}
+  :root {
+    --bg: #eef2f6;
+    --ink: #14283d;
+    --steel: #5b7188;
+    --yellow: #ffbf1f;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Vazirmatn", "Vazir", "IRANSans", Tahoma, "Segoe UI", system-ui, sans-serif;
+    line-height: 1.9;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-[data-theme="light"]{
-  --bg:#f1f2f4;
-  --surface:#ffffff;
-  --surface-2:#f5f6f8;
-  --text:#12161c;
-  --muted:#707b87;
-  --border:#e3e6ea;
-  --accent:#2f6feb;      --accent-rgb:47,111,235;
-  --accent-contrast:#ffffff;
-  --danger:#e04447;      --danger-rgb:224,68,71;
-  --success:#12a150;
-  --overlay:rgba(15,20,26,.45);
-  --shadow:0 1px 2px rgba(16,24,40,.05), 0 4px 12px rgba(16,24,40,.06);
-}
+  .tape {
+    height: 14px;
+    flex: none;
+    background: repeating-linear-gradient(-45deg, var(--yellow) 0 18px, var(--ink) 18px 36px);
+  }
 
-[data-theme="dark"]{
-  --bg:#0e1621;
-  --surface:#17212b;
-  --surface-2:#1e2a36;
-  --text:#e9edf1;
-  --muted:#8d9aa8;
-  --border:#26333f;
-  --accent:#5a9bf6;      --accent-rgb:90,155,246;
-  --accent-contrast:#0b1219;
-  --danger:#ef6a6d;      --danger-rgb:239,106,109;
-  --success:#3ecf8e;
-  --overlay:rgba(0,0,0,.6);
-  --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.35);
-}
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 28px 20px;
+    display: grid;
+    gap: 8px 48px;
+    align-items: center;
+    justify-items: center;
+    text-align: center;
+  }
 
-/* ============================================================
-   پایه
-   ============================================================ */
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-  font-family:'Vazirmatn',Tahoma,system-ui,sans-serif;
-  font-size:var(--fs-base);
-  line-height:1.65;
-  background:var(--bg);
-  color:var(--text);
-  -webkit-tap-highlight-color:transparent;
-  -webkit-text-size-adjust:100%;
-  padding-bottom:calc(90px + env(safe-area-inset-bottom));
-  transition:background-color .25s ease, color .25s ease;
-}
-button,input,textarea{font-family:inherit}
-input[type=number]::-webkit-outer-spin-button,
-input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-input[type=number]{-moz-appearance:textfield}
+  .art { width: min(380px, 84vw); }
+  .art svg { display: block; width: 100%; height: auto; overflow: visible; }
 
-/* ============================================================
-   نوار بالایی چسبان
-   ============================================================ */
-.topbar{
-  position:sticky; top:0; z-index:50;
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  padding:8px 12px 10px;
-  display:flex; flex-direction:column; gap:9px;
-  padding-top:calc(8px + env(safe-area-inset-top));
-}
+  h1 {
+    margin: 0 0 22px;
+    font-size: clamp(28px, 7vw, 46px);
+    line-height: 1.5;
+    font-weight: 800;
+  }
 
-/* ردیف جستجو */
-.search-row{display:flex; gap:8px; align-items:center}
-.search{position:relative; flex:1; min-width:0}
-.search input{
-  width:100%; height:42px;
-  padding:0 40px 0 38px;
-  border:1px solid var(--border); border-radius:var(--r-md);
-  background:var(--surface-2); color:var(--text);
-  font-size:14px; outline:none;
-  transition:border-color .15s, box-shadow .15s;
-}
-.search input::placeholder{color:var(--muted)}
-.search input:focus{
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(var(--accent-rgb),.16);
-}
-.search .s-icon{
-  position:absolute; right:12px; top:50%; transform:translateY(-50%);
-  color:var(--muted); pointer-events:none; display:flex;
-}
-.search .s-clear{
-  position:absolute; left:7px; top:50%; transform:translateY(-50%);
-  width:28px; height:28px; border:none; border-radius:50%;
-  background:var(--border); color:var(--muted);
-  display:none; align-items:center; justify-content:center; cursor:pointer;
-}
-.search.has-value .s-clear{display:flex}
+  .progress {
+    height: 12px;
+    border-radius: 6px;
+    background: #dbe3eb;
+    overflow: hidden;
+    margin: 0 auto 8px;
+    max-width: 420px;
+  }
+  .progress span {
+    display: block;
+    height: 100%;
+    background: repeating-linear-gradient(-45deg, var(--yellow) 0 12px, #e5a400 12px 24px);
+    background-size: 34px 34px;
+    animation: slide 1s linear infinite;
+  }
+  .progress-label { font-size: 15px; color: var(--steel); margin-bottom: 26px; }
 
-.icon-btn{
-  flex:none; width:42px; height:42px;
-  border:1px solid var(--border); border-radius:var(--r-md);
-  background:var(--surface-2); color:var(--text);
-  display:flex; align-items:center; justify-content:center; cursor:pointer;
-  transition:background-color .15s;
-}
-.icon-btn:active{background:var(--border)}
+  .call {
+    background: var(--card);
+    border-radius: 16px;
+    border-right: 6px solid var(--yellow);
+    padding: 18px 22px 16px;
+    max-width: 440px;
+    margin: 0 auto;
+    box-shadow: 0 6px 24px rgba(20, 40, 61, .08);
+    text-align: center;
+  }
+  .call p { margin: 0 0 4px; font-weight: 700; font-size: 16px; }
+  .number {
+    display: block;
+    direction: ltr;
+    font-size: clamp(30px, 8vw, 40px);
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
 
-/* ردیف‌های تگ (اسلایدر بی‌نهایت) */
-.chips{display:flex; flex-direction:column; gap:6px}
-.marquee{
-  display:flex; overflow-x:auto; width:100%;
-  user-select:none; scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;
-  will-change:scroll-position; transform:translateZ(0);
-}
-.marquee::-webkit-scrollbar{display:none}
-.marquee-content{display:flex; flex-shrink:0; gap:6px; padding-right:6px}
-.chip{
-  padding:5px 12px;
-  border:1px solid var(--border); border-radius:var(--r-sm);
-  background:var(--surface-2); color:var(--muted);
-  font-size:var(--fs-sm); font-weight:600;
-  white-space:nowrap; cursor:pointer; direction:rtl;
-  transition:background-color .15s, color .15s, border-color .15s;
-}
-.chip:active{
-  background:var(--accent); color:var(--accent-contrast);
-  border-color:var(--accent);
-}
+  .gear { transform-box: fill-box; transform-origin: center; }
+  .g-big   { animation: spin 40s linear infinite; }
+  .g-mid   { animation: spin 20s linear infinite reverse; }
+  .g-small { animation: spin 15s linear infinite reverse; }
+  .wrench  { animation: tighten 2.4s ease-in-out infinite; }
 
-/* ============================================================
-   لیست کالاها
-   ============================================================ */
-.list{
-  padding:10px 12px 0;
-  display:flex; flex-direction:column; gap:6px;
-  animation:fadeIn .3s ease-out;
-}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes slide { to { background-position: 34px 0; } }
+  @keyframes tighten {
+    0%, 100% { transform: rotate(24deg); }
+    50%      { transform: rotate(72deg); }
+  }
 
-.item{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  background:var(--surface);
-  border:1px solid var(--border); border-radius:var(--r-md);
-  padding:11px 14px; cursor:pointer;
-  transition:background-color .15s;
-}
-.item:active{background:var(--surface-2)}
-.item-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px}
-.item-name{font-size:var(--fs-base); font-weight:500}
-.item-tag{
-  align-self:flex-start; font-size:11px; color:var(--muted);
-  background:var(--surface-2); border:1px solid var(--border);
-  border-radius:5px; padding:1px 6px;
-}
-.item-price{
-  flex:none; font-size:13.5px; font-weight:700;
-  color:var(--accent); background:rgba(var(--accent-rgb),.1);
-  padding:4px 9px; border-radius:7px; white-space:nowrap;
-}
+  @media (min-width: 820px) {
+    main { grid-template-columns: 1fr 1fr; text-align: right; justify-items: stretch; }
+    .art { justify-self: center; width: 100%; max-width: 420px; }
+    .progress { margin-inline: 0; }
+    .call { margin-inline: 0; }
+  }
 
-.status{text-align:center; color:var(--muted); font-size:var(--fs-sm); padding:16px 12px}
-.empty{text-align:center; padding:48px 20px; color:var(--muted)}
-.empty b{display:block; color:var(--text); font-size:15px; margin-bottom:6px}
-
-/* ============================================================
-   دکمه شناور سبد
-   ============================================================ */
-.fab{
-  position:fixed; left:16px; z-index:60;
-  bottom:calc(16px + env(safe-area-inset-bottom));
-  width:56px; height:56px;
-  border:none; border-radius:var(--r-xl);
-  background:var(--accent); color:var(--accent-contrast);
-  display:none; align-items:center; justify-content:center;
-  box-shadow:0 6px 20px rgba(var(--accent-rgb),.35);
-  cursor:pointer; transition:transform .15s;
-}
-.fab:active{transform:scale(.94)}
-.fab-badge{
-  position:absolute; top:-6px; right:-6px;
-  min-width:22px; height:22px; padding:0 5px;
-  border-radius:11px; background:var(--danger); color:#fff;
-  font-size:12px; font-weight:700;
-  display:flex; align-items:center; justify-content:center;
-  border:2px solid var(--bg);
-}
-
-/* ============================================================
-   مودال‌ها
-   ============================================================ */
-.modal{
-  display:none; position:fixed; inset:0; z-index:100;
-  background:var(--overlay);
-  align-items:center; justify-content:center; padding:16px;
-}
-.sheet{
-  width:100%; max-width:380px; max-height:86vh;
-  background:var(--surface);
-  border:1px solid var(--border); border-radius:var(--r-xl);
-  display:flex; flex-direction:column; overflow:hidden;
-  box-shadow:var(--shadow);
-  animation:pop .22s cubic-bezier(.16,1,.3,1);
-}
-@keyframes pop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
-@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-@media (max-width:600px){   /* گوشی‌های عریض (مثل پرو مکس) هم از پایین باز شوند */
-  .modal{padding:0; align-items:flex-end}
-  .sheet{max-width:none; max-height:92vh; border-radius:var(--r-xl) var(--r-xl) 0 0; border-bottom:none; animation:slideUp .24s ease-out}
-}
-
-.sheet-head{
-  padding:14px 16px; border-bottom:1px solid var(--border);
-  font-size:var(--fs-lg); font-weight:700; text-align:center; line-height:1.5;
-}
-.sheet-body{padding:16px; overflow-y:auto}
-.sheet-foot{
-  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
-  border-top:1px solid var(--border);
-  display:flex; flex-direction:column; gap:8px;
-}
-
-.meta-pill{
-  display:block; width:fit-content; margin:0 auto 16px;
-  background:var(--surface-2); border:1px solid var(--border);
-  border-radius:var(--r-sm); padding:6px 12px;
-  color:var(--muted); font-size:13px; font-weight:600;
-}
-.total-line{
-  margin-top:16px; padding-top:14px;
-  border-top:1px dashed var(--border);
-  text-align:center; font-size:var(--fs-lg); font-weight:800; color:var(--accent);
-}
-
-/* شمارنده تعداد */
-.qty{
-  display:flex; align-items:center; justify-content:center; gap:4px;
-  width:fit-content; margin:0 auto;
-  background:var(--surface-2); border:1px solid var(--border);
-  border-radius:var(--r-lg); padding:4px;
-}
-.qty button{
-  width:40px; height:40px; border:none; border-radius:9px;
-  background:var(--surface); color:var(--text);
-  font-size:20px; font-weight:600; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  transition:transform .12s;
-}
-.qty button:active{transform:scale(.9)}
-.qty input{
-  width:66px; height:40px; text-align:center;
-  border:none; background:transparent; color:var(--text);
-  font-size:17px; font-weight:800;
-}
-
-/* دکمه‌ها */
-.btn{
-  height:44px; padding:0 14px;
-  border:1px solid transparent; border-radius:var(--r-md);
-  font-size:var(--fs-base); font-weight:700; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  transition:opacity .15s, transform .12s;
-}
-.btn:active{transform:scale(.985); opacity:.9}
-.btn-primary{background:var(--accent); color:var(--accent-contrast)}
-.btn-ghost{background:transparent; color:var(--muted); border-color:var(--border)}
-.btn-danger{background:rgba(var(--danger-rgb),.1); color:var(--danger); border-color:rgba(var(--danger-rgb),.35)}
-.btn-solid-danger{background:var(--danger); color:#fff}
-.btn-eitaa{background:#E85D04; color:#fff}
-.btn-telegram{background:#229ED9; color:#fff}
-
-/* سبد خرید */
-.cart-list{max-height:44vh; overflow-y:auto; margin:-4px -4px 0; padding:4px}
-.cart-item{
-  display:flex; align-items:flex-start; gap:10px;
-  background:var(--surface-2); border:1px solid var(--border);
-  border-radius:var(--r-md); padding:10px 12px; margin-bottom:8px;
-}
-.cart-item:last-child{margin-bottom:0}
-.cart-main{flex:1; min-width:0}
-.cart-name{font-size:13.5px; font-weight:700; margin-bottom:8px; line-height:1.5}
-.cart-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
-.cart-qty{
-  display:flex; align-items:center; gap:2px;
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); padding:2px;
-}
-.cart-qty button{
-  width:28px; height:28px; border:none; background:transparent;
-  color:var(--accent); font-size:17px; font-weight:800; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-}
-.cart-qty span{min-width:26px; text-align:center; font-size:13px; font-weight:800}
-.cart-calc{font-size:13px; font-weight:800; color:var(--accent); background:rgba(var(--accent-rgb),.1); padding:3px 8px; border-radius:6px}
-.cart-del{
-  flex:none; width:32px; height:32px; border:none; border-radius:var(--r-sm);
-  background:rgba(var(--danger-rgb),.1); color:var(--danger);
-  font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
-}
-.note{font-size:13.5px; line-height:1.9; color:var(--text); text-align:center}
-.note b{color:var(--success)}
+  @media (prefers-reduced-motion: reduce) {
+    .gear, .wrench, .progress span { animation: none; }
+    .wrench { transform: rotate(45deg); }
+  }
 </style>
 </head>
 <body>
 
-<!-- ================= نوار بالا ================= -->
-<div class="topbar">
+<div class="tape" aria-hidden="true"></div>
 
-  <div class="search-row">
-    <div class="search" id="searchWrap">
-      <span class="s-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg>
-      </span>
-      <input type="text" id="myInput" oninput="debouncedSearch()" placeholder="جستجوی نام کالا..." autocomplete="off">
-      <button class="s-clear" onclick="clearSearch()" aria-label="پاک کردن">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
+<main>
+  <div class="art">
+    <svg viewBox="0 0 400 400" role="img" aria-label="چرخ‌دنده‌هایی که در حال تعمیر با آچار هستند">
+      <defs>
+        <mask id="jaw" maskUnits="userSpaceOnUse" x="-60" y="-60" width="240" height="120">
+          <rect x="-60" y="-60" width="240" height="120" fill="#fff"/>
+          <rect x="-60" y="-15" width="62" height="30" fill="#000"/>
+        </mask>
+      </defs>
 
-    <button class="icon-btn" id="themeBtn" onclick="cycleTheme()" aria-label="تغییر تم"></button>
+      <g class="gear g-big">
+        <circle cx="200" cy="200" r="78" fill="#5b7188"/>
+        <circle cx="200" cy="200" r="88" fill="none" stroke="#5b7188" stroke-width="20" pathLength="32" stroke-dasharray="1 1"/>
+        <g fill="#eef2f6">
+          <circle cx="250" cy="200" r="11"/>
+          <circle cx="225" cy="243.3" r="11"/>
+          <circle cx="175" cy="243.3" r="11"/>
+          <circle cx="150" cy="200" r="11"/>
+          <circle cx="175" cy="156.7" r="11"/>
+          <circle cx="225" cy="156.7" r="11"/>
+        </g>
+        <circle cx="200" cy="200" r="30" fill="#3f5368"/>
+      </g>
+
+      <g class="gear g-mid">
+        <circle cx="312" cy="106" r="34" fill="#14283d"/>
+        <circle cx="312" cy="106" r="42" fill="none" stroke="#14283d" stroke-width="14" pathLength="16" stroke-dasharray="1 1"/>
+        <circle cx="312" cy="106" r="12" fill="#eef2f6"/>
+      </g>
+
+      <g class="gear g-small">
+        <circle cx="108" cy="302" r="28" fill="#9fb1c3"/>
+        <circle cx="108" cy="302" r="35" fill="none" stroke="#9fb1c3" stroke-width="12" pathLength="12" stroke-dasharray="1 1"/>
+        <circle cx="108" cy="302" r="10" fill="#eef2f6"/>
+      </g>
+
+      <g transform="translate(200 200)">
+        <g class="wrench">
+          <polygon points="17,0 8.5,14.7 -8.5,14.7 -17,0 -8.5,-14.7 8.5,-14.7" fill="#14283d"/>
+          <g mask="url(#jaw)" fill="#ffbf1f">
+            <circle cx="0" cy="0" r="36"/>
+            <rect x="20" y="-10" width="135" height="20" rx="10"/>
+            <circle cx="140" cy="0" r="4" fill="#14283d"/>
+          </g>
+        </g>
+      </g>
+    </svg>
   </div>
 
-  <div class="chips">
-    <div class="marquee" id="marquee-cats">
-      <div class="marquee-content" id="cat-content-1"></div>
-      <div class="marquee-content" id="cat-content-2"></div>
+  <section>
+    <h1>در حال بروزرسانی هستیم</h1>
+
+    <div class="progress" role="progressbar" aria-label="در حال بروزرسانی"><span></span></div>
+    <div class="progress-label">به‌زودی برمی‌گردیم</div>
+
+    <div class="call">
+      <p>برای استعلام قیمت از شماره تلفن فروشگاه استفاده کنید</p>
+      <span class="number">۰۲۵-۳۶۶۶۴۶۶۶</span>
     </div>
-    <div class="marquee" id="marquee-brands">
-      <div class="marquee-content" id="brand-content-1"></div>
-      <div class="marquee-content" id="brand-content-2"></div>
-    </div>
-  </div>
+  </section>
+</main>
 
-</div>
+<div class="tape" aria-hidden="true"></div>
 
-<!-- ================= لیست ================= -->
-<div class="list" id="itemList"></div>
-<div class="status" id="status">در حال بارگذاری...</div>
-
-<!-- ================= دکمه سبد ================= -->
-<button class="fab" id="cartFab" onclick="openCartModal()" aria-label="سبد سفارش">
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/>
-    <path d="M2.5 3h2.2l2.4 12.1a1.6 1.6 0 0 0 1.6 1.3h8.6a1.6 1.6 0 0 0 1.6-1.3L21 7H6"/>
-  </svg>
-  <span class="fab-badge" id="cartBadge">0</span>
-</button>
-
-<!-- ================= مودال سفارش ================= -->
-<div id="orderModal" class="modal" onclick="closeModalOnBG(event,'orderModal')">
-  <div class="sheet">
-    <div class="sheet-head" id="modalItemName">نام کالا</div>
-    <div class="sheet-body">
-      <span class="meta-pill" id="modalItemPrice">قیمت واحد: 0 تومان</span>
-      <div class="qty">
-        <button onclick="changeQty(1)" aria-label="افزایش">+</button>
-        <input type="number" inputmode="numeric" id="modalQty" value="1" min="1"
-               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="calcTotal()">
-        <button onclick="changeQty(-1)" aria-label="کاهش">−</button>
-      </div>
-      <div class="total-line" id="modalTotal">جمع کل: 0 تومان</div>
-    </div>
-    <div class="sheet-foot">
-      <button class="btn btn-primary" onclick="addToCart()">افزودن به سبد سفارش</button>
-      <button class="btn btn-ghost" onclick="closeModal('orderModal')">انصراف</button>
-    </div>
-  </div>
-</div>
-
-<!-- ================= مودال سبد ================= -->
-<div id="cartModal" class="modal" onclick="closeModalOnBG(event,'cartModal')">
-  <div class="sheet">
-    <div class="sheet-head">پیش‌فاکتور شما</div>
-    <div class="sheet-body">
-      <div id="cartItemsList" class="cart-list"></div>
-      <div class="total-line" id="cartSumTotal">جمع کل: 0 تومان</div>
-    </div>
-    <div class="sheet-foot">
-      <button class="btn btn-eitaa" onclick="sendOrderEitaa()">ارسال سفارش در ایتا</button>
-      <button class="btn btn-telegram" onclick="sendOrderTelegram()">ارسال سفارش در تلگرام</button>
-      <button class="btn btn-danger" onclick="openConfirmClearModal()">حذف تمام سفارشات</button>
-      <button class="btn btn-ghost" onclick="closeModal('cartModal')">بستن / ادامه خرید</button>
-    </div>
-  </div>
-</div>
-
-<!-- ================= مودال تایید حذف ================= -->
-<div id="confirmClearModal" class="modal" onclick="closeModalOnBG(event,'confirmClearModal')">
-  <div class="sheet">
-    <div class="sheet-head">حذف کل سبد خرید</div>
-    <div class="sheet-body">
-      <div class="note">آیا از حذف تمام کالاهای سبد خرید مطمئن هستید؟</div>
-    </div>
-    <div class="sheet-foot">
-      <button class="btn btn-solid-danger" onclick="confirmClearCart()">بله، حذف کن</button>
-      <button class="btn btn-ghost" onclick="closeModal('confirmClearModal')">انصراف</button>
-    </div>
-  </div>
-</div>
-
-<!-- ================= مودال کالای یافت‌نشد ================= -->
-<div id="notFoundModal" class="modal" onclick="closeModalOnBG(event,'notFoundModal')">
-  <div class="sheet">
-    <div class="sheet-head"><b style="color:var(--danger)">کالای مورد نظر یافت نشد</b></div>
-    <div class="sheet-body">
-      <div class="note">
-        این کالا فعلاً در لیست موجود نیست.<br>
-        <span id="notFoundCode" dir="ltr" style="display:inline-block;margin-top:6px;color:var(--muted)"></span>
-      </div>
-    </div>
-    <div class="sheet-foot">
-      <button class="btn btn-primary" onclick="closeModal('notFoundModal')">مشاهده لیست کالاها</button>
-    </div>
-  </div>
-</div>
-
-<!-- ================= مودال ایتا ================= -->
-<div id="eitaaModal" class="modal" onclick="closeModalOnBG(event,'eitaaModal')">
-  <div class="sheet">
-    <div class="sheet-head"><b style="color:var(--success)">متن سفارش کپی شد</b></div>
-    <div class="sheet-body">
-      <div class="note">
-        سفارش شما در حافظه کپی شد.<br>
-        پس از ورود به صفحه چت واحد فروش، متن را جای‌گذاری (Paste) و ارسال نمایید.
-      </div>
-    </div>
-    <div class="sheet-foot">
-      <button class="btn btn-primary" onclick="redirectToEitaa()">متوجه شدم</button>
-      <button class="btn btn-ghost" onclick="closeModal('eitaaModal')">بستن</button>
-    </div>
-  </div>
-</div>
-
-
-<script>
-/* ============================================================
-   ۰) آداپتور برنامک ایتا و تم
-   ============================================================ */
-function getWebApp(){
-  if (typeof window.Eitaa !== 'undefined' && window.Eitaa.WebApp) return window.Eitaa.WebApp;
-  return null;
-}
-
-/* تشخیص نسخهٔ کلاینت (اندروید/دسکتاپ در برابر نسخهٔ وب) از طریق خود SDK ایتا —
-   نه از روی User-Agent، چون تشخیص مبتنی بر UA قبلاً با کلاینت ایتا مشکل ایجاد می‌کرد.
-   خود برنامک همان فیلد platform را که در مستندات مینی‌اپ تلگرام تعریف شده برمی‌گرداند. */
-function getClientPlatform(){
-  var app = getWebApp();
-  if(!app) return null;
-  var v = app.platform || app.platformType || app.platform_type || app.clientPlatform || app.client_platform || null;
-  return v ? String(v).toLowerCase() : null;
-}
-var WEB_CLIENT_PLATFORMS = ['web','weba','webk','webview','browser'];
-function isWebClient(){
-  var p = getClientPlatform();
-  if(!p) return false;   // اگر پلتفرم قابل تشخیص نبود، نسخهٔ بومی (اندروید/دسکتاپ) فرض می‌شود
-  return WEB_CLIENT_PLATFORMS.indexOf(p) > -1;
-}
-
-/* --- ابزار رنگ --- */
-function hexToRgb(h){
-  if(!h) return null;
-  h = String(h).trim().replace('#','');
-  if(h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
-  if(!/^[0-9a-fA-F]{6}$/.test(h)) return null;
-  return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
-}
-function rgbToHex(a){
-  return '#'+a.map(function(v){ v=Math.max(0,Math.min(255,Math.round(v))); return ('0'+v.toString(16)).slice(-2); }).join('');
-}
-function shade(hex, amt){                  // amt مثبت = روشن‌تر، منفی = تیره‌تر
-  var c = hexToRgb(hex); if(!c) return hex;
-  var t = amt>0 ? 255 : 0, p = Math.abs(amt);
-  return rgbToHex(c.map(function(v){ return v + (t-v)*p; }));
-}
-function isDarkHex(hex){
-  var c = hexToRgb(hex); if(!c) return false;
-  return (0.2126*c[0] + 0.7152*c[1] + 0.0722*c[2]) / 255 < 0.5;
-}
-function rgbTriplet(hex, fallback){
-  var c = hexToRgb(hex);
-  return c ? c.join(',') : fallback;
-}
-
-/* برای اطمینان، چند حالت رایج نام‌گذاری کلیدهای themeParams در ایتا را امتحان می‌کنیم */
-function pick(obj, keys){
-  if(!obj) return null;
-  for(var i=0;i<keys.length;i++){
-    var v = obj[keys[i]];
-    if(typeof v === 'string' && v.charAt(0) === '#') return v;
-  }
-  return null;
-}
-function readThemeParams(){
-  var app = getWebApp();
-  if(!app) return null;
-  var tp = app.themeParams || app.theme_params || null;
-  if(tp && Object.keys(tp).length) return tp;
-
-  /* پشتیبان: خواندن CSS Variableهایی که خود کلاینت ایتا ممکن است تزریق کند */
-  var cs = getComputedStyle(document.documentElement);
-  var probe  = ['bg','text','hint','button','button-text','secondary-bg','link','destructive-text','section-bg','section-separator'];
-  var prefixes = ['--eitaa-theme-','--tg-theme-'];
-  var out = {}, found = false;
-  for(var p=0;p<prefixes.length;p++){
-    for(var i=0;i<probe.length;i++){
-      var v = cs.getPropertyValue(prefixes[p]+probe[i]+'-color').trim();
-      if(v){ out[probe[i].replace(/-/g,'_')+'_color'] = v; found = true; }
-    }
-    if(found) break;
-  }
-  return found ? out : null;
-}
-
-var THEME_KEY = 'priceListThemeMode';
-function safeGetLS(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
-function safeSetLS(key, val){ try{ localStorage.setItem(key, val); }catch(e){} }
-var themeMode = safeGetLS(THEME_KEY) || 'auto';   // auto | light | dark
-var PLATFORM_VARS = ['--bg','--surface','--surface-2','--text','--muted','--border',
-                     '--accent','--accent-rgb','--accent-contrast','--danger','--danger-rgb'];
-
-function clearPlatformVars(){
-  for(var i=0;i<PLATFORM_VARS.length;i++) document.documentElement.style.removeProperty(PLATFORM_VARS[i]);
-}
-
-function applyPlatformTheme(tp, dark){
-  var S = document.documentElement.style;
-
-  var surface = pick(tp, ['section_bg_color','sectionBgColor','bg_color','bgColor','background_color','backgroundColor']);
-  var page    = pick(tp, ['secondary_bg_color','secondaryBgColor']);
-  var text    = pick(tp, ['text_color','textColor','font_color']);
-  var muted   = pick(tp, ['hint_color','hintColor','subtitle_text_color','secondary_text_color']);
-  var accent  = pick(tp, ['button_color','buttonColor','link_color','linkColor','accent_text_color','primary_color']);
-  var onAcc   = pick(tp, ['button_text_color','buttonTextColor']);
-  var danger  = pick(tp, ['destructive_text_color','destructiveTextColor']);
-  var border  = pick(tp, ['section_separator_color','sectionSeparatorColor','separator_color']);
-
-  if(!surface) return false;                       // چیزی برای اعمال نداریم
-
-  if(!page || page.toLowerCase() === surface.toLowerCase())
-    page = shade(surface, dark ? -0.30 : -0.045);
-  if(!border) border = shade(surface, dark ? 0.14 : -0.10);
-
-  S.setProperty('--surface',   surface);
-  S.setProperty('--surface-2', shade(surface, dark ? 0.07 : -0.028));
-  S.setProperty('--bg',        page);
-  S.setProperty('--border',    border);
-  if(text)  S.setProperty('--text',  text);
-  if(muted) S.setProperty('--muted', muted);
-  if(accent){
-    S.setProperty('--accent', accent);
-    S.setProperty('--accent-rgb', rgbTriplet(accent, dark?'90,155,246':'47,111,235'));
-    S.setProperty('--accent-contrast', onAcc || (isDarkHex(accent) ? '#ffffff' : '#101418'));
-  }
-  if(danger){
-    S.setProperty('--danger', danger);
-    S.setProperty('--danger-rgb', rgbTriplet(danger, dark?'239,106,109':'224,68,71'));
-  }
-  return true;
-}
-
-function refreshTheme(){
-  var app = getWebApp();
-  var tp  = readThemeParams();
-  var dark;
-
-  if(themeMode === 'light' || themeMode === 'dark'){
-    clearPlatformVars();
-    dark = (themeMode === 'dark');
-  } else if(tp){
-    var scheme = app && (app.colorScheme || app.color_scheme);
-    dark = scheme ? (scheme === 'dark')
-                  : isDarkHex(pick(tp,['bg_color','bgColor','section_bg_color']) || '#ffffff');
-    clearPlatformVars();
-    if(!applyPlatformTheme(tp, dark)) clearPlatformVars();
-  } else {
-    clearPlatformVars();
-    dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  }
-
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-
-  /* هماهنگ‌سازی نوار سیستم */
-  var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-  var sf = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim();
-  var meta = document.getElementById('metaThemeColor');
-  if(meta) meta.setAttribute('content', sf || bg);
-  try{ app && app.setBackgroundColor && app.setBackgroundColor(bg); }catch(e){}
-  try{ app && app.setHeaderColor     && app.setHeaderColor(sf);     }catch(e){}
-
-  renderThemeIcon();
-}
-
-var THEME_ICONS = {
-  auto : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor" stroke="none"/></svg>',
-  light: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg>',
-  dark : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>'
-};
-function renderThemeIcon(){
-  var b = document.getElementById('themeBtn');
-  b.innerHTML = THEME_ICONS[themeMode];
-  b.title = themeMode === 'auto' ? 'تم: خودکار' : (themeMode === 'dark' ? 'تم: تیره' : 'تم: روشن');
-}
-function cycleTheme(){
-  themeMode = themeMode === 'auto' ? 'light' : (themeMode === 'light' ? 'dark' : 'auto');
-  safeSetLS(THEME_KEY, themeMode);
-  refreshTheme();
-  haptic('light');
-}
-
-/* راه‌اندازی مینی‌اپ */
-function initMiniApp(){
-  var app = getWebApp();
-  if(app){
-    try{ app.ready  && app.ready();  }catch(e){}
-    try{ app.expand && app.expand(); }catch(e){}
-    try{ app.onEvent && app.onEvent('themeChanged', refreshTheme); }catch(e){}
-  }
-  if(window.matchMedia){
-    var mq = window.matchMedia('(prefers-color-scheme: dark)');
-    (mq.addEventListener ? mq.addEventListener('change', refreshTheme) : mq.addListener(refreshTheme));
-  }
-  refreshTheme();
-}
-/* اسکریپت SDK ایتا با defer لود می‌شود، پس تا قبل از DOMContentLoaded ممکن است window.Eitaa هنوز آماده نباشد؛
-   برای همین صبر می‌کنیم تا این رویداد شلیک شود (که خودش منتظر فونت/عکس نمی‌ماند، فقط منتظر اسکریپت‌های defer است) */
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', initMiniApp);
-}else{
-  initMiniApp();
-}
-
-function haptic(style){
-  try{
-    var app = getWebApp();
-    app && app.HapticFeedback && app.HapticFeedback.impactOccurred(style || 'light');
-  }catch(e){}
-}
-
-/* ============================================================
-   ۱) داده‌ها و نرمال‌سازی  (بدون تغییر منطقی)
-   ============================================================ */
-var allItems = [];
-var STORAGE_OK = (function(){ try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }catch(e){ return false; } })();
-var lastCartRaw = safeGetLS('userCart');
-var cart = (function(){ try{ var c = JSON.parse(lastCartRaw); return Array.isArray(c) ? c : []; }catch(e){ return []; } })();
-
-/* هر صفحهٔ مینی‌اپ نسخهٔ خودش از سبد را در حافظه دارد؛ برای اینکه صفحه‌های قدیمی‌تر سبد کهنه نشان ندهند
-   (و موقع ذخیره، کالاهای صفحه‌های دیگر را پاک نکنند)، حافظهٔ گوشی را منبع اصلی می‌گیریم:
-   قبل از هر خواندن یا تغییر سبد، آخرین نسخه از حافظه دوباره خوانده می‌شود. */
-function reloadCart(){
-  if(!STORAGE_OK) return;
-  var raw = safeGetLS('userCart');
-  lastCartRaw = raw;
-  try{ var c = JSON.parse(raw); cart = Array.isArray(c) ? c : []; }catch(e){ cart = []; }
-}
-function refreshCartViews(){
-  reloadCart();
-  updateCartUI();
-  if(openModals.indexOf('cartModal') !== -1){
-    if(cart.length === 0) closeModal('cartModal'); else renderCartList();
-  }
-}
-function cartChangedElsewhere(){
-  if(!STORAGE_OK) return;
-  if(safeGetLS('userCart') !== lastCartRaw) refreshCartViews();
-}
-window.addEventListener('storage', function(e){ if(e.key === 'userCart' || e.key === null) refreshCartViews(); });
-window.addEventListener('focus', cartChangedElsewhere);
-window.addEventListener('pageshow', cartChangedElsewhere);
-document.addEventListener('visibilitychange', function(){ if(!document.hidden) cartChangedElsewhere(); });
-setInterval(function(){ if(!document.hidden) cartChangedElsewhere(); }, 1500);   // پشتیبان برای وب‌ویوهایی که رویدادها را نمی‌فرستند
-var currentItemCode = "";
-var currentItemName = "";
-var currentItemPrice = 0;
-var currentItemStep = 0;
-var currentItemMinOrder = 0;
-var currentItemDefaultQty = 1;
-
-/* قوانین تعداد (تعداد در بسته = step، حداقل سفارش = minOrder):
-   - هر دو:        کمترین = حداقل سفارش؛ بعد از آن هر بار به اندازهٔ یک بسته اضافه می‌شود (مثلاً 60، 72، 84 ...)
-   - فقط حداقل:    کمترین = حداقل سفارش؛ بعد از آن یکی‌یکی
-   - فقط بسته:     کمترین = یک بسته؛ بعد هر بار یک بسته
-   - هیچ‌کدام:     کمترین 1؛ یکی‌یکی
-   عدد دستی همیشه به نزدیک‌ترین عدد مجازِ بالاتر گرد می‌شود. */
-function qtyFloorOf(step, minOrder){
-  step = step || 0; minOrder = minOrder || 0;
-  if(minOrder > 0) return minOrder;
-  if(step > 0) return step;
-  return 1;
-}
-function qtyUnitOf(step){ return step > 0 ? step : 1; }
-function roundUpQty(q, step, minOrder){
-  var floor = qtyFloorOf(step, minOrder), unit = qtyUnitOf(step);
-  if(isNaN(q) || q < floor) return floor;
-  if(unit === 1) return q;
-  return floor + Math.ceil((q - floor) / unit) * unit;
-}
-function qtyFloor(){ return qtyFloorOf(currentItemStep, currentItemMinOrder); }
-function qtyStepUnit(){ return qtyUnitOf(currentItemStep); }
-function sanitizeQty(raw){
-  var q = parseInt(normalize(raw).replace(/[^0-9]/g,''), 10);   // پشتیبانی از ارقام فارسی/عربی تایپ‌شده
-  return roundUpQty(q, currentItemStep, currentItemMinOrder);
-}
-
-var charMap = {
-  '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
-  '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
-  'آ':'ا','أ':'ا','إ':'ا','ي':'ی','ك':'ک','ة':'ه','ؤ':'و','\u200c':''
-};
-/* همهٔ اعداد نمایشی (از جمله داخل نام کالاها) انگلیسی نمایش داده می‌شوند */
-function toLatinDigits(t){
-  return String(t).replace(/[۰-۹٠-٩]/g, function(d){ return charMap[d]; });
-}
-function normalize(t){
-  return String(t).replace(/[۰-۹٠-٩آأإيكةؤ\u200c]/g, function(w){ return charMap[w] || w; }).toLowerCase();
-}
-
-/* این اسکریپت انتهای body قرار دارد، پس در این نقطه HTML صفحه کامل پارس شده؛
-   دیگر منتظر رویداد window.onload (که تا دانلود کامل فونت و اسکریپت ایتا صبر می‌کند) نمی‌مانیم. */
-initSliders();
-setTimeout(loadProducts, 0);
-
-/* ============================================================
-   ۲) اسلایدرهای تگ
-   ============================================================ */
-function initSliders(){
-  var brandsList = [].concat(Array.from(new Set([
-    "یکشین","فابر","استدلر","زبرا","سی کلاس","سهند","لاکسر","گلف","کویلو","وحدت","کرونا","اطلس",
-    "مدیر","صدف","سومر","وردا","وشکو","هیرو","کیکو","سویل","پیداکس","آرتلاین","میکرو","ام کیو",
-    "موربیت","کملیون","اعتدال","سوپر باند","پرشیا","سلنا","کیان","ادمیرال","اسکول مکس","کانکس",
-    "رازی","فکتیس","پنتر","آریا","فابل","پیکاسو","بنیتو","پالمو","ماین","ووک","آذین","پلیکان",
-    "پاپکو","پارسیکار","کنکو","مپد","کادبلیو","اوات","نوآوران"
-  ])));
-
-  var categoriesList = [].concat(Array.from(new Set([
-    "پست ایت","مداد مشکی","مداد قرمز","دفتر منگنه","مداد رنگی","چسب 5 سانت","چسب نواری 36",
-    "خودکار","پانچ","تراش","جامدادی","پوشه دکمه دار","قمقمه","کلاسور","دفتر","دفترچه","غلط گیر",
-    "لاک نواری","یدک کلاسور","ماشین حساب","باطری","دوخت","سوزن","کیف فایل","کلربوک","کاور",
-    "ماژیک فسفری","ماژیک وایت برد","ماژیک معمولی","خمیر","ساک دستی","گواش","آبرنگ","رنگ انگشتی",
-    "پاک کن","راپید","بوم","پرگار","چسب ماتیکی","چراغ مطالعه","روان","مداد طراحی","قلمو","کاغذ نقدی"
-  ])));
-
-  function createChipsHTML(items){
-    return items.map(function(item){
-      return '<div class="chip" onclick="setQuickSearch(\'' + item + '\')">' + item + '</div>';
-    }).join('');
-  }
-
-  document.getElementById('cat-content-1').innerHTML = createChipsHTML(categoriesList);
-  document.getElementById('cat-content-2').innerHTML = createChipsHTML(categoriesList);
-  document.getElementById('brand-content-1').innerHTML = createChipsHTML(brandsList);
-  document.getElementById('brand-content-2').innerHTML = createChipsHTML(brandsList);
-
-  setupMarqueeTouchAndAuto('marquee-cats',  -0.3);
-  setupMarqueeTouchAndAuto('marquee-brands', 0.3);
-}
-
-/* اسکرول بی‌نهایت مبتنی بر Delta Time (عیناً مثل نسخه قبل) */
-function setupMarqueeTouchAndAuto(elementId, speed){
-  var el = document.getElementById(elementId);
-  if(!el) return;
-  el.dir = "ltr";
-
-  var isInteracting = false, timeoutId = null, exactScroll = 0, lastTimestamp = null;
-
-  setTimeout(function(){
-    var halfWidth = el.scrollWidth / 2;
-    exactScroll = (speed < 0) ? halfWidth : 0;
-    el.scrollLeft = exactScroll;
-
-    function checkWrap(){
-      halfWidth = el.scrollWidth / 2;
-      if(speed > 0){
-        if(exactScroll >= halfWidth) exactScroll -= halfWidth;
-        else if(exactScroll <= 0)    exactScroll += halfWidth;
-      }else{
-        if(exactScroll <= 0)         exactScroll += halfWidth;
-        else if(exactScroll >= halfWidth) exactScroll -= halfWidth;
-      }
-    }
-
-    function scrollLoop(timestamp){
-      if(!lastTimestamp) lastTimestamp = timestamp;
-      var deltaTime = timestamp - lastTimestamp;
-      lastTimestamp = timestamp;
-      if(deltaTime > 100) deltaTime = 16.66;
-
-      if(!isInteracting){
-        exactScroll += speed * (deltaTime / 16.66);
-        checkWrap();
-        el.scrollLeft = exactScroll;
-      }else{
-        exactScroll = el.scrollLeft;
-      }
-      requestAnimationFrame(scrollLoop);
-    }
-
-    el.addEventListener('scroll', function(){ if(isInteracting) checkWrap(); }, {passive:true});
-
-    function startInteract(){ isInteracting = true; clearTimeout(timeoutId); }
-    function endInteract(){
-      timeoutId = setTimeout(function(){ isInteracting = false; lastTimestamp = null; }, 1500);
-    }
-    el.addEventListener('touchstart', startInteract, {passive:true});
-    el.addEventListener('touchend',   endInteract,   {passive:true});
-    el.addEventListener('mousedown',  startInteract);
-    el.addEventListener('mouseup',    endInteract);
-    el.addEventListener('mouseleave', endInteract);
-
-    requestAnimationFrame(scrollLoop);
-  }, 150);
-}
-
-/* ============================================================
-   ۳) جستجو
-   ============================================================ */
-function setQuickSearch(word){
-  var input = document.getElementById("myInput");
-  input.value = word;
-  toggleClearBtn();
-  doSearch();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function clearSearch(){
-  var input = document.getElementById("myInput");
-  input.value = "";
-  toggleClearBtn();
-  doSearch();
-  input.focus();
-}
-function toggleClearBtn(){
-  var v = document.getElementById("myInput").value;
-  document.getElementById("searchWrap").classList.toggle('has-value', !!v);
-}
-
-/* ============================================================
-   بارگذاری کالاها از فایل جدا (products.txt)
-   - اگر نسخهٔ ذخیره‌شده در مرورگر باشد، همان لحظه نمایش داده می‌شود
-   - همزمان فایل از سرور بررسی می‌شود؛ فقط اگر تغییر کرده باشد لیست به‌روز می‌شود
-   ============================================================ */
-/* ============================================================
-   لینک مستقیم به یک کالا
-   تلگرام:  https://t.me/tahririr_bot/list?startapp=کدکالا
-   لینک مستقیم سایت (گیت‌هاب):  آدرس‌سایت/?code=کدکالا  (یا ?startapp=کدکالا)
-   اگر کد در لیست باشد مستقیم پنجرهٔ انتخاب تعداد همان کالا باز می‌شود؛
-   اگر نباشد، مینی‌اپ عادی (لیست کامل) نمایش داده می‌شود.
-   ============================================================ */
-var pendingStartCode = '';
-var startCodeChecked = false;
-function getStartCode(){
-  function fromParams(str){
-    if(!str) return '';
-    var keys = ['tgWebAppStartParam','startapp','code'];
-    for(var i=0;i<keys.length;i++){
-      var m = new RegExp('[?&#]' + keys[i] + '=([^&#]*)').exec(str);
-      if(m && m[1]) return m[1];
-    }
-    return '';
-  }
-  var raw = fromParams(location.search) || fromParams(location.hash);
-  if(!raw){
-    try{
-      var sdks = [window.Telegram && window.Telegram.WebApp, window.Eitaa && window.Eitaa.WebApp];
-      for(var s=0; s<sdks.length && !raw; s++){
-        var sp = sdks[s] && sdks[s].initDataUnsafe && sdks[s].initDataUnsafe.start_param;
-        if(sp) raw = String(sp);
-      }
-    }catch(e){}
-  }
-  if(!raw) return '';
-  try{ raw = decodeURIComponent(raw.replace(/\+/g, ' ')); }catch(e){}
-  raw = raw.trim();
-  /* استثنا: کد «1» در لینک‌های قدیمیِ دکمه‌های شیشه‌ای فقط برای اجرای startapp بوده؛ مینی‌اپ عادی باز می‌شود، نه «کالا یافت نشد» */
-  if(toLatinDigits(raw) === '1') return '';
-  return raw;
-}
-function tryOpenStartCode(final){
-  try{
-    if(!startCodeChecked){ startCodeChecked = true; pendingStartCode = getStartCode(); }
-    if(!pendingStartCode) return;
-    var want = normalize(pendingStartCode).trim();
-    var item = allItems.find(function(x){ return normalize(x.code).trim() === want; });
-    if(item){ pendingStartCode = ''; openOrderModal(item); }
-    else if(final){
-      /* کد در لیست نیست (کالا تمام شده): پیام «یافت نشد» نشان بده؛ فقط وقتی که لیست واقعاً بارگذاری شده باشد */
-      var missing = pendingStartCode;
-      pendingStartCode = '';
-      if(allItems.length){
-        document.getElementById('notFoundCode').textContent = 'کد کالا: ' + toLatinDigits(missing);
-        openModal('notFoundModal');
-      }
-    }
-  }catch(e){}
-}
-
-function loadProducts(){
-  var PRODUCTS_URL = 'products.txt';
-  var PRODUCTS_KEY = 'productsTxtV1';
-  var cached = safeGetLS(PRODUCTS_KEY);
-  if(cached){ processData(cached); tryOpenStartCode(false); }
-  fetch(PRODUCTS_URL, { cache: 'no-cache' })
-    .then(function(r){ if(!r.ok) throw new Error('bad status'); return r.text(); })
-    .then(function(t){
-      if(!t || t === cached){ tryOpenStartCode(true); return; }
-      safeSetLS(PRODUCTS_KEY, t);
-      processData(t);
-      if(document.getElementById('myInput').value) doSearch();
-      tryOpenStartCode(true);
-    })
-    .catch(function(){ if(!cached) processData(''); tryOpenStartCode(true); });
-}
-
-var searchTimeout;
-function debouncedSearch(){
-  toggleClearBtn();
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(doSearch, 300);
-}
-function doSearch(){
-  var val = normalize(document.getElementById("myInput").value).trim();
-  if(!val){ showItems(allItems); return; }
-  var words = val.split(/\s+/);
-  var filtered = allItems.filter(function(item){
-    return words.every(function(word){ return item.sn.indexOf(word) > -1; });
-  });
-  showItems(filtered);
-}
-
-/* ============================================================
-   ۴) پردازش داده و رندر لیست
-   ============================================================ */
-function processData(text){
-  var lines = text.split("\n");
-  var originalIndex = 0, tempItems = [];
-
-  /* فرمت واقعی خروجی اکسل (۵ ستون، با TAB، به همین ترتیب ستون‌ها):
-     کمینه سفارش  |  تعداد در بسته  |  قیمت  |  نام کالا  |  کد کالا */
-  for(var i=0;i<lines.length;i++){
-    var line = lines[i].trim();
-    if(!line || line.indexOf("!!!") === 0) continue;
-
-    var parts = line.split("\t");
-    if(parts.length < 5) continue;   // هر ۵ ستون لازم است (اکسل برای خالی هم 0 می‌گذارد)
-
-    var minOrder = parseInt(normalize(parts[0]).replace(/[^0-9]/g,''), 10);
-    if(isNaN(minOrder) || minOrder < 0) minOrder = 0;
-
-    var step = parseInt(normalize(parts[1]).replace(/[^0-9]/g,''), 10);
-    if(isNaN(step) || step < 0) step = 0;
-
-    var p    = parseInt(parts[2].replace(/,/g,'').replace(/"/g,''), 10);
-    var n    = toLatinDigits(parts[3].replace(/"/g,'').trim());
-    var code = parts[4].replace(/"/g,'').trim();
-
-    if(!isNaN(p) && n && code){
-      tempItems.push({ id: originalIndex++, code: code, p: p, n: n, step: step, minOrder: minOrder, sn: normalize(n) });
-    }
-  }
-  allItems = tempItems;
-
-  /* همگام‌سازی سبد بر اساس کد کالا (نه نام)؛ اگر لیست خالی بود سبد دست‌نخورده می‌ماند */
-  reloadCart();
-  var cartUpdated = false;
-  for(var c=0; allItems.length && c<cart.length; c++){
-    var liveItem = allItems.find(function(item){ return item.code === cart[c].code; });
-    if(liveItem){
-      if(cart[c].price !== liveItem.p){ cart[c].price = liveItem.p; cartUpdated = true; }
-      if(cart[c].name  !== liveItem.n){ cart[c].name  = liveItem.n; cartUpdated = true; }
-      if((cart[c].step||0)     !== (liveItem.step||0)){ cart[c].step = liveItem.step; cartUpdated = true; }
-      if((cart[c].minOrder||0) !== (liveItem.minOrder||0)){ cart[c].minOrder = liveItem.minOrder; cartUpdated = true; }
-      var okQty = roundUpQty(cart[c].qty, liveItem.step, liveItem.minOrder);   // تعداد قدیمی با قانون فعلی کالا هماهنگ شود
-      if(cart[c].qty !== okQty){ cart[c].qty = okQty; cartUpdated = true; }
-    }else{
-      cart.splice(c,1); c--; cartUpdated = true;
-    }
-  }
-  if(cartUpdated) saveCart();
-
-  showItems(allItems);
-  updateCartUI();
-}
-
-function escapeHTML(s){
-  return String(s).replace(/[&<>"']/g, function(m){
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
-  });
-}
-
-function showItems(items){
-  var listEl   = document.getElementById("itemList");
-  var statusEl = document.getElementById("status");
-
-  if(items.length === 0){
-    listEl.innerHTML = '<div class="empty"><b>کالایی پیدا نشد</b>عبارت دیگری را جستجو کنید.</div>';
-    statusEl.innerText = "";
-    return;
-  }
-
-  var limit = Math.min(items.length, 150);
-  var html = "";
-  for(var i=0;i<limit;i++){
-    var it  = items[i];
-    var tag = "";
-    if(it.step > 0 && it.minOrder > 0) tag = '<span class="item-tag">بسته ' + it.step + ' تایی | حداقل ' + it.minOrder + '</span>';
-    else if(it.step > 0)               tag = '<span class="item-tag">بسته ' + it.step + ' تایی</span>';
-    else if(it.minOrder > 0)           tag = '<span class="item-tag">حداقل ' + it.minOrder + ' عدد</span>';
-
-    html += '<div class="item" onclick="openOrderModalByIndex(' + it.id + ')">' +
-              '<div class="item-main">' +
-                '<span class="item-name">' + escapeHTML(it.n) + '</span>' + tag +
-              '</div>' +
-              '<span class="item-price">' + formatToToman(it.p) + '</span>' +
-            '</div>';
-  }
-  listEl.innerHTML = html;
-  statusEl.innerText = "نمایش " + limit + " مورد از " + items.length + " کالا (برای سفارش کلیک کنید)";
-}
-
-function formatToToman(n){
-  var num = parseInt(n, 10);
-  if(isNaN(num)) return n;
-  var toman = Math.floor(num / 10);
-  return toman.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " تومان";
-}
-
-/* ============================================================
-   ۵) مدیریت مودال‌ها
-   ============================================================ */
-var openModals = [];
-function openModal(id){
-  document.getElementById(id).style.display = "flex";
-  if(openModals.indexOf(id) === -1) openModals.push(id);
-  syncBackButton();
-}
-function closeModal(id){
-  document.getElementById(id).style.display = "none";
-  openModals = openModals.filter(function(m){ return m !== id; });
-  syncBackButton();
-}
-function closeModalOnBG(event, id){ if(event.target.id === id) closeModal(id); }
-
-var backBound = false;
-function onPlatformBack(){ if(openModals.length) closeModal(openModals[openModals.length-1]); }
-function syncBackButton(){
-  var app = getWebApp();
-  if(!app || !app.BackButton) return;
-  try{
-    if(openModals.length){
-      if(!backBound){ app.BackButton.onClick(onPlatformBack); backBound = true; }
-      app.BackButton.show();
-    }else{
-      app.BackButton.hide();
-    }
-  }catch(e){}
-}
-
-function openOrderModalByIndex(id){
-  var item = allItems.find(function(x){ return x.id === id; });
-  if(item) openOrderModal(item);
-}
-function openOrderModal(item){
-  reloadCart();
-  currentItemCode     = item.code;
-  currentItemName     = item.n;
-  currentItemPrice    = parseInt(item.p, 10);
-  currentItemStep     = item.step || 0;
-  currentItemMinOrder = item.minOrder || 0;
-
-  /* اگر این کالا از قبل در سبد است، مودال با همان تعداد باز می‌شود تا کاربر آن را
-     اصلاح کند، نه اینکه دوباره از کف پیش‌فرض شروع شود و روی مقدار قبلی جمع بخورد */
-  var existing = cart.find(function(c){ return c.code === item.code; });
-  currentItemDefaultQty = existing ? existing.qty : qtyFloor();
-
-  var extra = "";
-  if(currentItemStep > 0 && currentItemMinOrder > 0) extra = " | حداقل سفارش: " + currentItemMinOrder + " عدد، سپس هر بار " + currentItemStep + " عدد";
-  else if(currentItemStep > 0)                       extra = " | فروش بسته‌ای: هر بار " + currentItemStep + " عدد";
-  else if(currentItemMinOrder > 0)                   extra = " | حداقل سفارش: " + currentItemMinOrder + " عدد";
-
-  document.getElementById("modalItemName").innerText  = item.n;
-  document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(item.p) + extra;
-  document.getElementById("modalQty").value = currentItemDefaultQty;
-  calcTotal();
-  openModal("orderModal");
-  haptic('light');
-}
-
-function clearInputOnFocus(input){ if(input.value === String(currentItemDefaultQty)) input.value = ""; }
-function restoreInputOnBlur(input){
-  input.value = sanitizeQty(input.value);
-  calcTotal();
-}
-function changeQty(amount){
-  var input = document.getElementById("modalQty");
-  var unit  = qtyStepUnit();
-  var floor = qtyFloor();
-  var cur   = sanitizeQty(input.value);   // اگر عدد دستی هنوز گرد نشده، اول به عدد مجاز تبدیل می‌شود
-  var newVal = cur + amount * unit;
-  if(newVal >= floor){ input.value = newVal; calcTotal(); haptic('light'); }
-}
-function calcTotal(){
-  var qty = parseInt(document.getElementById("modalQty").value, 10) || 0;
-  document.getElementById("modalTotal").innerText = "جمع کل: " + formatToToman(currentItemPrice * qty);
-}
-
-/* ============================================================
-   ۶) سبد خرید
-   ============================================================ */
-function saveCart(){ var raw = JSON.stringify(cart); lastCartRaw = raw; safeSetLS('userCart', raw); }
-
-function addToCart(){
-  reloadCart();
-  var qty = sanitizeQty(document.getElementById("modalQty").value);
-  var idx = cart.findIndex(function(item){ return item.code === currentItemCode; });
-  if(idx !== -1){
-    /* مودال مقدار فعلیِ همین کالا در سبد را نشان می‌داد، پس اینجا جایگزین می‌کنیم نه جمع */
-    cart[idx].qty  = qty;
-    cart[idx].name = currentItemName; cart[idx].price = currentItemPrice;
-    cart[idx].step = currentItemStep; cart[idx].minOrder = currentItemMinOrder;
-  }else{
-    cart.push({ code: currentItemCode, name: currentItemName, price: currentItemPrice, qty: qty,
-                step: currentItemStep, minOrder: currentItemMinOrder });
-  }
-
-  saveCart();
-  updateCartUI();
-  closeModal('orderModal');
-  haptic('medium');
-}
-
-function removeFromCart(code){
-  reloadCart();
-  var index = cart.findIndex(function(c){ return c.code === code; });
-  if(index === -1){ updateCartUI(); renderCartList(); if(cart.length === 0) closeModal('cartModal'); return; }
-  cart.splice(index, 1);
-  saveCart(); updateCartUI(); renderCartList();
-  if(cart.length === 0) closeModal('cartModal');
-}
-function updateCartQty(code, change){
-  reloadCart();
-  var index = cart.findIndex(function(c){ return c.code === code; });
-  if(index === -1){ updateCartUI(); renderCartList(); if(cart.length === 0) closeModal('cartModal'); return; }
-  var item  = cart[index];
-  var unit  = qtyUnitOf(item.step);
-  var floor = qtyFloorOf(item.step, item.minOrder);
-  item.qty = roundUpQty(item.qty, item.step, item.minOrder) + change * unit;
-  if(item.qty < floor) cart.splice(index, 1);   // کمتر از حداقل = حذف از سبد
-  saveCart(); updateCartUI(); renderCartList();
-  if(cart.length === 0) closeModal('cartModal');
-}
-function updateCartUI(){
-  var fab   = document.getElementById("cartFab");
-  var badge = document.getElementById("cartBadge");
-  if(cart.length > 0){ fab.style.display = "flex"; badge.innerText = cart.length; }
-  else fab.style.display = "none";
-}
-function openCartModal(){
-  reloadCart(); updateCartUI();
-  if(cart.length === 0) return;
-  renderCartList();
-  openModal("cartModal");
-}
-function openConfirmClearModal(){ openModal("confirmClearModal"); }
-function confirmClearCart(){
-  cart = [];
-  saveCart(); updateCartUI();
-  closeModal('confirmClearModal');
-  closeModal('cartModal');
-}
-
-function renderCartList(){
-  var listContainer = document.getElementById("cartItemsList");
-  var sumTotalEl    = document.getElementById("cartSumTotal");
-  var html = "", finalSum = 0;
-
-  for(var i=0;i<cart.length;i++){
-    var item = cart[i];
-    var rowTotal = item.price * item.qty;
-    finalSum += rowTotal;
-
-    html +=
-      '<div class="cart-item">' +
-        '<div class="cart-main">' +
-          '<div class="cart-name">' + escapeHTML(item.name) + '</div>' +
-          '<div class="cart-row">' +
-            '<div class="cart-qty">' +
-              '<button data-code="' + escapeHTML(item.code) + '" onclick="updateCartQty(this.dataset.code, 1)">+</button>' +
-              '<span>' + item.qty + '</span>' +
-              '<button data-code="' + escapeHTML(item.code) + '" onclick="updateCartQty(this.dataset.code, -1)">−</button>' +
-            '</div>' +
-            '<div class="cart-calc">' + formatToToman(rowTotal) + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<button class="cart-del" data-code="' + escapeHTML(item.code) + '" onclick="removeFromCart(this.dataset.code)" aria-label="حذف">✕</button>' +
-      '</div>';
-  }
-  listContainer.innerHTML = html;
-  sumTotalEl.innerText = "جمع کل پیش‌فاکتور: " + formatToToman(finalSum);
-}
-
-/* ============================================================
-   ۷) ارسال سفارش
-   ============================================================ */
-function openSafeLink(url, isEitaaLink){
-  var app = getWebApp();
-  if(app){
-    try{
-      /* روی نسخهٔ اندروید/دسکتاپ ایتا، openEitaaLink پی‌وی ادمین را به‌درستی باز می‌کند.
-         روی نسخهٔ وب ایتا (که مثل مینی‌اپ‌های تلگرام وب رفتار می‌کند) این متد کار نمی‌کند؛
-         در آن حالت طبق همان روش استاندارد بازکردن لینک خارجی در مینی‌اپ عمل می‌کنیم که
-         خود کلاینت وب ایتا آن را به‌درستی به پی‌وی ادمین هدایت می‌کند. */
-      if(isEitaaLink && !isWebClient() && typeof app.openEitaaLink === 'function'){
-        app.openEitaaLink(url);
-        return;
-      }
-      if(typeof app.openLink === 'function'){ app.openLink(url, { try_browser: true }); return; }
-    }catch(e){ console.log("WebApp API Error:", e); }
-  }
-  var a = document.createElement('a');
-  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){ document.body.removeChild(a); }, 100);
-}
-
-function getOrderMessageText(){
-  reloadCart();
-  if(cart.length === 0) return "";
-  var message = "📋 سلام، درخواست سفارش جدید:\n\n";
-  var finalSum = 0;
-  for(var i=0;i<cart.length;i++){
-    var item = cart[i];
-    finalSum += item.price * item.qty;
-    message += "🔹 " + (i+1) + ". " + item.name +
-               "\n     تعداد: " + item.qty + " عدد | فی: " + formatToToman(item.price) + "\n";
-  }
-  message += "\n💰 جمع کل سفارش: " + formatToToman(finalSum);
-  return message;
-}
-
-function sendOrderEitaa(){
-  var text = getOrderMessageText(); if(!text) return;
-
-  var copyToClipboard = function(str){
-    if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(str);
-    return new Promise(function(resolve, reject){
-      var ta = document.createElement("textarea");
-      ta.value = str; ta.style.position = "fixed"; ta.style.opacity = "0";
-      document.body.appendChild(ta); ta.focus(); ta.select();
-      try{ document.execCommand('copy') ? resolve() : reject(); }catch(err){ reject(); }
-      document.body.removeChild(ta);
-    });
-  };
-
-  copyToClipboard(text)
-    .then(function(){ openModal("eitaaModal"); })
-    .catch(function(){
-      var ta = document.createElement("textarea");
-      ta.value = text; document.body.appendChild(ta); ta.select();
-      try{ document.execCommand('copy'); }catch(e){}
-      document.body.removeChild(ta);
-      openModal("eitaaModal");
-    });
-}
-function redirectToEitaa(){
-  closeModal('eitaaModal');
-  closeModal('cartModal');
-  openSafeLink("https://eitaa.com/tahrir_ir_f", true);
-}
-
-function sendOrderTelegram(){
-  var text = getOrderMessageText(); if(!text) return;
-  var url = "https://t.me/tahrir_ir_f?text=" + encodeURIComponent(text);
-  closeModal('cartModal');
-  var a = document.createElement('a');
-  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){ document.body.removeChild(a); }, 100);
-}
-</script>
 </body>
 </html>
