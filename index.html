@@ -312,34 +312,6 @@ input[type=number]{-moz-appearance:textfield}
 }
 .note{font-size:13.5px; line-height:1.9; color:var(--text); text-align:center}
 .note b{color:var(--success)}
-
-/* ============================================================
-   کنترل کامل با کیبورد (ویندوز / مک) و ثبت سریع
-   ============================================================ */
-:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.search input:focus-visible{outline:none}
-.sheet-body:focus{outline:none}
-.item{scroll-margin-top:var(--topbar-h,150px); scroll-margin-bottom:100px}
-.item.kb-active{
-  background:var(--surface-2); border-color:var(--accent);
-  box-shadow:0 0 0 2px rgba(var(--accent-rgb),.25);
-}
-
-/* ===== ورودی صوتی ===== */
-.icon-btn.listening{background:var(--danger); color:#fff; border-color:var(--danger); animation:micPulse 1.1s ease-in-out infinite}
-@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(var(--danger-rgb),.45)}50%{box-shadow:0 0 0 7px rgba(var(--danger-rgb),0)}}
-.voice-bar{
-  display:none; align-items:center; gap:8px;
-  background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-md);
-  padding:6px 10px; font-size:12.5px; line-height:1.6;
-}
-.voice-bar.err{border-color:rgba(var(--danger-rgb),.45); color:var(--danger)}
-.voice-bar span{flex:1; min-width:0}
-.voice-bar button{
-  flex:none; width:24px; height:24px; border:none; border-radius:50%;
-  background:var(--border); color:var(--muted); cursor:pointer; font-size:12px;
-  display:flex; align-items:center; justify-content:center;
-}
 </style>
 </head>
 <body>
@@ -352,18 +324,14 @@ input[type=number]{-moz-appearance:textfield}
       <span class="s-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg>
       </span>
-      <input type="text" id="myInput" oninput="debouncedSearch()" onkeydown="searchKeydown(event)" placeholder="جستجوی نام کالا..." autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" role="combobox" aria-controls="itemList" aria-expanded="true" aria-autocomplete="list" aria-label="جستجوی نام کالا">
+      <input type="text" id="myInput" oninput="debouncedSearch()" placeholder="جستجوی نام کالا..." autocomplete="off">
       <button class="s-clear" onclick="clearSearch()" aria-label="پاک کردن">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
-    <button class="icon-btn" id="micBtn" onclick="toggleVoice()" aria-label="ثبت سفارش صوتی" title="ثبت سفارش صوتی">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
-    </button>
     <button class="icon-btn" id="themeBtn" onclick="cycleTheme()" aria-label="تغییر تم"></button>
   </div>
-  <div class="voice-bar" id="voiceBar" role="status" aria-live="polite"><span id="voiceText"></span><button onclick="closeVoiceBar()" aria-label="بستن">✕</button></div>
 
   <div class="chips">
     <div class="marquee" id="marquee-cats">
@@ -379,11 +347,11 @@ input[type=number]{-moz-appearance:textfield}
 </div>
 
 <!-- ================= لیست ================= -->
-<div class="list" id="itemList" role="listbox" aria-label="لیست کالاها"></div>
+<div class="list" id="itemList"></div>
 <div class="status" id="status">در حال بارگذاری...</div>
 
 <!-- ================= دکمه سبد ================= -->
-<button class="fab" id="cartFab" onclick="openCartModal()" aria-label="سبد سفارش" title="سبد سفارش (F2)">
+<button class="fab" id="cartFab" onclick="openCartModal()" aria-label="سبد سفارش">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/>
     <path d="M2.5 3h2.2l2.4 12.1a1.6 1.6 0 0 0 1.6 1.3h8.6a1.6 1.6 0 0 0 1.6-1.3L21 7H6"/>
@@ -392,15 +360,15 @@ input[type=number]{-moz-appearance:textfield}
 </button>
 
 <!-- ================= مودال سفارش ================= -->
-<div id="orderModal" class="modal" role="dialog" aria-modal="true" onclick="closeModalOnBG(event,'orderModal')">
+<div id="orderModal" class="modal" onclick="closeModalOnBG(event,'orderModal')">
   <div class="sheet">
     <div class="sheet-head" id="modalItemName">نام کالا</div>
     <div class="sheet-body">
       <span class="meta-pill" id="modalItemPrice">قیمت واحد: ۰ تومان</span>
       <div class="qty">
         <button onclick="changeQty(1)" aria-label="افزایش">+</button>
-        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" aria-label="تعداد" id="modalQty" value="1"
-               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="normalizeQtyInput(this); calcTotal()" onkeydown="qtyKeydown(event)">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="modalQty" value="1"
+               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="normalizeQtyInput(this); calcTotal()">
         <button onclick="changeQty(-1)" aria-label="کاهش">−</button>
       </div>
       <div class="total-line" id="modalTotal">جمع کل: ۰ تومان</div>
@@ -413,7 +381,7 @@ input[type=number]{-moz-appearance:textfield}
 </div>
 
 <!-- ================= مودال سبد ================= -->
-<div id="cartModal" class="modal" role="dialog" aria-modal="true" onclick="closeModalOnBG(event,'cartModal')">
+<div id="cartModal" class="modal" onclick="closeModalOnBG(event,'cartModal')">
   <div class="sheet">
     <div class="sheet-head">پیش‌فاکتور شما</div>
     <div class="sheet-body">
@@ -430,7 +398,7 @@ input[type=number]{-moz-appearance:textfield}
 </div>
 
 <!-- ================= مودال تایید حذف ================= -->
-<div id="confirmClearModal" class="modal" role="dialog" aria-modal="true" onclick="closeModalOnBG(event,'confirmClearModal')">
+<div id="confirmClearModal" class="modal" onclick="closeModalOnBG(event,'confirmClearModal')">
   <div class="sheet">
     <div class="sheet-head">حذف کل سبد خرید</div>
     <div class="sheet-body">
@@ -438,13 +406,13 @@ input[type=number]{-moz-appearance:textfield}
     </div>
     <div class="sheet-foot">
       <button class="btn btn-solid-danger" onclick="confirmClearCart()">بله، حذف کن</button>
-      <button class="btn btn-ghost" data-autofocus onclick="closeModal('confirmClearModal')">انصراف</button>
+      <button class="btn btn-ghost" onclick="closeModal('confirmClearModal')">انصراف</button>
     </div>
   </div>
 </div>
 
 <!-- ================= مودال ایتا ================= -->
-<div id="eitaaModal" class="modal" role="dialog" aria-modal="true" onclick="closeModalOnBG(event,'eitaaModal')">
+<div id="eitaaModal" class="modal" onclick="closeModalOnBG(event,'eitaaModal')">
   <div class="sheet">
     <div class="sheet-head"><b style="color:var(--success)">متن سفارش کپی شد</b></div>
     <div class="sheet-body">
@@ -454,7 +422,7 @@ input[type=number]{-moz-appearance:textfield}
       </div>
     </div>
     <div class="sheet-foot">
-      <button class="btn btn-primary" data-autofocus onclick="redirectToEitaa()">متوجه شدم</button>
+      <button class="btn btn-primary" onclick="redirectToEitaa()">متوجه شدم</button>
       <button class="btn btn-ghost" onclick="closeModal('eitaaModal')">بستن</button>
     </div>
   </div>
@@ -5615,7 +5583,6 @@ function setupMarqueeTouchAndAuto(elementId, speed){
    ۳) جستجو
    ============================================================ */
 function setQuickSearch(word){
-  closeVoiceBar();
   var input = document.getElementById("myInput");
   input.value = word;
   toggleClearBtn();
@@ -5623,7 +5590,6 @@ function setQuickSearch(word){
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function clearSearch(){
-  closeVoiceBar();
   var input = document.getElementById("myInput");
   input.value = "";
   toggleClearBtn();
@@ -5635,18 +5601,13 @@ function toggleClearBtn(){
   document.getElementById("searchWrap").classList.toggle('has-value', !!v);
 }
 
-var searchTimeout, searchPending = false;
+var searchTimeout;
 function debouncedSearch(){
-  closeVoiceBar();
   toggleClearBtn();
   clearTimeout(searchTimeout);
-  searchPending = true;
   searchTimeout = setTimeout(doSearch, 300);
 }
-/* اگر کاربر قبل از پایان تأخیر ۳۰۰ میلی‌ثانیه Enter بزند، همان لحظه جستجو اجرا شود */
-function flushSearch(){ if(searchPending) doSearch(); }
 function doSearch(){
-  clearTimeout(searchTimeout); searchPending = false;
   var val = normalize(document.getElementById("myInput").value).trim();
   if(!val){ showItems(allItems); return; }
   var words = val.split(/\s+/);
@@ -5711,22 +5672,19 @@ function showItems(items){
   if(items.length === 0){
     listEl.innerHTML = '<div class="empty"><b>کالایی پیدا نشد</b>عبارت دیگری را جستجو کنید.</div>';
     statusEl.innerText = "";
-    activeIdx = -1;
     return;
   }
 
   var limit = Math.min(items.length, 150);
   var html = "";
   for(var i=0;i<limit;i++){
-    html += '<div class="item" id="it-' + items[i].id + '" role="option" data-id="' + items[i].id + '" onclick="openOrderModalByIndex(' + items[i].id + ')">' +
+    html += '<div class="item" onclick="openOrderModalByIndex(' + items[i].id + ')">' +
               '<span class="item-name">'  + escapeHTML(items[i].n) + '</span>' +
               '<span class="item-price">' + formatToToman(items[i].p) + '</span>' +
             '</div>';
   }
   listEl.innerHTML = html;
   statusEl.innerText = "نمایش " + limit + " مورد از " + items.length + " کالا (برای سفارش کلیک کنید)";
-  activeIdx = -1;
-  if(kbdMode && document.getElementById("myInput").value.trim()) setActive(0, false);
 }
 
 function formatToToman(n){
@@ -5740,31 +5698,15 @@ function formatToToman(n){
    ۵) مدیریت مودال‌ها
    ============================================================ */
 var openModals = [];
-var modalReturnFocus = {};
 function openModal(id){
-  var m = document.getElementById(id);
-  if(openModals.indexOf(id) === -1) modalReturnFocus[id] = document.activeElement;
-  m.style.display = "flex";
+  document.getElementById(id).style.display = "flex";
   if(openModals.indexOf(id) === -1) openModals.push(id);
   syncBackButton();
-  focusModal(id);   // باید همزمان با همان لمس/کلیک اجرا شود تا کیبورد آیفون هم باز شود
-}
-function focusModal(id){
-  var m = document.getElementById(id);
-  var t = m.querySelector('[data-autofocus]') || (id === 'orderModal' && voiceOpen ? m.querySelector('#modalAddBtn') : m.querySelector('#modalQty'));
-  if(!t){ t = m.querySelector('.sheet-body'); if(t) t.setAttribute('tabindex','-1'); }
-  if(!t) return;
-  try{ t.focus({preventScroll:true}); }catch(e){ try{ t.focus(); }catch(e2){} }
 }
 function closeModal(id){
-  var wasOpen = openModals.indexOf(id) > -1;
   document.getElementById(id).style.display = "none";
   openModals = openModals.filter(function(m){ return m !== id; });
   syncBackButton();
-  var back = modalReturnFocus[id]; delete modalReturnFocus[id];
-  if(wasOpen && kbdMode && back && back !== document.body && document.body.contains(back)){
-    try{ back.focus({preventScroll:true}); }catch(e){}
-  }
 }
 function closeModalOnBG(event, id){ if(event.target.id === id) closeModal(id); }
 
@@ -5795,7 +5737,7 @@ function openOrderModal(name, price){
   document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(price);
   var existingIdx = findCartIndex(name);
   var existingQty = existingIdx !== -1 ? cart[existingIdx].qty : 0;
-  document.getElementById("modalQty").value = pendingQty ? pendingQty : (existingQty > 0 ? existingQty : 1);
+  document.getElementById("modalQty").value = existingQty > 0 ? existingQty : 1;
   document.getElementById("modalAddBtn").innerText = existingQty > 0 ? "ثبت تغییر تعداد در سبد" : "افزودن به سبد سفارش";
   calcTotal();
   openModal("orderModal");
@@ -5813,7 +5755,7 @@ function normalizeQtyInput(input){
 function clearInputOnFocus(input){
   input.setAttribute("data-prev", input.value);
   if(input.value === "1") input.value = "";
-  else { try{ input.select(); input.setSelectionRange(0, input.value.length); }catch(e){} }
+  else { try{ input.select(); }catch(e){} }
 }
 function restoreInputOnBlur(input){
   if(input.value.trim() === "" || parseInt(input.value,10) <= 0){
@@ -5914,8 +5856,6 @@ function addToCart(){
   updateCartUI();
   closeModal('orderModal');
   haptic('medium');
-  closeVoiceBar();
-  if(kbdMode) focusSearch(true);   // دسکتاپ: برگشت به جستجو با متن انتخاب‌شده، آمادهٔ کالای بعدی
 }
 
 function cartRowName(btn){
@@ -6066,365 +6006,6 @@ function sendOrderTelegram(){
   a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
   document.body.appendChild(a); a.click();
   setTimeout(function(){ document.body.removeChild(a); }, 100);
-}
-
-/* ============================================================
-   ۸) کنترل با کیبورد و کیبورد عددی موبایل
-   ------------------------------------------------------------
-   دسکتاپ:  تایپ → ↑↓ → Enter (باز شدن تعداد) → عدد → Enter (ثبت) → برگشت به جستجو
-   موبایل:  با لمس کالا، کیبورد عددی خودکار باز می‌شود
-   ============================================================ */
-var kbdMode = !!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches);
-var activeIdx = -1;
-
-function markTouch(){ kbdMode = false; setActive(-1, false); }
-document.addEventListener('pointerdown', function(e){ if(e.pointerType === 'touch' || e.pointerType === 'pen') markTouch(); }, true);
-document.addEventListener('touchstart', markTouch, { passive:true, capture:true });
-
-function setActive(i, scroll){
-  var input = document.getElementById('myInput');
-  var els = document.querySelectorAll('#itemList .item');
-  var old = document.querySelector('#itemList .item.kb-active');
-  if(old) old.classList.remove('kb-active');
-  if(i < 0 || i >= els.length){ activeIdx = -1; input.removeAttribute('aria-activedescendant'); return; }
-  activeIdx = i;
-  els[i].classList.add('kb-active');
-  input.setAttribute('aria-activedescendant', els[i].id);
-  if(scroll){ try{ els[i].scrollIntoView({ block:'nearest' }); }catch(e){} }
-}
-function focusSearch(select){
-  var input = document.getElementById('myInput');
-  try{ input.focus({ preventScroll:true }); }catch(e){ input.focus(); }
-  if(select){ try{ input.select(); }catch(e){} }
-}
-
-function searchKeydown(e){
-  if(e.isComposing || e.keyCode === 229) return;
-  var input = e.currentTarget;
-  var els = document.querySelectorAll('#itemList .item');
-  switch(e.key){
-    case 'ArrowDown':
-      if(!els.length) return;
-      e.preventDefault(); kbdMode = true;
-      setActive(activeIdx < 0 ? 0 : Math.min(activeIdx + 1, els.length - 1), true);
-      break;
-    case 'ArrowUp':
-      if(!els.length) return;
-      e.preventDefault(); kbdMode = true;
-      setActive(activeIdx < 0 ? 0 : Math.max(activeIdx - 1, 0), true);
-      break;
-    case 'PageDown':
-      if(!els.length) return;
-      e.preventDefault(); kbdMode = true;
-      setActive(Math.min((activeIdx < 0 ? 0 : activeIdx) + 8, els.length - 1), true);
-      break;
-    case 'PageUp':
-      if(!els.length) return;
-      e.preventDefault(); kbdMode = true;
-      setActive(Math.max((activeIdx < 0 ? 0 : activeIdx) - 8, 0), true);
-      break;
-    case 'Enter':
-      e.preventDefault();
-      flushSearch();
-      els = document.querySelectorAll('#itemList .item');
-      if(kbdMode && els.length){
-        var idx = activeIdx > -1 ? activeIdx : (input.value.trim() ? 0 : -1);
-        if(idx > -1) openOrderModalByIndex(parseInt(els[idx].getAttribute('data-id'), 10));
-      }else{
-        input.blur();      // موبایل: دکمهٔ «جستجو» کیبورد را می‌بندد و نتیجه‌ها دیده می‌شوند
-      }
-      break;
-    case 'Escape':
-      if(input.value){ e.preventDefault(); input.value = ''; toggleClearBtn(); doSearch(); }
-      break;
-  }
-}
-
-function stepQty(d){
-  var input = document.getElementById('modalQty');
-  var cur = parseInt(input.value, 10);
-  if(isNaN(cur)) cur = parseInt(input.getAttribute('data-prev'), 10) || 1;
-  var n = cur + d;
-  if(n < 1) return;
-  input.value = n; calcTotal(); haptic('light');
-  try{ input.select(); }catch(e){}
-}
-function qtyKeydown(e){
-  if(e.isComposing || e.keyCode === 229) return;
-  var k = e.key;
-  if(k === 'Enter'){ e.preventDefault(); addToCart(); }
-  else if(k === 'ArrowUp'   || k === '+' || k === '='){ e.preventDefault(); stepQty(1); }
-  else if(k === 'ArrowDown' || k === '-'){               e.preventDefault(); stepQty(-1); }
-}
-
-/* Tab فقط بین عناصر مودال باز بچرخد */
-function trapTab(e, id){
-  var m = document.getElementById(id);
-  var f = Array.prototype.filter.call(
-    m.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])'),
-    function(el){ return !el.disabled && el.getClientRects().length; }
-  );
-  if(!f.length) return;
-  var a = document.activeElement, i = f.indexOf(a);
-  if(i === -1){ e.preventDefault(); (e.shiftKey ? f[f.length-1] : f[0]).focus(); return; }
-  if(e.shiftKey && i === 0){ e.preventDefault(); f[f.length-1].focus(); }
-  else if(!e.shiftKey && i === f.length-1){ e.preventDefault(); f[0].focus(); }
-}
-
-document.addEventListener('keydown', function(e){
-  var k = e.key;
-  if(k === 'ArrowUp' || k === 'ArrowDown' || k === 'Tab') kbdMode = true;
-  var top = openModals.length ? openModals[openModals.length-1] : null;
-
-  if(top){
-    if(k === 'Escape'){ e.preventDefault(); closeModal(top); return; }
-    if(k === 'Tab'){ trapTab(e, top); return; }
-    if(k === 'Enter' && top === 'orderModal'){
-      var tag = e.target && e.target.tagName;
-      if(tag !== 'BUTTON' && tag !== 'INPUT'){ e.preventDefault(); addToCart(); }
-    }
-    return;
-  }
-
-  if((e.ctrlKey || e.metaKey) && e.code === 'KeyK'){ e.preventDefault(); focusSearch(true); return; }
-  if(e.ctrlKey || e.metaKey || e.altKey) return;
-  if(k === 'F2'){ e.preventDefault(); openCartModal(); return; }
-
-  var t = e.target, tg = t && t.tagName;
-  if(tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT' || (t && t.isContentEditable)) return;
-  if(e.code === 'Slash' && !e.shiftKey){ e.preventDefault(); focusSearch(true); return; }
-  /* شروع تایپ از هر جای صفحه، مستقیم وارد کادر جستجو می‌شود */
-  if(tg !== 'BUTTON' && k && k.length === 1 && /\S/.test(k)) focusSearch(false);
-});
-
-/* وقتی کیبورد مجازی باز است (مخصوصاً آیفون) پنجرهٔ تعداد بالای کیبورد بماند و دکمهٔ «افزودن» پنهان نشود */
-function adjustForKeyboard(){
-  var vv = window.visualViewport, m = document.getElementById('orderModal');
-  if(!vv || !m) return;
-  var kb = Math.round(window.innerHeight - vv.height - vv.offsetTop);
-  m.style.paddingBottom = (m.style.display === 'flex' && kb > 80) ? kb + 'px' : '';
-}
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', adjustForKeyboard);
-  window.visualViewport.addEventListener('scroll', adjustForKeyboard);
-}
-
-/* ارتفاع نوار چسبان برای اسکرول درست آیتم انتخاب‌شده */
-function syncTopbarH(){
-  var t = document.querySelector('.topbar');
-  if(t) document.documentElement.style.setProperty('--topbar-h', (t.offsetHeight + 8) + 'px');
-}
-window.addEventListener('resize', syncTopbarH);
-window.addEventListener('load', syncTopbarH);
-setTimeout(syncTopbarH, 80);
-
-/* دسکتاپ: صفحه که باز شد مستقیم داخل جستجو باشیم (روی موبایل نه، چون کیبورد بی‌دلیل باز می‌شود) */
-if(kbdMode) setTimeout(function(){ if(!openModals.length) focusSearch(false); }, 120);
-
-/* ============================================================
-   ۹) ثبت سفارش صوتی (فارسی، سرویس تشخیص گفتار مرورگر/گوگل)
-   مثال: «۵۰ تا خودکار کیان» ← تعداد ۵۰ + جستجوی «خودکار کیان»
-   ============================================================ */
-var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-var pendingQty = null, voiceOpen = false;
-var recog = null, listening = false, voiceFinal = '', voiceErr = '', voiceTimer = null;
-
-var NUM_WORDS = {
-  'صفر':0,'یک':1,'دو':2,'سه':3,'چهار':4,'پنج':5,'شش':6,'شیش':6,'هفت':7,'هشت':8,'نه':9,'ده':10,
-  'یازده':11,'دوازده':12,'سیزده':13,'چهارده':14,'پانزده':15,'پونزده':15,'شانزده':16,'شونزده':16,
-  'هفده':17,'هجده':18,'نوزده':19,'بیست':20,'سی':30,'چهل':40,'پنجاه':50,'شصت':60,'هفتاد':70,'هشتاد':80,'نود':90,
-  'صد':100,'یکصد':100,'دویست':200,'سیصد':300,'چهارصد':400,'پانصد':500,'پونصد':500,'ششصد':600,'هفتصد':700,'هشتصد':800,'نهصد':900,
-  'هزار':1000
-};
-var QTY_MARKERS = { 'تا':1, 'عدد':1, 'دانه':1, 'تایی':1 };
-var STOP_WORDS  = { 'لطفا':1,'ثبت':1,'کن':1,'کنید':1,'بزن':1,'بزنید':1,'اضافه':1,'بده':1,'بذار':1,'بگذار':1,'میخوام':1,'میخواهم':1,'رو':1,'را':1 };
-
-function isNumTok(t){ return /^\d+$/.test(t) || Object.prototype.hasOwnProperty.call(NUM_WORDS, t); }
-function runValue(toks){
-  var cur = 0, total = 0;
-  for(var i=0;i<toks.length;i++){
-    var t = toks[i];
-    if(t === 'و') continue;
-    if(/^\d+$/.test(t)){ cur += parseInt(t,10); continue; }
-    var v = NUM_WORDS[t];
-    if(v === 1000){ total += (cur || 1) * 1000; cur = 0; }
-    else cur += v;
-  }
-  return total + cur;
-}
-/* پیدا کردن دنباله‌های عددی (رقم یا حروف) در آرایهٔ کلمه‌ها؛ هر دنباله: {s, e, val} با e انحصاری */
-function findNumberRuns(tokens){
-  var runs = [], i = 0;
-  while(i < tokens.length){
-    if(isNumTok(tokens[i])){
-      var j = i + 1;
-      while(j < tokens.length){
-        if(isNumTok(tokens[j])) j++;
-        else if(tokens[j] === 'و' && j+1 < tokens.length && isNumTok(tokens[j+1])) j += 2;
-        else break;
-      }
-      /* اعداد حرفی و رقمی را قاطی نکن؛ دنبالهٔ رقمی تکی بماند */
-      runs.push({ s:i, e:j, val:runValue(tokens.slice(i, j)) });
-      i = j;
-    }else i++;
-  }
-  return runs;
-}
-
-/* متن گفته‌شده ← { qty, words } */
-function parseSpoken(raw){
-  var t = normalize(raw)
-    .replace(/(\d)[,٬،](?=\d{3}\b)/g, '$1')
-    .replace(/[.,،؟?!؛:;"“”«»()\-–—]/g, ' ')
-    .replace(/(\d)(تایی|تا|عدد|دانه)(?=\s|$)/g, '$1 $2')     // 50تا
-    .trim();
-  var tokens = t.split(/\s+/).filter(Boolean);
-  /* «دوتا» «پنجتا» «سه‌تا» (بعد از نرمال‌سازی «سهتا») */
-  var exp = [];
-  tokens.forEach(function(tk){
-    var m = tk.match(/^(.+?)(تایی|تا)$/);
-    if(m && !Object.prototype.hasOwnProperty.call(QTY_MARKERS, tk) && Object.prototype.hasOwnProperty.call(NUM_WORDS, m[1])){ exp.push(m[1], m[2]); }
-    else exp.push(tk);
-  });
-  tokens = exp.filter(function(tk){ return !STOP_WORDS[tk]; });
-
-  var runs = findNumberRuns(tokens), qtyRun = null, markerAt = -1;
-  for(var r=0;r<runs.length;r++){                       // ۱) عددی که بلافاصله بعدش «تا/عدد/دانه» آمده
-    var nx = tokens[runs[r].e];
-    if(nx && QTY_MARKERS[nx]){ qtyRun = runs[r]; markerAt = runs[r].e; break; }
-  }
-  if(!qtyRun && runs.length && runs[0].s === 0) qtyRun = runs[0];   // ۲) عدد اول جمله
-  var qty = null;
-  if(qtyRun && qtyRun.val >= 1 && qtyRun.val <= 99999) qty = qtyRun.val; else qtyRun = null;
-
-  var words = [];
-  for(var k=0;k<tokens.length;k++){
-    if(qtyRun && k >= qtyRun.s && k < qtyRun.e) continue;
-    if(qtyRun && k === markerAt) continue;
-    words.push(tokens[k]);
-  }
-  /* عددهای حرفی باقی‌مانده در نام کالا («دوازده رنگ») ← رقم، چون در لیست رقمی نوشته شده‌اند */
-  var out = [], rr = findNumberRuns(words), p = 0;
-  for(var q=0;q<words.length;){
-    var run = null;
-    for(var z=0;z<rr.length;z++) if(rr[z].s === q){ run = rr[z]; break; }
-    if(run){ out.push(String(run.val)); q = run.e; } else { out.push(words[q]); q++; }
-  }
-  return { qty: qty, words: out };
-}
-
-/* ---------- نوار پیام ---------- */
-function showVoiceMsg(text, isErr, autoHideMs){
-  var bar = document.getElementById('voiceBar');
-  document.getElementById('voiceText').textContent = text;
-  bar.classList.toggle('err', !!isErr);
-  bar.style.display = 'flex';
-  clearTimeout(voiceTimer);
-  if(autoHideMs) voiceTimer = setTimeout(closeVoiceBar, autoHideMs);
-  syncTopbarH();
-}
-function closeVoiceBar(){
-  pendingQty = null;
-  clearTimeout(voiceTimer);
-  var bar = document.getElementById('voiceBar');
-  if(bar && bar.style.display !== 'none'){ bar.style.display = 'none'; syncTopbarH(); }
-}
-
-/* ---------- پردازش نتیجه ---------- */
-function processVoice(text){
-  var res = parseSpoken(text);
-  var input = document.getElementById('myInput');
-  if(!res.words.length){
-    showVoiceMsg('«' + text + '» ← اسم کالا تشخیص داده نشد، دوباره بگو', true, 5000);
-    return;
-  }
-  input.value = res.words.join(' ');
-  toggleClearBtn();
-  doSearch();
-  var exact = allItems.filter(function(it){ return res.words.every(function(w){ return it.sn.indexOf(w) > -1; }); });
-  var qtyTxt = res.qty ? 'تعداد ' + res.qty : 'بدون تعداد';
-  pendingQty = res.qty;
-
-  if(!exact.length){
-    /* نزدیک‌ترین‌ها: بیشترین تعداد کلمهٔ منطبق */
-    var best = 0, scored = allItems.map(function(it){
-      var sc = res.words.filter(function(w){ return it.sn.indexOf(w) > -1; }).length;
-      if(sc > best) best = sc; return { it: it, sc: sc };
-    });
-    if(best >= 1 && res.words.length >= 2){
-      showItems(scored.filter(function(x){ return x.sc === best; }).map(function(x){ return x.it; }));
-      showVoiceMsg('«' + text + '» ← نتیجهٔ دقیق نبود، نزدیک‌ترین‌ها نمایش داده شد · ' + qtyTxt + ' · کالای درست را انتخاب کن', false);
-    }else{
-      showVoiceMsg('«' + text + '» ← کالایی پیدا نشد', true, 6000);
-      pendingQty = null;
-    }
-    return;
-  }
-  if(exact.length === 1){
-    showVoiceMsg('«' + text + '» ← ' + qtyTxt + ' · ' + exact[0].n, false);
-    voiceOpen = true;
-    try{ openOrderModalByIndex(exact[0].id); } finally { voiceOpen = false; }
-  }else{
-    showVoiceMsg('«' + text + '» ← ' + qtyTxt + ' · ' + exact.length + ' کالا پیدا شد، کالای مورد نظر را انتخاب کن', false);
-    if(kbdMode) setActive(0, true);
-  }
-}
-
-/* ---------- ضبط ---------- */
-var VOICE_ERRORS = {
-  'not-allowed':'اجازهٔ میکروفون داده نشده است',
-  'service-not-allowed':'اجازهٔ میکروفون یا سرویس تشخیص گفتار در این برنامه فعال نیست',
-  'audio-capture':'میکروفون پیدا نشد',
-  'network':'اتصال به سرویس تشخیص گفتار (گوگل) برقرار نشد؛ اینترنت یا فیلتر را بررسی کن',
-  'no-speech':'صدایی شنیده نشد، دوباره امتحان کن',
-  'language-not-supported':'زبان فارسی در این دستگاه پشتیبانی نمی‌شود'
-};
-function toggleVoice(){
-  if(!SpeechRec){
-    showVoiceMsg('ورودی صوتی در این برنامه/مرورگر پشتیبانی نمی‌شود. می‌توانی از میکروفون کیبورد گوشی داخل کادر جستجو استفاده کنی.', true, 7000);
-    focusSearch(false);
-    return;
-  }
-  if(listening){ try{ recog.stop(); }catch(e){} return; }
-  startVoice();
-}
-function startVoice(){
-  var mic = document.getElementById('micBtn');
-  voiceFinal = ''; voiceErr = '';
-  closeVoiceBar();
-  try{
-    recog = new SpeechRec();
-    recog.lang = 'fa-IR';
-    recog.interimResults = true;
-    recog.continuous = false;
-    recog.maxAlternatives = 1;
-  }catch(e){ showVoiceMsg('شروع ورودی صوتی ممکن نشد', true, 5000); return; }
-
-  recog.onstart = function(){
-    listening = true; mic.classList.add('listening'); haptic('light');
-    showVoiceMsg('🎙 در حال شنیدن... مثلاً «۵۰ تا خودکار کیان»', false);
-  };
-  recog.onresult = function(ev){
-    var interim = '';
-    for(var i=ev.resultIndex;i<ev.results.length;i++){
-      var r = ev.results[i];
-      if(r.isFinal) voiceFinal += ' ' + r[0].transcript; else interim += r[0].transcript;
-    }
-    showVoiceMsg('🎙 ' + (voiceFinal + ' ' + interim).trim(), false);
-  };
-  recog.onerror = function(ev){ voiceErr = ev && ev.error ? ev.error : 'error'; };
-  recog.onend = function(){
-    listening = false; mic.classList.remove('listening'); recog = null;
-    var txt = voiceFinal.trim();
-    if(voiceErr && voiceErr !== 'aborted'){
-      showVoiceMsg(VOICE_ERRORS[voiceErr] || ('خطا در ورودی صوتی (' + voiceErr + ')'), true, 7000);
-      return;
-    }
-    if(!txt){ showVoiceMsg('صدایی شنیده نشد، دوباره امتحان کن', true, 4000); return; }
-    processVoice(txt);
-  };
-  try{ recog.start(); }
-  catch(e){ listening = false; mic.classList.remove('listening'); showVoiceMsg('شروع ورودی صوتی ممکن نشد', true, 5000); }
 }
 </script>
 </body>
