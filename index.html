@@ -5512,7 +5512,7 @@ var charMap = {
   'آ':'ا','أ':'ا','إ':'ا','ي':'ی','ك':'ک','ة':'ه','ؤ':'و','\u200c':''
 };
 function normalize(t){
-  return String(t).replace(/[۰-۹٠-٩آأإيكةؤ\u200c]/g, function(w){ return (w in charMap) ? charMap[w] : w; }).toLowerCase();
+  return String(t).replace(/[۰-۹٠-٩آأإيكةؤ\u200c]/g, function(w){ return charMap[w] || w; }).toLowerCase();
 }
 
 /* این اسکریپت انتهای body قرار دارد، پس در این نقطه HTML صفحه کامل پارس شده؛
@@ -6237,7 +6237,7 @@ var NUM_WORDS = {
   'هزار':1000
 };
 var QTY_MARKERS = { 'تا':1, 'عدد':1, 'دانه':1, 'تایی':1 };
-var STOP_WORDS  = { 'لطفا':1,'ثبت':1,'بزن':1,'بزنید':1,'اضافه':1,'بده':1,'بذار':1,'بگذار':1,'میخوام':1,'میخواهم':1,'رو':1,'را':1 };
+var STOP_WORDS  = { 'لطفا':1,'ثبت':1,'کن':1,'کنید':1,'بزن':1,'بزنید':1,'اضافه':1,'بده':1,'بذار':1,'بگذار':1,'میخوام':1,'میخواهم':1,'رو':1,'را':1 };
 
 function isNumTok(t){ return /^\d+$/.test(t) || Object.prototype.hasOwnProperty.call(NUM_WORDS, t); }
 function runValue(toks){
@@ -6286,18 +6286,14 @@ function parseSpoken(raw){
     if(m && !Object.prototype.hasOwnProperty.call(QTY_MARKERS, tk) && Object.prototype.hasOwnProperty.call(NUM_WORDS, m[1])){ exp.push(m[1], m[2]); }
     else exp.push(tk);
   });
-  tokens = exp.filter(function(tk, i){
-    if(STOP_WORDS[tk]) return false;
-    if((tk === 'کن' || tk === 'کنید') && i > 0 && (exp[i-1] === 'ثبت' || exp[i-1] === 'اضافه')) return false;
-    return true;
-  });
+  tokens = exp.filter(function(tk){ return !STOP_WORDS[tk]; });
 
   var runs = findNumberRuns(tokens), qtyRun = null, markerAt = -1;
   for(var r=0;r<runs.length;r++){                       // ۱) عددی که بلافاصله بعدش «تا/عدد/دانه» آمده
     var nx = tokens[runs[r].e];
     if(nx && QTY_MARKERS[nx]){ qtyRun = runs[r]; markerAt = runs[r].e; break; }
   }
-  if(!qtyRun && runs.length && runs[0].s === 0 && /^\d+$/.test(tokens[0])) qtyRun = runs[0];   // ۲) عدد رقمی اول جمله («۵۰ خودکار کیان»)؛ برای عدد حرفی حتماً «تا» لازم است چون «سی کلاس» نام برند است
+  if(!qtyRun && runs.length && runs[0].s === 0) qtyRun = runs[0];   // ۲) عدد اول جمله
   var qty = null;
   if(qtyRun && qtyRun.val >= 1 && qtyRun.val <= 99999) qty = qtyRun.val; else qtyRun = null;
 
@@ -6307,7 +6303,6 @@ function parseSpoken(raw){
     if(qtyRun && k === markerAt) continue;
     words.push(tokens[k]);
   }
-  var rawWords = words.slice();
   /* عددهای حرفی باقی‌مانده در نام کالا («دوازده رنگ») ← رقم، چون در لیست رقمی نوشته شده‌اند */
   var out = [], rr = findNumberRuns(words), p = 0;
   for(var q=0;q<words.length;){
@@ -6315,7 +6310,7 @@ function parseSpoken(raw){
     for(var z=0;z<rr.length;z++) if(rr[z].s === q){ run = rr[z]; break; }
     if(run){ out.push(String(run.val)); q = run.e; } else { out.push(words[q]); q++; }
   }
-  return { qty: qty, words: out, rawWords: rawWords };
+  return { qty: qty, words: out };
 }
 
 /* ---------- نوار پیام ---------- */
@@ -6343,27 +6338,20 @@ function processVoice(text){
     showVoiceMsg('«' + text + '» ← اسم کالا تشخیص داده نشد، دوباره بگو', true, 5000);
     return;
   }
-  function matchAll(ws){ return allItems.filter(function(it){ return ws.every(function(w){ return it.sn.indexOf(w) > -1; }); }); }
-  /* اول کلمه‌ها همان‌طور که گفته شد (مثل برند «سی کلاس»)، بعد با تبدیل عدد حرفی به رقم («دوازده رنگ» ← 12) */
-  var words = res.rawWords, exact = matchAll(words);
-  if(!exact.length && res.words.join(' ') !== words.join(' ')){
-    var ex2 = matchAll(res.words);
-    if(ex2.length){ words = res.words; exact = ex2; }
-  }
-  if(!exact.length) words = res.words;
-  input.value = words.join(' ');
+  input.value = res.words.join(' ');
   toggleClearBtn();
   doSearch();
+  var exact = allItems.filter(function(it){ return res.words.every(function(w){ return it.sn.indexOf(w) > -1; }); });
   var qtyTxt = res.qty ? 'تعداد ' + res.qty : 'بدون تعداد';
   pendingQty = res.qty;
 
   if(!exact.length){
     /* نزدیک‌ترین‌ها: بیشترین تعداد کلمهٔ منطبق */
     var best = 0, scored = allItems.map(function(it){
-      var sc = words.filter(function(w){ return it.sn.indexOf(w) > -1; }).length;
+      var sc = res.words.filter(function(w){ return it.sn.indexOf(w) > -1; }).length;
       if(sc > best) best = sc; return { it: it, sc: sc };
     });
-    if(best >= 1 && words.length >= 2){
+    if(best >= 1 && res.words.length >= 2){
       showItems(scored.filter(function(x){ return x.sc === best; }).map(function(x){ return x.it; }));
       showVoiceMsg('«' + text + '» ← نتیجهٔ دقیق نبود، نزدیک‌ترین‌ها نمایش داده شد · ' + qtyTxt + ' · کالای درست را انتخاب کن', false);
     }else{
