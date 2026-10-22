@@ -162,9 +162,10 @@ input[type=number]{-moz-appearance:textfield}
   display:flex; align-items:center; justify-content:space-between; gap:10px;
   background:var(--surface);
   border:1px solid var(--border); border-radius:var(--r-md);
-  padding:11px 14px;
+  padding:11px 14px; cursor:pointer;
   transition:background-color .15s;
 }
+.item:active{background:var(--surface-2)}
 .item-name{flex:1; min-width:0; font-size:var(--fs-base); font-weight:500}
 .item-price{
   flex:none; font-size:13.5px; font-weight:700;
@@ -176,6 +177,141 @@ input[type=number]{-moz-appearance:textfield}
 .empty{text-align:center; padding:48px 20px; color:var(--muted)}
 .empty b{display:block; color:var(--text); font-size:15px; margin-bottom:6px}
 
+/* ============================================================
+   دکمه شناور سبد
+   ============================================================ */
+.fab{
+  position:fixed; left:16px; z-index:60;
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  width:56px; height:56px;
+  border:none; border-radius:var(--r-xl);
+  background:var(--accent); color:var(--accent-contrast);
+  display:none; align-items:center; justify-content:center;
+  box-shadow:0 6px 20px rgba(var(--accent-rgb),.35);
+  cursor:pointer; transition:transform .15s;
+}
+.fab:active{transform:scale(.94)}
+.fab-badge{
+  position:absolute; top:-6px; right:-6px;
+  min-width:22px; height:22px; padding:0 5px;
+  border-radius:11px; background:var(--danger); color:#fff;
+  font-size:12px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  border:2px solid var(--bg);
+}
+
+/* ============================================================
+   مودال‌ها
+   ============================================================ */
+.modal{
+  display:none; position:fixed; inset:0; z-index:100;
+  background:var(--overlay);
+  align-items:center; justify-content:center; padding:16px;
+}
+.sheet{
+  width:100%; max-width:380px; max-height:86vh;
+  background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--r-xl);
+  display:flex; flex-direction:column; overflow:hidden;
+  box-shadow:var(--shadow);
+  animation:pop .22s cubic-bezier(.16,1,.3,1);
+}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@media (max-width:600px), (pointer:coarse) and (max-width:900px){
+  .modal{padding:0; align-items:flex-end}
+  .sheet{max-width:none; max-height:92vh; max-height:92dvh; border-radius:var(--r-xl) var(--r-xl) 0 0; border-bottom:none; animation:slideUp .24s ease-out}
+}
+
+.sheet-head{
+  padding:14px 16px; border-bottom:1px solid var(--border);
+  font-size:var(--fs-lg); font-weight:700; text-align:center; line-height:1.5;
+}
+.sheet-body{padding:16px; overflow-y:auto}
+.sheet-foot{
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--border);
+  display:flex; flex-direction:column; gap:8px;
+}
+
+.meta-pill{
+  display:block; width:fit-content; margin:0 auto 16px;
+  background:var(--surface-2); border:1px solid var(--border);
+  border-radius:var(--r-sm); padding:6px 12px;
+  color:var(--muted); font-size:13px; font-weight:600;
+}
+.total-line{
+  margin-top:16px; padding-top:14px;
+  border-top:1px dashed var(--border);
+  text-align:center; font-size:var(--fs-lg); font-weight:800; color:var(--accent);
+}
+
+/* شمارنده تعداد */
+.qty{
+  display:flex; align-items:center; justify-content:center; gap:4px;
+  width:fit-content; margin:0 auto;
+  background:var(--surface-2); border:1px solid var(--border);
+  border-radius:var(--r-lg); padding:4px;
+}
+.qty button{
+  width:40px; height:40px; border:none; border-radius:9px;
+  background:var(--surface); color:var(--text);
+  font-size:20px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .12s;
+}
+.qty button:active{transform:scale(.9)}
+.qty input{
+  width:66px; height:40px; text-align:center;
+  border:none; background:transparent; color:var(--text);
+  font-size:17px; font-weight:800;
+}
+
+/* دکمه‌ها */
+.btn{
+  height:44px; padding:0 14px;
+  border:1px solid transparent; border-radius:var(--r-md);
+  font-size:var(--fs-base); font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:opacity .15s, transform .12s;
+}
+.btn:active{transform:scale(.985); opacity:.9}
+.btn-primary{background:var(--accent); color:var(--accent-contrast)}
+.btn-ghost{background:transparent; color:var(--muted); border-color:var(--border)}
+.btn-danger{background:rgba(var(--danger-rgb),.1); color:var(--danger); border-color:rgba(var(--danger-rgb),.35)}
+.btn-solid-danger{background:var(--danger); color:#fff}
+.btn-eitaa{background:#E85D04; color:#fff}
+.btn-telegram{background:#229ED9; color:#fff}
+
+/* سبد خرید */
+.cart-list{max-height:44vh; overflow-y:auto; margin:-4px -4px 0; padding:4px}
+.cart-item{
+  display:flex; align-items:flex-start; gap:10px;
+  background:var(--surface-2); border:1px solid var(--border);
+  border-radius:var(--r-md); padding:10px 12px; margin-bottom:8px;
+}
+.cart-item:last-child{margin-bottom:0}
+.cart-main{flex:1; min-width:0}
+.cart-name{font-size:13.5px; font-weight:700; margin-bottom:8px; line-height:1.5}
+.cart-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.cart-qty{
+  display:flex; align-items:center; gap:2px;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); padding:2px;
+}
+.cart-qty button{
+  width:28px; height:28px; border:none; background:transparent;
+  color:var(--accent); font-size:17px; font-weight:800; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.cart-qty span{min-width:26px; text-align:center; font-size:13px; font-weight:800}
+.cart-calc{font-size:13px; font-weight:800; color:var(--accent); background:rgba(var(--accent-rgb),.1); padding:3px 8px; border-radius:6px}
+.cart-del{
+  flex:none; width:32px; height:32px; border:none; border-radius:var(--r-sm);
+  background:rgba(var(--danger-rgb),.1); color:var(--danger);
+  font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.note{font-size:13.5px; line-height:1.9; color:var(--text); text-align:center}
+.note b{color:var(--success)}
 </style>
 </head>
 <body>
@@ -213,6 +349,84 @@ input[type=number]{-moz-appearance:textfield}
 <!-- ================= لیست ================= -->
 <div class="list" id="itemList"></div>
 <div class="status" id="status">در حال بارگذاری...</div>
+
+<!-- ================= دکمه سبد ================= -->
+<button class="fab" id="cartFab" onclick="openCartModal()" aria-label="سبد سفارش">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/>
+    <path d="M2.5 3h2.2l2.4 12.1a1.6 1.6 0 0 0 1.6 1.3h8.6a1.6 1.6 0 0 0 1.6-1.3L21 7H6"/>
+  </svg>
+  <span class="fab-badge" id="cartBadge">0</span>
+</button>
+
+<!-- ================= مودال سفارش ================= -->
+<div id="orderModal" class="modal" onclick="closeModalOnBG(event,'orderModal')">
+  <div class="sheet">
+    <div class="sheet-head" id="modalItemName">نام کالا</div>
+    <div class="sheet-body">
+      <span class="meta-pill" id="modalItemPrice">قیمت واحد: ۰ تومان</span>
+      <div class="qty">
+        <button onclick="changeQty(1)" aria-label="افزایش">+</button>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="modalQty" value="1"
+               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="normalizeQtyInput(this); calcTotal()">
+        <button onclick="changeQty(-1)" aria-label="کاهش">−</button>
+      </div>
+      <div class="total-line" id="modalTotal">جمع کل: ۰ تومان</div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-primary" id="modalAddBtn" onclick="addToCart()">افزودن به سبد سفارش</button>
+      <button class="btn btn-ghost" onclick="closeModal('orderModal')">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= مودال سبد ================= -->
+<div id="cartModal" class="modal" onclick="closeModalOnBG(event,'cartModal')">
+  <div class="sheet">
+    <div class="sheet-head">پیش‌فاکتور شما</div>
+    <div class="sheet-body">
+      <div id="cartItemsList" class="cart-list"></div>
+      <div class="total-line" id="cartSumTotal">جمع کل: ۰ تومان</div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-eitaa" onclick="sendOrderEitaa()">ارسال سفارش در ایتا</button>
+      <button class="btn btn-telegram" onclick="sendOrderTelegram()">ارسال سفارش در تلگرام</button>
+      <button class="btn btn-danger" onclick="openConfirmClearModal()">حذف تمام سفارشات</button>
+      <button class="btn btn-ghost" onclick="closeModal('cartModal')">بستن / ادامه خرید</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= مودال تایید حذف ================= -->
+<div id="confirmClearModal" class="modal" onclick="closeModalOnBG(event,'confirmClearModal')">
+  <div class="sheet">
+    <div class="sheet-head">حذف کل سبد خرید</div>
+    <div class="sheet-body">
+      <div class="note">آیا از حذف تمام کالاهای سبد خرید مطمئن هستید؟</div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-solid-danger" onclick="confirmClearCart()">بله، حذف کن</button>
+      <button class="btn btn-ghost" onclick="closeModal('confirmClearModal')">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= مودال ایتا ================= -->
+<div id="eitaaModal" class="modal" onclick="closeModalOnBG(event,'eitaaModal')">
+  <div class="sheet">
+    <div class="sheet-head"><b style="color:var(--success)">متن سفارش کپی شد</b></div>
+    <div class="sheet-body">
+      <div class="note">
+        سفارش شما در حافظه کپی شد.<br>
+        پس از ورود به صفحه چت واحد فروش، متن را جای‌گذاری (Paste) و ارسال نمایید.
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-primary" onclick="redirectToEitaa()">متوجه شدم</button>
+      <button class="btn btn-ghost" onclick="closeModal('eitaaModal')">بستن</button>
+    </div>
+  </div>
+</div>
 
 <!-- ================= داده‌ها (قیمت TAB نام) ================= -->
 <textarea id="myData" style="display:none;">
@@ -435,7 +649,7 @@ input[type=number]{-moz-appearance:textfield}
 1,500,000	بادکنک جور100تایی
 220,000	بادکنک فویل عدد
 1,910,000	بادکنک کروم لاتکس
-7,420,000	بادکنک کرونا
+7,980,000	بادکنک کرونا
 600,000	بادکنک کوچک بسته بندی جور
 75,000	بادکنک لبخندچوبی
 1,199,000	بازی آرمان ست شکارچیM16
@@ -751,7 +965,8 @@ input[type=number]{-moz-appearance:textfield}
 8,600,000	پاکن اینوکس جور
 4,740,000	پاکن برقی استورم384
 5,100,000	پاکن برقی استورم دوسر385
-1,672,400	پاکن برقی چینی
+2,650,000	پاکن برقی چینی
+4,500,000	پاکن برقی مهندسی
 9,000,000	پاکن بزرگ طراحی پنتل12عددی
 350,000	پاکن بلندپنجه2195
 806,800	پاکن بلندموشی1905
@@ -772,6 +987,7 @@ input[type=number]{-moz-appearance:textfield}
 23,880,000	پاکن تراش ماین کاتری24عددی
 22,500,000	پاکن تراش ماین لاما18عددی
 600,000	پاکن تراش ورداذرت
+528,000	پاکن جادویی
 19,000,000	پاکن خمیری اسکول مکس
 5,120,000	پاکن خمیری چینی
 32,130,000	پاکن خمیری فابرکاستل
@@ -779,6 +995,8 @@ input[type=number]{-moz-appearance:textfield}
 990,000	پاکن دبه ای ریزفانتزی
 324,500	پاکن رژلبی کرومی
 260,000	پاکن سی بی اس رنگی4009
+1,370,000	پاکن ضامن دارطرح بادام زمینی
+1,370,000	پاکن ضامن دارطرح خرس
 9,345,000	پاکن عطری ژله ای45عددی463512
 9,609,700	پاکن عطری میوه ای دامس
 224,508,900	پاکن فابرکاستل استندی
@@ -846,6 +1064,7 @@ input[type=number]{-moz-appearance:textfield}
 1,950,000	پانچ سونیتو4801
 1,380,000	پانچ طرحداربزرگ اهرمی
 1,320,000	پانچ طرحداربزرگ کفش
+1,260,000	پانچ طرحداروحدت شکل دار
 8,900,000	پانچ کالو700
 4,800,000	پانچ کالو520
 34,000,000	پانچ کانکس 800
@@ -923,6 +1142,7 @@ input[type=number]{-moz-appearance:textfield}
 1,265,000	پست ایت 421پیداکس 5تکه
 1,078,000	پست ایت 432پیداکس ممو3تکه
 298,000	پست ایت 55023
+740,000	پست ایت 7.5* 7.5کد418
 850,000	پست ایت اسکای10*7/5
 980,000	پست ایت اسکای7.5*12.5
 910,000	پست ایت اسکای خطدار7.5*10
@@ -1071,10 +1291,11 @@ input[type=number]{-moz-appearance:textfield}
 140,000	پوشه دکمه دارA5
 525,000	پوشه دواراعلا
 785,000	پوشه دوارسهندطلقی
-698,000	پوشه زیپ کیپ A5کد7025
+950,000	پوشه زیپ کیپ A5کد7025
 1,785,000	پوشه زیپ کیپ اکلیلیA5
+1,365,000	پوشه زیپ کیپ اکلیلیA6
 2,035,000	پوشه زیپ کیپ اکلیلیA4
-950,000	پوشه زیپ کیپ عطف A5
+960,000	پوشه زیپ کیپ عطف A5
 920,000	پوشه زیپ کیپ عطف دارA6
 1,140,000	پوشه زیپ کیپ فانتزی عطف دارA4
 865,000	پوشه زیپ کیپ فانتزیA4
@@ -1952,7 +2173,8 @@ input[type=number]{-moz-appearance:textfield}
 139,000	خودکاراطلس فارس قلم آبی
 139,000	خودکاراطلس فارس قلم قرمز
 139,000	خودکاراطلس فارس قلم مشکی
-1,400,000	خودکاراکلیلی میوه ای12رنگ
+3,410,000	خودکاراکلیلی میوه ای12رنگ
+2,387,000	خودکاراکلیلی میوه ای7رنگ
 2,169,500	خودکارالوند8رنگ
 474,000	خودکاربیک 1/6آبی
 160,000	خودکاربیک آتلانتیس 84عددی
@@ -2065,7 +2287,7 @@ input[type=number]{-moz-appearance:textfield}
 4,250,000	دستگاه حرارتی کوچک 6012
 2,300,000	دستگاه حرارتی کوچک پیلس کلیددار
 15,000,000	دستگاه سیمی دوبل پلاستیکی
-690,000,000	دستگاه سیمی سوپرباندM06
+880,000,000	دستگاه سیمی سوپرباندM06
 385,000,000	دستگاه سیمی لول باخلاص کن
 385,000,000	دستگاه سیمی لول بدون خلاص کن
 25,000,000	دستگاه لاک اب کن برقی
@@ -2547,8 +2769,8 @@ input[type=number]{-moz-appearance:textfield}
 4,250,000	دفترکلاسوری دایان پارچه ای
 2,950,000	دفترکلاسوری دایان فلزی
 2,300,000	دفترکلاسوری سامی100برگ
-2,100,000	دفترکلاسوری سوپرباندطلقی بدون
-2,980,000	دفترکلاسوری سوپرباندطلقی فلزبدون
+2,760,000	دفترکلاسوری سوپرباندطلقی بدون
+3,540,000	دفترکلاسوری سوپرباندطلقی فلزبدون
 4,800,000	دفترکلاسوری سوپرباندطلقی فلز
 4,770,000	دفترکلاسوری سویل20حلقه خشتی فلز
 3,970,000	دفترکلاسوری سویل خشتی قفل پلاستیک
@@ -2722,7 +2944,7 @@ input[type=number]{-moz-appearance:textfield}
 1,250,000	دفتریکشین سیمی طلقی80برگ 60
 1,350,000	دفتریکشین سیمی نقاشی رحلیA4
 365,000	دفتریکشین شطرنجی درشت 32برگ
-820,000	دفتریکشین شطرنجی سیمی طلقی
+890,000	دفتریکشین شطرنجی سیمی طلقی
 1,390,000	دفتریکشین لاتین سیمی طلقی100برگ
 850,000	دفتریکشین لاتین سیمی طلقی50برگ
 1,390,000	دفتریکشین لاتین سیمی طلقی80برگ
@@ -2844,10 +3066,10 @@ input[type=number]{-moz-appearance:textfield}
 1,080,000	ذره بین90
 930,000	ذره بین75
 895,000	ذره بین تاشو60
-3,000,000	ذره بین طلایی100
+5,580,000	ذره بین طلایی100
 1,937,500	ذره بین طلایی60
 2,250,000	ذره بین طلایی80
-2,500,000	ذره بین طلایی90
+4,880,000	ذره بین طلایی90
 400,000	ذغال طراحی فابرکاستل
 1,200,000	ذغال گیر
 2,064,000	ذفتر100مجلدعرش کد177
@@ -3002,7 +3224,7 @@ input[type=number]{-moz-appearance:textfield}
 2,000,000	زغال طراحی کامران
 3,865,000	زغال فشرده
 1,500,000	زونکن ایرانی بزرگ 4سانتی
-2,000,000	زونکن ایرانی بزرگ اعلا
+2,100,000	زونکن ایرانی بزرگ اعلا
 950,000	زونکن ایرانی ساده3گوش
 1,950,000	زونکن ایرانی کوچک
 2,900,000	زونکن ایرانی لب فلزبزرگ
@@ -3166,7 +3388,7 @@ input[type=number]{-moz-appearance:textfield}
 10,900,000	ست قمقمه فلاکسی باجفت لیوان1009
 1,848,000	ست قمقمه وظرف غذاخانه مدرسه
 750,000	ست مدادمشکی الیپون4تایی
-2,090,000	ست مدارکاردستی ارمیچردار
+2,750,000	ست مدارکاردستی ارمیچردار
 6,545,000	ست نظم دهنده توری کروناپاستلی
 7,040,000	ست نظم دهنده توری کرونامشکی
 4,500,000	ست نفیس 3تکه
@@ -3359,8 +3581,8 @@ input[type=number]{-moz-appearance:textfield}
 18,000,000	طلق شفاف A3
 10,800,000	طلق شفاف A4
 142,000	طلق ضخیم پرگه شفاف )800(A4
-4,800,000	طلق ضخیم سوپرباندوزیری
-7,500,000	طلق ضخیم سوپرباندA4
+6,150,000	طلق ضخیم سوپرباندوزیری
+8,580,000	طلق ضخیم سوپرباندA4
 160,000	طلق ضخیم سهندشفاف A4
 75,000	طلق ضخیم وزیری شفاف پرگه)1200(
 75,000	طلق ضخیمa5
@@ -3931,7 +4153,6 @@ input[type=number]{-moz-appearance:textfield}
 4,500,000	کاترپنتر203
 889,900	کاترتویودستی بزرگ
 1,542,500	کاترتویوسربی بزرگ
-750,000,000	کاترحرفه ای فلکه ای 828  A4
 35,000,000	کاتررومیزی چینی سایزA4
 62,675,000	کاتررومیزی کادبلیوa3
 248,000	کاترفانتزی استندی211
@@ -3962,7 +4183,7 @@ input[type=number]{-moz-appearance:textfield}
 65,000	کاردستی جاباطری
 850,000	کاردستی ست ایرانی6تکه ارمیچردار
 550,000	کاردستی ست ایرانی6تکه
-1,356,000	کاردستی ست مدارالکترونیکی2000
+1,760,000	کاردستی ست مدارالکترونیکی2000
 30,000	کاردستی سرپیچ
 40,000	کاردستی کلیداهرمی
 55,000	کاردستی کلیدفشاری
@@ -4121,11 +4342,11 @@ input[type=number]{-moz-appearance:textfield}
 7,608,000	کلربوک 20برگ A3
 1,015,000	کلربوک 30برگ
 8,976,000	کلربوک 30برگ A3
-1,380,000	کلربوک 40برگ
+1,920,000	کلربوک 40برگ
 10,320,000	کلربوک 40برگ A3
 2,540,000	کلربوک 60برگ
 11,520,000	کلربوک 60برگ A3
-2,450,000	کلربوک 80برگ
+3,410,000	کلربوک 80برگ
 3,460,000	کلربوک اسکای قابدار80برگ
 9,108,000	کلربوک پاپکو100برگ
 1,665,000	کلربوک پاپکو20برگ
@@ -4140,9 +4361,9 @@ input[type=number]{-moz-appearance:textfield}
 2,706,000	کلربوک پرگه30برگ
 1,150,000	کلربوک رویالکس 20برگ
 5,880,000	کلربوک سوپرباند100برگ قابدار
-790,000	کلربوک سوپرباند10برگ
-1,140,000	کلربوک سوپرباند20برگ
-2,064,000	کلربوک سوپرباند40برگ
+1,020,000	کلربوک سوپرباند10برگ
+1,620,000	کلربوک سوپرباند20برگ
+3,000,000	کلربوک سوپرباند40برگ
 5,436,000	کلربوک سوپرباند80برگ قابدار
 3,744,000	کلربوک سهند100برگ
 1,064,000	کلربوک سهند10برگ
@@ -4281,6 +4502,7 @@ input[type=number]{-moz-appearance:textfield}
 1,120,000	لاک نواری پیکاسو12متر
 840,000	لاک نواری حیوانات 3820پیداکس
 1,700,000	لاک نواری فشاری اسکول مکس
+1,360,000	لاک نواری فشاری وردا
 910,000	لاک نواری فشاری 306
 1,610,000	لاک نواری فلفل979پیداکس
 993,800	لاک نواری فیلیپ 560
@@ -4291,6 +4513,7 @@ input[type=number]{-moz-appearance:textfield}
 904,300	لاک نواری مینگ کای خرسی20متری8036
 880,000	لاک نواری وردا10متری890
 980,000	لاک نواری وردا12متری836
+880,000	لاک نواری وردا8متری813ـ891
 950,000	لاک نواری وشکو12متری
 200,000	لوازم عروسک
 600,000	لوح تقدیر2لت گالینگور خارجی
@@ -4402,6 +4625,7 @@ input[type=number]{-moz-appearance:textfield}
 300,000	ماژیک فسفری مونیخ
 398,000	ماژیک فسفری مینی اسمارت
 312,500	ماژیک فسفری مینی پاستلی اسکول مکس
+425,000	ماژیک فسفری وحدت
 282,400	ماژیک فسفری وشکوقلمی
 485,000	ماژیک فسفری هانزر 342
 460,000	ماژیک فسفری مینی اسکول مکس
@@ -4486,7 +4710,7 @@ input[type=number]{-moz-appearance:textfield}
 12,000,000	ماژیک وایت بردفابرکاستل
 3,420,000	ماژیک وایت بردکروناگرد
 2,400,000	ماژیک وایت بردکرون آبی گرد
-125,000	ماژیک وایت بردکوچک پاکن دار
+178,000	ماژیک وایت بردکوچک پاکن دار
 5,760,000	ماژیک وایت بردکورس 10رنگ
 3,456,000	ماژیک وایت بردکورس 6رنگ
 4,350,000	ماژیک وایت بردکیان آبی گرد
@@ -4798,6 +5022,7 @@ input[type=number]{-moz-appearance:textfield}
 13,000,000	مدادمشکی ام کیوزغالی پاکن دار48تای
 2,750,000	مدادمشکی ام کیوH22ماه وستاره
 2,380,000	مدادمشکی بدنه سبزووک 20014
+2,960,000	مدادمشکی بدنه طلایی7090
 1,345,000	مدادمشکی بینهایت پاکندار6تایی
 12,800,000	مدادمشکی پاکندارتیزوپلاس 72تایی
 2,999,000	مدادمشکی پالموطرحدار
@@ -5243,6 +5468,11 @@ function haptic(style){
    ۱) داده‌ها و نرمال‌سازی  (بدون تغییر منطقی)
    ============================================================ */
 var allItems = [];
+var CART_KEY = 'userCart';
+var lastCartRaw = safeGetLS(CART_KEY);   // آخرین مقدار خام سبد که می‌دانیم (برای تشخیص تغییر از تب‌های دیگر)
+var cart = loadCart();
+var currentItemName = "";
+var currentItemPrice = 0;
 
 var charMap = {
   '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
@@ -5412,7 +5642,21 @@ function processData(){
   }
   allItems = tempItems;
 
+  /* همگام‌سازی سبد با قیمت‌های جدید */
+  refreshCartFromStorage();
+  var cartUpdated = false;
+  for(var c=0;c<cart.length;c++){
+    var liveItem = allItems.find(function(item){ return item.n === cart[c].name; });
+    if(liveItem){
+      if(cart[c].price !== liveItem.p){ cart[c].price = liveItem.p; cartUpdated = true; }
+    }else{
+      cart.splice(c,1); c--; cartUpdated = true;
+    }
+  }
+  if(cartUpdated) saveCart();
+
   showItems(allItems);
+  updateCartUI();
 }
 
 function escapeHTML(s){
@@ -5434,13 +5678,13 @@ function showItems(items){
   var limit = Math.min(items.length, 150);
   var html = "";
   for(var i=0;i<limit;i++){
-    html += '<div class="item">' +
+    html += '<div class="item" onclick="openOrderModalByIndex(' + items[i].id + ')">' +
               '<span class="item-name">'  + escapeHTML(items[i].n) + '</span>' +
               '<span class="item-price">' + formatToToman(items[i].p) + '</span>' +
             '</div>';
   }
   listEl.innerHTML = html;
-  statusEl.innerText = "نمایش " + limit + " مورد از " + items.length + " کالا";
+  statusEl.innerText = "نمایش " + limit + " مورد از " + items.length + " کالا (برای سفارش کلیک کنید)";
 }
 
 function formatToToman(n){
@@ -5448,6 +5692,320 @@ function formatToToman(n){
   if(isNaN(num)) return n;
   var toman = Math.floor(num / 10);
   return toman.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " تومان";
+}
+
+/* ============================================================
+   ۵) مدیریت مودال‌ها
+   ============================================================ */
+var openModals = [];
+function openModal(id){
+  document.getElementById(id).style.display = "flex";
+  if(openModals.indexOf(id) === -1) openModals.push(id);
+  syncBackButton();
+}
+function closeModal(id){
+  document.getElementById(id).style.display = "none";
+  openModals = openModals.filter(function(m){ return m !== id; });
+  syncBackButton();
+}
+function closeModalOnBG(event, id){ if(event.target.id === id) closeModal(id); }
+
+var backBound = false;
+function onPlatformBack(){ if(openModals.length) closeModal(openModals[openModals.length-1]); }
+function syncBackButton(){
+  var app = getWebApp();
+  if(!app || !app.BackButton) return;
+  try{
+    if(openModals.length){
+      if(!backBound){ app.BackButton.onClick(onPlatformBack); backBound = true; }
+      app.BackButton.show();
+    }else{
+      app.BackButton.hide();
+    }
+  }catch(e){}
+}
+
+function openOrderModalByIndex(id){
+  var item = allItems.find(function(x){ return x.id === id; });
+  if(item) openOrderModal(item.n, item.p);
+}
+function openOrderModal(name, price){
+  refreshCartFromStorage();               // قبل از باز شدن، آخرین وضعیت سبد را از حافظه بخوان
+  currentItemName  = name;
+  currentItemPrice = parseInt(price, 10);
+  document.getElementById("modalItemName").innerText  = name;
+  document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(price);
+  var existingIdx = findCartIndex(name);
+  var existingQty = existingIdx !== -1 ? cart[existingIdx].qty : 0;
+  document.getElementById("modalQty").value = existingQty > 0 ? existingQty : 1;
+  document.getElementById("modalAddBtn").innerText = existingQty > 0 ? "ثبت تغییر تعداد در سبد" : "افزودن به سبد سفارش";
+  calcTotal();
+  openModal("orderModal");
+  haptic('light');
+}
+
+/* تبدیل ارقام فارسی/عربی به انگلیسی و حذف هر کاراکتر غیرعددی (کیبورد فارسی آیفون) */
+function normalizeQtyInput(input){
+  var v = input.value
+    .replace(/[\u06F0-\u06F9]/g, function(d){ return String(d.charCodeAt(0) - 0x06F0); })
+    .replace(/[\u0660-\u0669]/g, function(d){ return String(d.charCodeAt(0) - 0x0660); })
+    .replace(/[^0-9]/g, '');
+  if(v !== input.value) input.value = v;
+}
+function clearInputOnFocus(input){
+  input.setAttribute("data-prev", input.value);
+  if(input.value === "1") input.value = "";
+  else { try{ input.select(); }catch(e){} }
+}
+function restoreInputOnBlur(input){
+  if(input.value.trim() === "" || parseInt(input.value,10) <= 0){
+    var prev = parseInt(input.getAttribute("data-prev"), 10);
+    input.value = (prev > 0) ? String(prev) : "1";
+    calcTotal();
+  }
+}
+function changeQty(amount){
+  var input = document.getElementById("modalQty");
+  var newVal = (parseInt(input.value,10) || 0) + amount;
+  if(newVal >= 1){ input.value = newVal; calcTotal(); haptic('light'); }
+}
+function calcTotal(){
+  var qty = parseInt(document.getElementById("modalQty").value, 10) || 0;
+  document.getElementById("modalTotal").innerText = "جمع کل: " + formatToToman(currentItemPrice * qty);
+}
+
+/* ============================================================
+   ۶) سبد خرید
+   ============================================================ */
+/* هر کالا (بر اساس نام) فقط یک ردیف؛ ردیف‌های تکراری با هم جمع می‌شوند */
+function normalizeCart(arr){
+  var out = [], map = Object.create(null);
+  if(!Array.isArray(arr)) return out;
+  for(var i=0;i<arr.length;i++){
+    var it = arr[i];
+    if(!it || !it.name) continue;
+    var q = parseInt(it.qty, 10), p = parseInt(it.price, 10);
+    if(isNaN(q) || q <= 0) continue;
+    var key = String(it.name);
+    if(key in map){ out[map[key]].qty += q; }
+    else{ map[key] = out.length; out.push({ name: key, price: isNaN(p) ? 0 : p, qty: q }); }
+  }
+  return out;
+}
+function loadCart(){
+  try{ return normalizeCart(JSON.parse(safeGetLS(CART_KEY))); }catch(e){ return []; }
+}
+function findCartIndex(name){
+  for(var i=0;i<cart.length;i++){ if(cart[i].name === name) return i; }
+  return -1;
+}
+
+/* ---------- ذخیره + اطلاع به تب‌های دیگر ---------- */
+var cartChannel = null;
+try{
+  if(window.BroadcastChannel){
+    cartChannel = new BroadcastChannel('userCartSync');
+    cartChannel.onmessage = function(){ refreshCartFromStorage(); };
+  }
+}catch(e){ cartChannel = null; }
+
+function saveCart(){
+  var raw = JSON.stringify(cart);
+  lastCartRaw = raw;
+  safeSetLS(CART_KEY, raw);
+  try{ cartChannel && cartChannel.postMessage(1); }catch(e){}
+}
+
+/* اگر محتوای حافظه با آنچه در این تب داریم فرق کرده بود، سبد را بازخوانی و رابط را به‌روز می‌کند */
+function refreshCartFromStorage(){
+  var raw = safeGetLS(CART_KEY);
+  if(raw === lastCartRaw) return false;
+  lastCartRaw = raw;
+  cart = loadCart();
+  onCartExternalChange();
+  return true;
+}
+function onCartExternalChange(){
+  updateCartUI();
+  var cm = document.getElementById('cartModal');
+  if(cm && cm.style.display === 'flex'){
+    if(cart.length === 0){ closeModal('confirmClearModal'); closeModal('cartModal'); }
+    else renderCartList();
+  }
+}
+
+/* چهار لایهٔ همگام‌سازی: رویداد storage (فوری) + BroadcastChannel + بازگشت به تب + بررسی سبک هر ۱ ثانیه */
+window.addEventListener('storage', function(e){ if(e.key === CART_KEY || e.key === null) refreshCartFromStorage(); });
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) refreshCartFromStorage(); });
+window.addEventListener('focus', refreshCartFromStorage);
+window.addEventListener('pageshow', refreshCartFromStorage);
+setInterval(function(){ if(!document.hidden) refreshCartFromStorage(); }, 1000);
+
+/* ---------- عملیات سبد ---------- */
+function addToCart(){
+  var qty = parseInt(document.getElementById("modalQty").value, 10) || 1;
+  refreshCartFromStorage();
+  var idx = findCartIndex(currentItemName);
+  if(idx !== -1){                       // کالا از قبل در سبد است: تعداد جایگزین می‌شود، ردیف جدید ساخته نمی‌شود
+    cart[idx].qty   = qty;
+    cart[idx].price = currentItemPrice;
+  }else{
+    cart.push({ name: currentItemName, price: currentItemPrice, qty: qty });
+  }
+  saveCart();
+  updateCartUI();
+  closeModal('orderModal');
+  haptic('medium');
+}
+
+function cartRowName(btn){
+  var row = btn && btn.closest ? btn.closest('.cart-item') : null;
+  return row ? row.getAttribute('data-name') : null;
+}
+function removeFromCart(btn){
+  refreshCartFromStorage();
+  var idx = findCartIndex(cartRowName(btn));
+  if(idx === -1){ renderCartList(); return; }
+  cart.splice(idx, 1);
+  saveCart(); updateCartUI(); renderCartList();
+  if(cart.length === 0) closeModal('cartModal');
+}
+function updateCartQty(btn, change){
+  refreshCartFromStorage();
+  var idx = findCartIndex(cartRowName(btn));
+  if(idx === -1){ renderCartList(); return; }
+  cart[idx].qty += change;
+  if(cart[idx].qty <= 0) cart.splice(idx, 1);
+  saveCart(); updateCartUI(); renderCartList();
+  if(cart.length === 0) closeModal('cartModal');
+}
+function updateCartUI(){
+  var fab   = document.getElementById("cartFab");
+  var badge = document.getElementById("cartBadge");
+  if(cart.length > 0){ fab.style.display = "flex"; badge.innerText = cart.length; }
+  else fab.style.display = "none";
+}
+function openCartModal(){
+  if(cart.length === 0) return;
+  renderCartList();
+  openModal("cartModal");
+}
+function openConfirmClearModal(){ openModal("confirmClearModal"); }
+function confirmClearCart(){
+  cart = [];
+  saveCart(); updateCartUI();
+  closeModal('confirmClearModal');
+  closeModal('cartModal');
+}
+
+function renderCartList(){
+  var listContainer = document.getElementById("cartItemsList");
+  var sumTotalEl    = document.getElementById("cartSumTotal");
+  var html = "", finalSum = 0;
+
+  for(var i=0;i<cart.length;i++){
+    var item = cart[i];
+    var rowTotal = item.price * item.qty;
+    finalSum += rowTotal;
+
+    html +=
+      '<div class="cart-item" data-name="' + escapeHTML(item.name) + '">' +
+        '<div class="cart-main">' +
+          '<div class="cart-name">' + escapeHTML(item.name) + '</div>' +
+          '<div class="cart-row">' +
+            '<div class="cart-qty">' +
+              '<button onclick="updateCartQty(this, 1)">+</button>' +
+              '<span>' + item.qty + '</span>' +
+              '<button onclick="updateCartQty(this, -1)">−</button>' +
+            '</div>' +
+            '<div class="cart-calc">' + formatToToman(rowTotal) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="cart-del" onclick="removeFromCart(this)" aria-label="حذف">✕</button>' +
+      '</div>';
+  }
+  listContainer.innerHTML = html;
+  sumTotalEl.innerText = "جمع کل پیش‌فاکتور: " + formatToToman(finalSum);
+}
+
+/* ============================================================
+   ۷) ارسال سفارش
+   ============================================================ */
+function openSafeLink(url, isEitaaLink){
+  var app = getWebApp();
+  if(app){
+    try{
+      /* روی نسخهٔ اندروید/دسکتاپ ایتا، openEitaaLink پی‌وی ادمین را به‌درستی باز می‌کند.
+         روی نسخهٔ وب ایتا (که مثل مینی‌اپ‌های تلگرام وب رفتار می‌کند) این متد کار نمی‌کند؛
+         در آن حالت طبق همان روش استاندارد بازکردن لینک خارجی در مینی‌اپ عمل می‌کنیم که
+         خود کلاینت وب ایتا آن را به‌درستی به پی‌وی ادمین هدایت می‌کند. */
+      if(isEitaaLink && !isWebClient() && typeof app.openEitaaLink === 'function'){
+        app.openEitaaLink(url);
+        return;
+      }
+      if(typeof app.openLink === 'function'){ app.openLink(url, { try_browser: true }); return; }
+    }catch(e){ console.log("WebApp API Error:", e); }
+  }
+  var a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); }, 100);
+}
+
+function getOrderMessageText(){
+  refreshCartFromStorage();
+  var rows = normalizeCart(cart);          // تضمین: هر کالا فقط یک ردیف و تعدادها جمع شده
+  if(rows.length === 0) return "";
+  var message = "📋 سلام، درخواست سفارش جدید:\n\n";
+  var finalSum = 0;
+  for(var i=0;i<rows.length;i++){
+    var item = rows[i];
+    finalSum += item.price * item.qty;
+    message += "🔹 " + (i+1) + ". " + item.name +
+               "\n     تعداد: " + item.qty + " عدد | فی: " + formatToToman(item.price) + "\n";
+  }
+  message += "\n💰 جمع کل سفارش: " + formatToToman(finalSum);
+  return message;
+}
+
+function sendOrderEitaa(){
+  var text = getOrderMessageText(); if(!text) return;
+
+  var copyToClipboard = function(str){
+    if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(str);
+    return new Promise(function(resolve, reject){
+      var ta = document.createElement("textarea");
+      ta.value = str; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try{ document.execCommand('copy') ? resolve() : reject(); }catch(err){ reject(); }
+      document.body.removeChild(ta);
+    });
+  };
+
+  copyToClipboard(text)
+    .then(function(){ openModal("eitaaModal"); })
+    .catch(function(){
+      var ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta);
+      openModal("eitaaModal");
+    });
+}
+function redirectToEitaa(){
+  closeModal('eitaaModal');
+  closeModal('cartModal');
+  openSafeLink("https://eitaa.com/tahrir_ir_f", true);
+}
+
+function sendOrderTelegram(){
+  var text = getOrderMessageText(); if(!text) return;
+  var url = "https://t.me/tahrir_ir_f?text=" + encodeURIComponent(text);
+  closeModal('cartModal');
+  var a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); }, 100);
 }
 </script>
 </body>
