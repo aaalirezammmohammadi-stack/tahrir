@@ -285,6 +285,7 @@ input[type=number]{-moz-appearance:textfield}
 .btn-solid-danger{background:var(--danger); color:#fff}
 .btn-eitaa{background:#E85D04; color:#fff}
 .btn-telegram{background:#229ED9; color:#fff}
+.btn-bale{background:#1FA37F; color:#fff}
 
 /* سبد خرید */
 .cart-list{max-height:44vh; overflow-y:auto; margin:-4px -4px 0; padding:4px}
@@ -370,8 +371,8 @@ input[type=number]{-moz-appearance:textfield}
       <span class="meta-pill" id="modalItemPrice">قیمت واحد: 0 تومان</span>
       <div class="qty">
         <button onclick="changeQty(1)" aria-label="افزایش">+</button>
-        <input type="number" inputmode="numeric" id="modalQty" value="1" min="1"
-               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="calcTotal()">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="modalQty" value="1"
+               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="fixQtyDigits(this); calcTotal()">
         <button onclick="changeQty(-1)" aria-label="کاهش">−</button>
       </div>
       <div class="total-line" id="modalTotal">جمع کل: 0 تومان</div>
@@ -394,6 +395,7 @@ input[type=number]{-moz-appearance:textfield}
     <div class="sheet-foot">
       <button class="btn btn-eitaa" onclick="sendOrderEitaa()">ارسال سفارش در ایتا</button>
       <button class="btn btn-telegram" onclick="sendOrderTelegram()">ارسال سفارش در تلگرام</button>
+      <button class="btn btn-bale" onclick="sendOrderBale()">ارسال سفارش در بله</button>
       <button class="btn btn-danger" onclick="openConfirmClearModal()">حذف تمام سفارشات</button>
       <button class="btn btn-ghost" onclick="closeModal('cartModal')">بستن / ادامه خرید</button>
     </div>
@@ -1138,6 +1140,11 @@ function openOrderModal(item){
   haptic('light');
 }
 
+/* کیبورد فارسی (مخصوصاً آیفون) ارقام فارسی/عربی می‌فرستد؛ همان لحظه به انگلیسی تبدیل و بقیهٔ نویسه‌ها حذف می‌شود */
+function fixQtyDigits(input){
+  var v = String(input.value).replace(/[\u06F0-\u06F9\u0660-\u0669]/g, function(d){ return charMap[d]; }).replace(/[^0-9]/g, '');
+  if(v !== input.value) input.value = v;
+}
 function clearInputOnFocus(input){ if(input.value === String(currentItemDefaultQty)) input.value = ""; }
 function restoreInputOnBlur(input){
   input.value = sanitizeQty(input.value);
@@ -1314,7 +1321,7 @@ function checkMinOrderTotal(){
   return false;
 }
 
-function sendOrderEitaa(){
+function copyOrderThenOpen(modalId){
   if(!checkMinOrderTotal()) return;
   var text = getOrderMessageText(); if(!text) return;
 
@@ -1330,15 +1337,16 @@ function sendOrderEitaa(){
   };
 
   copyToClipboard(text)
-    .then(function(){ openModal("eitaaModal"); })
+    .then(function(){ openModal(modalId); })
     .catch(function(){
       var ta = document.createElement("textarea");
       ta.value = text; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); }catch(e){}
       document.body.removeChild(ta);
-      openModal("eitaaModal");
+      openModal(modalId);
     });
 }
+function sendOrderEitaa(){ copyOrderThenOpen("eitaaModal"); }
 function redirectToEitaa(){
   closeModal('eitaaModal');
   closeModal('cartModal');
@@ -1349,6 +1357,17 @@ function sendOrderTelegram(){
   if(!checkMinOrderTotal()) return;
   var text = getOrderMessageText(); if(!text) return;
   var url = "https://t.me/tahrir_ir_f?text=" + encodeURIComponent(text);
+  closeModal('cartModal');
+  var a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); }, 100);
+}
+/* بله: دقیقاً مثل تلگرام، متن سفارش داخل لینک چت واحد فروش گذاشته می‌شود و با همان روش باز می‌شود */
+function sendOrderBale(){
+  if(!checkMinOrderTotal()) return;
+  var text = getOrderMessageText(); if(!text) return;
+  var url = "https://ble.ir/tahrir_ir_f?text=" + encodeURIComponent(text);
   closeModal('cartModal');
   var a = document.createElement('a');
   a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
