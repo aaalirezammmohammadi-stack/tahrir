@@ -1406,9 +1406,26 @@ function sendOrderTelegram(){
   setTimeout(function(){ document.body.removeChild(a); }, 100);
 }
 /* بله: دقیقاً مثل تلگرام، متن سفارش داخل لینک چت واحد فروش گذاشته می‌شود و با همان روش باز می‌شود */
+function silentCopy(str){
+  /* کپی بی‌صدا، بدون هیچ پیام؛ باید همزمان با همان کلیک اجرا شود */
+  var ok = false;
+  try{
+    var ta = document.createElement("textarea");
+    ta.value = str; ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none";
+    document.body.appendChild(ta); ta.select();
+    try{ ta.setSelectionRange(0, str.length); }catch(e){}
+    ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+  }catch(e){}
+  if(!ok){
+    try{ if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(str).catch(function(){}); }catch(e){}
+  }
+}
 function sendOrderBale(){
   if(!checkMinOrderTotal()) return;
   var text = getOrderMessageText(); if(!text) return;
+  silentCopy(text);   // در نسخهٔ وب متن در لینک نمی‌رود؛ کاربر می‌تواند در چت Paste کند
   var url = "https://ble.ir/tahrir_ir_f?text=" + encodeURIComponent(text);
   closeModal('cartModal');
   var a = document.createElement('a');
