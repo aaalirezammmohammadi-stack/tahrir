@@ -168,6 +168,16 @@ input[type=number]{-moz-appearance:textfield}
   transition:background-color .15s;
 }
 .item:active{background:var(--surface-2)}
+@media (hover:hover) and (pointer:fine){
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .search input:focus-visible{outline:none}
+  .sheet-body:focus{outline:none}
+}
+.item{scroll-margin-top:var(--topbar-h,150px); scroll-margin-bottom:100px}
+.item.kb-active{
+  background:var(--surface-2); border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(var(--accent-rgb),.25);
+}
 .item-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px}
 .item-name{font-size:var(--fs-base); font-weight:500}
 .item-price{
@@ -328,7 +338,7 @@ input[type=number]{-moz-appearance:textfield}
       <span class="s-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg>
       </span>
-      <input type="text" id="myInput" oninput="debouncedSearch()" placeholder="جستجوی نام کالا..." autocomplete="off">
+      <input type="text" id="myInput" oninput="debouncedSearch()" onkeydown="searchKeydown(event)" placeholder="جستجوی نام کالا..." autocomplete="off" role="combobox" aria-controls="itemList" aria-expanded="true" aria-autocomplete="list" aria-label="جستجوی نام کالا">
       <button class="s-clear" onclick="clearSearch()" aria-label="پاک کردن">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -355,7 +365,7 @@ input[type=number]{-moz-appearance:textfield}
 <div class="status" id="status">در حال بارگذاری...</div>
 
 <!-- ================= دکمه سبد ================= -->
-<button class="fab" id="cartFab" onclick="openCartModal()" aria-label="سبد سفارش">
+<button class="fab" id="cartFab" onclick="openCartModal()" aria-label="سبد سفارش" title="سبد سفارش (F2)">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/>
     <path d="M2.5 3h2.2l2.4 12.1a1.6 1.6 0 0 0 1.6 1.3h8.6a1.6 1.6 0 0 0 1.6-1.3L21 7H6"/>
@@ -371,8 +381,8 @@ input[type=number]{-moz-appearance:textfield}
       <span class="meta-pill" id="modalItemPrice">قیمت واحد: 0 تومان</span>
       <div class="qty">
         <button onclick="changeQty(1)" aria-label="افزایش">+</button>
-        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="modalQty" value="1"
-               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="fixQtyDigits(this); calcTotal()">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="تعداد" id="modalQty" value="1"
+               onfocus="clearInputOnFocus(this)" onblur="restoreInputOnBlur(this)" oninput="fixQtyDigits(this); calcTotal()" onkeydown="qtyKeydown(event)">
         <button onclick="changeQty(-1)" aria-label="کاهش">−</button>
       </div>
       <div class="total-line" id="modalTotal">جمع کل: 0 تومان</div>
@@ -411,7 +421,7 @@ input[type=number]{-moz-appearance:textfield}
     </div>
     <div class="sheet-foot">
       <button class="btn btn-solid-danger" onclick="confirmClearCart()">بله، حذف کن</button>
-      <button class="btn btn-ghost" onclick="closeModal('confirmClearModal')">انصراف</button>
+      <button class="btn btn-ghost" data-autofocus onclick="closeModal('confirmClearModal')">انصراف</button>
     </div>
   </div>
 </div>
@@ -427,7 +437,7 @@ input[type=number]{-moz-appearance:textfield}
       </div>
     </div>
     <div class="sheet-foot">
-      <button class="btn btn-primary" onclick="closeModal('minTotalModal')">متوجه شدم</button>
+      <button class="btn btn-primary" data-autofocus onclick="closeModal('minTotalModal')">متوجه شدم</button>
     </div>
   </div>
 </div>
@@ -443,7 +453,7 @@ input[type=number]{-moz-appearance:textfield}
       </div>
     </div>
     <div class="sheet-foot">
-      <button class="btn btn-primary" onclick="closeModal('notFoundModal')">مشاهده کالاهای موجود</button>
+      <button class="btn btn-primary" data-autofocus onclick="closeModal('notFoundModal')">مشاهده کالاهای موجود</button>
     </div>
   </div>
 </div>
@@ -459,7 +469,7 @@ input[type=number]{-moz-appearance:textfield}
       </div>
     </div>
     <div class="sheet-foot">
-      <button class="btn btn-primary" onclick="redirectToEitaa()">متوجه شدم</button>
+      <button class="btn btn-primary" data-autofocus onclick="redirectToEitaa()">متوجه شدم</button>
       <button class="btn btn-ghost" onclick="closeModal('eitaaModal')">بستن</button>
     </div>
   </div>
@@ -974,9 +984,14 @@ function debouncedSearch(){
   }
   toggleClearBtn();
   clearTimeout(searchTimeout);
+  searchPending = true;
   searchTimeout = setTimeout(doSearch, 300);
 }
+/* اگر کاربر قبل از پایان تأخیر ۳۰۰ میلی‌ثانیه Enter بزند، همان لحظه جستجو اجرا شود */
+var searchPending = false;
+function flushSearch(){ if(searchPending) doSearch(); }
 function doSearch(){
+  clearTimeout(searchTimeout); searchPending = false;
   var val = normalize(document.getElementById("myInput").value).trim();
   if(!val){ showItems(allItems); return; }
   var words = val.split(/\s+/);
@@ -1051,6 +1066,7 @@ function showItems(items){
   var statusEl = document.getElementById("status");
 
   if(items.length === 0){
+    activeIdx = -1;
     listEl.innerHTML = '<div class="empty"><b>کالایی پیدا نشد</b>عبارت دیگری را جستجو کنید.</div>';
     statusEl.innerText = "";
     return;
@@ -1061,7 +1077,7 @@ function showItems(items){
   for(var i=0;i<limit;i++){
     var it  = items[i];
 
-    html += '<div class="item" onclick="openOrderModalByIndex(' + it.id + ')">' +
+    html += '<div class="item" id="it-' + it.id + '" role="option" data-id="' + it.id + '" onclick="openOrderModalByIndex(' + it.id + ')">' +
               '<div class="item-main">' +
                 '<span class="item-name">' + escapeHTML(it.n) + '</span>' +
               '</div>' +
@@ -1069,6 +1085,8 @@ function showItems(items){
             '</div>';
   }
   listEl.innerHTML = html;
+  activeIdx = -1;
+  if(kbdMode && document.getElementById("myInput").value.trim()) setActive(0, false);
   statusEl.innerText = "نمایش " + limit + " مورد از " + items.length + " کالا (برای سفارش کلیک کنید)";
 }
 
@@ -1083,15 +1101,34 @@ function formatToToman(n){
    ۵) مدیریت مودال‌ها
    ============================================================ */
 var openModals = [];
+var modalReturnFocus = {};
 function openModal(id){
-  document.getElementById(id).style.display = "flex";
+  var m = document.getElementById(id);
+  if(openModals.indexOf(id) === -1) modalReturnFocus[id] = document.activeElement;
+  m.style.display = "flex";
   if(openModals.indexOf(id) === -1) openModals.push(id);
   syncBackButton();
+  focusModal(id);   // باید همزمان با همان لمس/کلیک اجرا شود تا کیبورد عددی آیفون هم باز شود
+}
+function focusModal(id){
+  if(!kbdMode) return;   // موبایل: مثل قبل، هیچ فوکوس/کیبوردی خودکار باز نمی‌شود
+  var m = document.getElementById(id);
+  var t = m.querySelector('[data-autofocus]') || m.querySelector('#modalQty');
+  if(!t){ t = m.querySelector('.sheet-body'); if(t) t.setAttribute('tabindex','-1'); }
+  if(!t) return;
+  kbFocusing = true;   // فوکوس برنامه‌ای: عدد پیش‌فرض پاک نشود، فقط انتخاب شود
+  try{ t.focus({preventScroll:true}); }catch(e){ try{ t.focus(); }catch(e2){} }
+  kbFocusing = false;
 }
 function closeModal(id){
+  var wasOpen = openModals.indexOf(id) > -1;
   document.getElementById(id).style.display = "none";
   openModals = openModals.filter(function(m){ return m !== id; });
   syncBackButton();
+  var back = modalReturnFocus[id]; delete modalReturnFocus[id];
+  if(wasOpen && kbdMode && back && back !== document.body && document.body.contains(back)){
+    try{ back.focus({preventScroll:true}); }catch(e){}
+  }
 }
 function closeModalOnBG(event, id){ if(event.target.id === id) closeModal(id); }
 
@@ -1145,7 +1182,11 @@ function fixQtyDigits(input){
   var v = String(input.value).replace(/[\u06F0-\u06F9\u0660-\u0669]/g, function(d){ return charMap[d]; }).replace(/[^0-9]/g, '');
   if(v !== input.value) input.value = v;
 }
-function clearInputOnFocus(input){ if(input.value === String(currentItemDefaultQty)) input.value = ""; }
+var kbFocusing = false;
+function clearInputOnFocus(input){
+  if(kbFocusing){ try{ input.select(); }catch(e){} return; }
+  if(input.value === String(currentItemDefaultQty)) input.value = "";
+}
 function restoreInputOnBlur(input){
   input.value = sanitizeQty(input.value);
   calcTotal();
@@ -1186,6 +1227,7 @@ function addToCart(){
   updateCartUI();
   closeModal('orderModal');
   haptic('medium');
+  if(kbdMode) focusSearch(true);   // دسکتاپ: برگشت به جستجو با متن انتخاب‌شده، آمادهٔ کالای بعدی
 }
 
 function removeFromCart(code){
@@ -1374,6 +1416,141 @@ function sendOrderBale(){
   document.body.appendChild(a); a.click();
   setTimeout(function(){ document.body.removeChild(a); }, 100);
 }
+/* ============================================================
+   ۸) کنترل با کیبورد و کیبورد عددی موبایل
+   ------------------------------------------------------------
+   دسکتاپ:  تایپ ← ↑↓ ← Enter (باز شدن تعداد) ← عدد ← Enter (ثبت) ← برگشت به جستجو
+   موبایل:  هیچ تغییری نکرده (کیبورد عددی و رفتار لمسی مثل قبل)
+   ============================================================ */
+var kbdMode = !!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches);
+var activeIdx = -1;
+
+function markTouch(){ kbdMode = false; setActive(-1, false); }
+document.addEventListener('pointerdown', function(e){ if(e.pointerType === 'touch' || e.pointerType === 'pen') markTouch(); }, true);
+document.addEventListener('touchstart', markTouch, { passive:true, capture:true });
+
+function setActive(i, scroll){
+  var input = document.getElementById('myInput');
+  var els = document.querySelectorAll('#itemList .item');
+  var old = document.querySelector('#itemList .item.kb-active');
+  if(old) old.classList.remove('kb-active');
+  if(i < 0 || i >= els.length){ activeIdx = -1; input.removeAttribute('aria-activedescendant'); return; }
+  activeIdx = i;
+  els[i].classList.add('kb-active');
+  input.setAttribute('aria-activedescendant', els[i].id);
+  if(scroll){ try{ els[i].scrollIntoView({ block:'nearest' }); }catch(e){} }
+}
+function focusSearch(select){
+  var input = document.getElementById('myInput');
+  try{ input.focus({ preventScroll:true }); }catch(e){ input.focus(); }
+  if(select){ try{ input.select(); }catch(e){} }
+}
+
+function searchKeydown(e){
+  if(!kbdMode) return;   // موبایل: رفتار قبلی، بدون دخالت
+  if(e.isComposing || e.keyCode === 229) return;
+  var input = e.currentTarget;
+  var els = document.querySelectorAll('#itemList .item');
+  switch(e.key){
+    case 'ArrowDown':
+      if(!els.length) return;
+      e.preventDefault(); kbdMode = true;
+      setActive(activeIdx < 0 ? 0 : Math.min(activeIdx + 1, els.length - 1), true);
+      break;
+    case 'ArrowUp':
+      if(!els.length) return;
+      e.preventDefault(); kbdMode = true;
+      setActive(activeIdx < 0 ? 0 : Math.max(activeIdx - 1, 0), true);
+      break;
+    case 'PageDown':
+      if(!els.length) return;
+      e.preventDefault(); kbdMode = true;
+      setActive(Math.min((activeIdx < 0 ? 0 : activeIdx) + 8, els.length - 1), true);
+      break;
+    case 'PageUp':
+      if(!els.length) return;
+      e.preventDefault(); kbdMode = true;
+      setActive(Math.max((activeIdx < 0 ? 0 : activeIdx) - 8, 0), true);
+      break;
+    case 'Enter':
+      e.preventDefault();
+      flushSearch();
+      els = document.querySelectorAll('#itemList .item');
+      if(kbdMode && els.length){
+        var idx = activeIdx > -1 ? activeIdx : (input.value.trim() ? 0 : -1);
+        if(idx > -1) openOrderModalByIndex(parseInt(els[idx].getAttribute('data-id'), 10));
+      }else{
+        input.blur();      // موبایل: دکمهٔ «جستجو» کیبورد را می‌بندد و نتیجه‌ها دیده می‌شوند
+      }
+      break;
+    case 'Escape':
+      if(input.value){ e.preventDefault(); input.value = ''; toggleClearBtn(); doSearch(); }
+      break;
+  }
+}
+
+/* ↑ و + : یک بسته/یک عدد بیشتر ، ↓ و − : کمتر (با قانون حداقل و بسته‌ی همان کالا؛ در حالت صندوق آزاد) */
+function qtyKeydown(e){
+  if(!kbdMode) return;   // موبایل: رفتار قبلی، بدون دخالت
+  if(e.isComposing || e.keyCode === 229) return;
+  var k = e.key;
+  if(k === 'Enter'){ e.preventDefault(); addToCart(); }
+  else if(k === 'ArrowUp'   || k === '+' || k === '='){ e.preventDefault(); changeQty(1);  try{ e.currentTarget.select(); }catch(x){} }
+  else if(k === 'ArrowDown' || k === '-'){               e.preventDefault(); changeQty(-1); try{ e.currentTarget.select(); }catch(x){} }
+}
+
+/* Tab فقط بین عناصر مودال باز بچرخد */
+function trapTab(e, id){
+  var m = document.getElementById(id);
+  var f = Array.prototype.filter.call(
+    m.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])'),
+    function(el){ return !el.disabled && el.getClientRects().length; }
+  );
+  if(!f.length) return;
+  var a = document.activeElement, i = f.indexOf(a);
+  if(i === -1){ e.preventDefault(); (e.shiftKey ? f[f.length-1] : f[0]).focus(); return; }
+  if(e.shiftKey && i === 0){ e.preventDefault(); f[f.length-1].focus(); }
+  else if(!e.shiftKey && i === f.length-1){ e.preventDefault(); f[0].focus(); }
+}
+
+document.addEventListener('keydown', function(e){
+  var k = e.key;
+  if(k === 'ArrowUp' || k === 'ArrowDown' || k === 'Tab') kbdMode = true;
+  if(!kbdMode) return;
+  var top = openModals.length ? openModals[openModals.length-1] : null;
+
+  if(top){
+    if(k === 'Escape'){ e.preventDefault(); closeModal(top); return; }
+    if(k === 'Tab'){ trapTab(e, top); return; }
+    if(k === 'Enter' && top === 'orderModal'){
+      var tag = e.target && e.target.tagName;
+      if(tag !== 'BUTTON' && tag !== 'INPUT'){ e.preventDefault(); addToCart(); }
+    }
+    return;
+  }
+
+  if((e.ctrlKey || e.metaKey) && e.code === 'KeyK'){ e.preventDefault(); focusSearch(true); return; }
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+  if(k === 'F2'){ e.preventDefault(); openCartModal(); return; }
+
+  var t = e.target, tg = t && t.tagName;
+  if(tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT' || (t && t.isContentEditable)) return;
+  if(e.code === 'Slash' && !e.shiftKey){ e.preventDefault(); focusSearch(true); return; }
+  /* شروع تایپ از هر جای صفحه، مستقیم وارد کادر جستجو می‌شود */
+  if(tg !== 'BUTTON' && k && k.length === 1 && /\S/.test(k)) focusSearch(false);
+});
+
+/* ارتفاع نوار چسبان برای اسکرول درست آیتم انتخاب‌شده */
+function syncTopbarH(){
+  var t = document.querySelector('.topbar');
+  if(t) document.documentElement.style.setProperty('--topbar-h', (t.offsetHeight + 8) + 'px');
+}
+window.addEventListener('resize', syncTopbarH);
+window.addEventListener('load', syncTopbarH);
+setTimeout(syncTopbarH, 80);
+
+/* دسکتاپ: صفحه که باز شد مستقیم داخل جستجو باشیم (روی موبایل نه، چون کیبورد بی‌دلیل باز می‌شود) */
+if(kbdMode) setTimeout(function(){ if(!openModals.length) focusSearch(false); }, 120);
 </script>
 </body>
 </html>
