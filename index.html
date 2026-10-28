@@ -361,7 +361,7 @@ input[type=number]{-moz-appearance:textfield}
 </div>
 
 <!-- ================= لیست ================= -->
-<div class="list" id="itemList"></div>
+<div class="list" id="itemList" role="listbox" aria-label="فهرست کالاها"></div>
 <div class="status" id="status">در حال بارگذاری...</div>
 
 <!-- ================= دکمه سبد ================= -->
@@ -973,7 +973,15 @@ function loadProducts(){
       if(document.getElementById('myInput').value) doSearch();
       tryOpenStartCode(true);
     })
-    .catch(function(){ if(!cached) processData(''); tryOpenStartCode(true); });
+    .catch(function(){ if(!cached) showLoadError(); tryOpenStartCode(true); });
+}
+
+/* اگر لیست کالاها نه از سرور آمد و نه در حافظهٔ گوشی بود، به‌جای «کالایی پیدا نشد» خطای واقعی نشان بده */
+function showLoadError(){
+  document.getElementById("itemList").innerHTML =
+    '<div class="empty"><b>خطا در دریافت لیست کالاها</b>اتصال اینترنت را بررسی کنید.<br>' +
+    '<button class="btn btn-primary" style="margin-top:14px" onclick="location.reload()">تلاش دوباره</button></div>';
+  document.getElementById("status").innerText = "";
 }
 
 var searchTimeout;
@@ -1405,7 +1413,7 @@ function sendOrderTelegram(){
   document.body.appendChild(a); a.click();
   setTimeout(function(){ document.body.removeChild(a); }, 100);
 }
-/* بله: دقیقاً مثل تلگرام، متن سفارش داخل لینک چت واحد فروش گذاشته می‌شود و با همان روش باز می‌شود */
+/* بله: مثل تلگرام، متن سفارش داخل لینک چت واحد فروش می‌رود و با همان روش باز می‌شود؛ بی‌صدا هم در کلیپ‌بورد کپی می‌شود (برای نسخهٔ وب) */
 function silentCopy(str){
   /* کپی بی‌صدا، بدون هیچ پیام؛ باید همزمان با همان کلیک اجرا شود */
   var ok = false;
