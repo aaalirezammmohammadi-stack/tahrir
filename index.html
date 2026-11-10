@@ -178,12 +178,55 @@ input[type=number]{-moz-appearance:textfield}
   background:var(--surface-2); border-color:var(--accent);
   box-shadow:0 0 0 2px rgba(var(--accent-rgb),.25);
 }
-.item-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px}
+.item-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:0}
 .item-name{font-size:var(--fs-base); font-weight:500}
 .item-price{
   flex:none; font-size:13.5px; font-weight:700;
   color:var(--accent); background:rgba(var(--accent-rgb),.1);
   padding:4px 9px; border-radius:7px; white-space:nowrap;
+}
+
+
+/* ---- نشانگر «نسخه مخصوص فروشنده» ---- */
+.seller-bar{
+  display:none; text-align:center;
+  font-size:12px; font-weight:800; line-height:1.4;
+  padding:3px 10px; border-radius:var(--r-sm);
+  background:#f59e0b; color:#1a1200;
+}
+body.seller-mode .seller-bar{display:block}
+body.seller-mode .topbar{border-bottom:2px solid #f59e0b}
+
+/* ---- مرتب‌سازی قیمت (فقط هنگام جستجو) ---- */
+.sort-row{display:none; align-items:center; gap:6px}
+body.searching .sort-row{display:flex}
+.sort-label{font-size:var(--fs-sm); color:var(--muted); font-weight:600; flex:none}
+.sort-btn{
+  padding:4px 11px;
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface-2); color:var(--muted);
+  font-size:var(--fs-sm); font-weight:600; font-family:inherit;
+  white-space:nowrap; cursor:pointer;
+  transition:background-color .15s, color .15s, border-color .15s;
+}
+.sort-btn.active{background:var(--accent); color:var(--accent-contrast); border-color:var(--accent)}
+
+/* ---- برچسب‌های ریز زیر نام کالا ---- */
+.item-sub{display:flex; flex-wrap:wrap; align-items:center; gap:6px; line-height:1.3}
+.item-sub > *{margin-top:3px}
+.item-tag{font-size:10.5px; color:var(--muted); font-weight:500}
+.item-incart{
+  font-size:11px; font-weight:700; color:var(--success);
+  background:rgba(18,161,80,.12); padding:1px 7px; border-radius:6px;
+}
+.item.in-cart{border-right:3px solid var(--success)}
+
+/* ---- یادآوری «این کالا در سبد هست» داخل مودال ---- */
+.incart-note{
+  display:none; margin:0 0 14px; padding:8px 12px;
+  border:1px solid var(--success); border-radius:var(--r-sm);
+  background:rgba(18,161,80,.1); color:var(--success);
+  font-size:13px; font-weight:700; line-height:1.7; text-align:center;
 }
 
 .status{text-align:center; color:var(--muted); font-size:var(--fs-sm); padding:16px 12px}
@@ -333,6 +376,8 @@ input[type=number]{-moz-appearance:textfield}
 <!-- ================= نوار بالا ================= -->
 <div class="topbar">
 
+  <div class="seller-bar" id="sellerBar">نسخه مخصوص فروشنده</div>
+
   <div class="search-row">
     <div class="search" id="searchWrap">
       <span class="s-icon">
@@ -345,6 +390,12 @@ input[type=number]{-moz-appearance:textfield}
     </div>
 
     <button class="icon-btn" id="themeBtn" onclick="cycleTheme()" aria-label="تغییر تم"></button>
+  </div>
+
+  <div class="sort-row" id="sortRow">
+    <span class="sort-label">مرتب‌سازی:</span>
+    <button class="sort-btn" id="sortAsc" onclick="setSort('asc')" aria-pressed="false">ارزان به گران</button>
+    <button class="sort-btn" id="sortDesc" onclick="setSort('desc')" aria-pressed="false">گران به ارزان</button>
   </div>
 
   <div class="chips">
@@ -379,6 +430,7 @@ input[type=number]{-moz-appearance:textfield}
     <div class="sheet-head" id="modalItemName">نام کالا</div>
     <div class="sheet-body">
       <span class="meta-pill" id="modalItemPrice">قیمت واحد: 0 تومان</span>
+      <div class="incart-note" id="incartNote"></div>
       <div class="qty">
         <button onclick="changeQty(1)" aria-label="افزایش">+</button>
         <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="تعداد" id="modalQty" value="1"
@@ -388,7 +440,7 @@ input[type=number]{-moz-appearance:textfield}
       <div class="total-line" id="modalTotal">جمع کل: 0 تومان</div>
     </div>
     <div class="sheet-foot">
-      <button class="btn btn-primary" onclick="addToCart()">افزودن به سبد سفارش</button>
+      <button class="btn btn-primary" id="addBtn" onclick="addToCart()">افزودن به سبد سفارش</button>
       <button class="btn btn-ghost" onclick="closeModal('orderModal')">انصراف</button>
     </div>
   </div>
@@ -687,12 +739,17 @@ function haptic(style){
 var allItems = [];
 var STORAGE_OK = (function(){ try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }catch(e){ return false; } })();
 /* حالت ویژه (صندوق): با لینک یا کلمهٔ مخفی در کادر جستجو روشن/خاموش می‌شود و در حافظهٔ همان گوشی می‌ماند.
-   فقط محدودیت‌های تعداد (حداقل/بسته) و حداقل مبلغ فاکتور را کنار می‌گذارد؛ هیچ نشانه‌ای در خروجی نمی‌گذارد. */
+   فقط محدودیت‌های تعداد (حداقل/بسته) و حداقل مبلغ فاکتور را کنار می‌گذارد؛ هیچ نشانه‌ای در خروجی نمی‌گذارد (فقط روی صفحهٔ خود فروشنده نوار «نسخه مخصوص فروشنده» دیده می‌شود). */
 var CASHIER_WORD = 'kasa58x';   // برای تغییر کلمهٔ مخفی/پارامتر لینک فقط همین مقدار را عوض کنید (حروف کوچک انگلیسی و عدد)
 var CASHIER = (safeGetLS('plView') === '1');
+function applyCashierUI(){
+  document.body.classList.toggle('seller-mode', CASHIER);
+  if(typeof syncTopbarH === 'function') syncTopbarH();
+}
 function setCashier(on){
   CASHIER = !!on;
   safeSetLS('plView', CASHIER ? '1' : '0');
+  applyCashierUI();
   try{
     var d = document.createElement('div');
     d.textContent = CASHIER ? '\u2713' : '\u00d7';
@@ -788,7 +845,7 @@ setTimeout(loadProducts, 0);
    ============================================================ */
 function initSliders(){
   var brandsList = [].concat(Array.from(new Set([
-    "یکشین","فابر","استدلر","زبرا","سی کلاس","سهند","لاکسر","گلف","کویلو","وحدت","کرونا","اطلس",
+    "یکشین","فابر","استدلر","زبرا","سیکلاس","سهند","لاکسر","گلف","کویلو","وحدت","کرونا","اطلس",
     "مدیر","صدف","سومر","وردا","وشکو","هیرو","کیکو","سویل","پیداکس","آرتلاین","میکرو","ام کیو",
     "موربیت","کملیون","اعتدال","سوپر باند","پرشیا","سلنا","کیان","ادمیرال","اسکول مکس","کانکس",
     "رازی","فکتیس","پنتر","آریا","فابل","پیکاسو","بنیتو","پالمو","ماین","ووک","آذین","پلیکان",
@@ -799,7 +856,7 @@ function initSliders(){
     "پست ایت","مداد مشکی","مداد قرمز","دفتر منگنه","مداد رنگی","چسب 5 سانت","چسب نواری 36",
     "خودکار","پانچ","تراش","جامدادی","پوشه دکمه دار","قمقمه","کلاسور","دفتر","دفترچه","غلط گیر",
     "لاک نواری","یدک کلاسور","ماشین حساب","باطری","دوخت","سوزن","کیف فایل","کلربوک","کاور",
-    "ماژیک فسفری","ماژیک وایت برد","ماژیک معمولی","خمیر","ساک دستی","گواش","آبرنگ","رنگ انگشتی",
+    "ماژیک هایلایتر","ماژیک وایت برد","ماژیک معمولی","خمیر","ساک دستی","گواش","آبرنگ","رنگ انگشتی",
     "پاک کن","راپید","بوم","پرگار","چسب ماتیکی","چراغ مطالعه","روان","مداد طراحی","قلمو","کاغذ نقدی"
   ])));
 
@@ -874,6 +931,8 @@ function setupMarqueeTouchAndAuto(elementId, speed){
   }, 150);
 }
 
+applyCashierUI();
+
 /* ============================================================
    ۳) جستجو
    ============================================================ */
@@ -894,6 +953,26 @@ function clearSearch(){
 function toggleClearBtn(){
   var v = document.getElementById("myInput").value;
   document.getElementById("searchWrap").classList.toggle('has-value', !!v);
+  updateSortUI();
+}
+
+/* مرتب‌سازی قیمت: فقط وقتی چیزی جستجو شده نمایش داده می‌شود و با خالی شدن جستجو ریست می‌شود */
+var sortMode = '';   // '' = ترتیب پیش‌فرض | 'asc' = ارزان به گران | 'desc' = گران به ارزان
+function updateSortUI(){
+  var has = !!document.getElementById("myInput").value.trim();
+  if(!has) sortMode = '';
+  var wasSearching = document.body.classList.contains('searching');
+  document.body.classList.toggle('searching', has);
+  var a = document.getElementById('sortAsc'), d = document.getElementById('sortDesc');
+  if(a){ a.classList.toggle('active', sortMode === 'asc');  a.setAttribute('aria-pressed', sortMode === 'asc'); }
+  if(d){ d.classList.toggle('active', sortMode === 'desc'); d.setAttribute('aria-pressed', sortMode === 'desc'); }
+  if(wasSearching !== has) syncTopbarH();
+}
+function setSort(mode){
+  sortMode = (sortMode === mode) ? '' : mode;
+  updateSortUI();
+  doSearch();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /* ============================================================
@@ -1001,11 +1080,16 @@ function flushSearch(){ if(searchPending) doSearch(); }
 function doSearch(){
   clearTimeout(searchTimeout); searchPending = false;
   var val = normalize(document.getElementById("myInput").value).trim();
-  if(!val){ showItems(allItems); return; }
+  if(!val){ updateSortUI(); showItems(allItems); return; }
   var words = val.split(/\s+/);
   var filtered = allItems.filter(function(item){
     return words.every(function(word){ return item.sn.indexOf(word) > -1; });
   });
+  /* مرتب‌سازی روی «همهٔ» نتایج انجام می‌شود، قبل از محدودیت ۱۵۰ مورد نمایش */
+  if(sortMode){
+    var dir = (sortMode === 'asc') ? 1 : -1;
+    filtered = filtered.slice().sort(function(a, b){ return (a.p - b.p) * dir || (a.id - b.id); });
+  }
   showItems(filtered);
 }
 
@@ -1082,12 +1166,18 @@ function showItems(items){
 
   var limit = Math.min(items.length, 150);
   var html = "";
+  reloadCart();
+  var cartQty = cartQtyMap();
   for(var i=0;i<limit;i++){
     var it  = items[i];
+    var inQ = cartQty[it.code] || 0;
 
-    html += '<div class="item" id="it-' + it.id + '" role="option" data-id="' + it.id + '" onclick="openOrderModalByIndex(' + it.id + ')">' +
+    html += '<div class="item' + (inQ ? ' in-cart' : '') + '" id="it-' + it.id + '" role="option" data-id="' + it.id + '" onclick="openOrderModalByIndex(' + it.id + ')">' +
               '<div class="item-main">' +
                 '<span class="item-name">' + escapeHTML(it.n) + '</span>' +
+                '<div class="item-sub">' + qtyTagHTML(it) +
+                  '<span class="item-incart"' + (inQ ? '' : ' hidden') + '>' + (inQ ? '\u2713 \u062f\u0631 \u0633\u0628\u062f: ' + inQ : '') + '</span>' +
+                '</div>' +
               '</div>' +
               '<span class="item-price">' + formatToToman(it.p) + '</span>' +
             '</div>';
@@ -1096,6 +1186,36 @@ function showItems(items){
   activeIdx = -1;
   if(kbdMode && document.getElementById("myInput").value.trim()) setActive(0, false);
   statusEl.innerText = "نمایش " + limit + " مورد از " + items.length + " کالا (برای سفارش کلیک کنید)";
+}
+
+/* برچسب ریز حداقل سفارش / تعداد در بسته زیر نام کالا */
+function qtyTagHTML(it){
+  var t = "";
+  if(it.minOrder > 0 && it.step > 0) t = "حداقل " + it.minOrder + " \u00b7 بسته " + it.step + " تایی";
+  else if(it.step > 0)               t = "بسته " + it.step + " عددی";
+  else if(it.minOrder > 0)           t = "حداقل " + it.minOrder + " عدد";
+  return t ? '<span class="item-tag">' + t + '</span>' : '';
+}
+/* نقشهٔ کد کالا ← تعداد در سبد */
+function cartQtyMap(){
+  var m = {};
+  for(var i=0;i<cart.length;i++) m[cart[i].code] = cart[i].qty;
+  return m;
+}
+/* نشان «در سبد» روی ردیف‌های همین لحظهٔ لیست، بدون رندر دوباره */
+function updateListBadges(){
+  var rows = document.querySelectorAll('#itemList .item[data-id]');
+  if(!rows.length) return;
+  var m = cartQtyMap();
+  for(var i=0;i<rows.length;i++){
+    var it = allItems[parseInt(rows[i].getAttribute('data-id'), 10)];
+    var b  = rows[i].querySelector('.item-incart');
+    if(!it || !b) continue;
+    var q = m[it.code] || 0;
+    rows[i].classList.toggle('in-cart', !!q);
+    b.hidden = !q;
+    b.textContent = q ? '\u2713 \u062f\u0631 \u0633\u0628\u062f: ' + q : '';
+  }
 }
 
 function formatToToman(n){
@@ -1180,6 +1300,15 @@ function openOrderModal(item){
   document.getElementById("modalItemName").innerText  = item.n;
   document.getElementById("modalItemPrice").innerText = "قیمت واحد: " + formatToToman(item.p) + extra;
   document.getElementById("modalQty").value = currentItemDefaultQty;
+  var noteEl = document.getElementById("incartNote"), addBtn = document.getElementById("addBtn");
+  if(existing){
+    noteEl.textContent = "\u2713 این کالا الان " + existing.qty + " عدد در سبد هست؛ تعداد جدید جایگزین آن می‌شود";
+    noteEl.style.display = "block";
+    addBtn.textContent = "ثبت تعداد جدید (جایگزین " + existing.qty + " عدد قبلی)";
+  }else{
+    noteEl.style.display = "none";
+    addBtn.textContent = "افزودن به سبد سفارش";
+  }
   calcTotal();
   openModal("orderModal");
   haptic('light');
@@ -1264,6 +1393,7 @@ function updateCartQty(code, change){
   if(cart.length === 0) closeModal('cartModal');
 }
 function updateCartUI(){
+  updateListBadges();
   var fab   = document.getElementById("cartFab");
   var badge = document.getElementById("cartBadge");
   if(cart.length > 0){ fab.style.display = "flex"; badge.innerText = cart.length; }
