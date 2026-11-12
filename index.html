@@ -369,6 +369,30 @@ body.searching .sort-row{display:flex}
 }
 .note{font-size:13.5px; line-height:1.9; color:var(--text); text-align:center}
 .note b{color:var(--success)}
+/* ===== ورودی صوتی ===== */
+.icon-btn.listening{background:var(--danger); color:#fff; border-color:var(--danger); animation:micPulse 1.1s ease-in-out infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(var(--danger-rgb),.45)}50%{box-shadow:0 0 0 7px rgba(var(--danger-rgb),0)}}
+.voice-bar{
+  display:none; align-items:center; gap:8px;
+  background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-md);
+  padding:6px 10px; font-size:12.5px; line-height:1.6;
+}
+.voice-bar.err{border-color:rgba(var(--danger-rgb),.45); color:var(--danger)}
+.voice-bar span{flex:1; min-width:0}
+.voice-bar button{
+  flex:none; width:24px; height:24px; border:none; border-radius:50%;
+  background:var(--border); color:var(--muted); cursor:pointer; font-size:12px;
+  display:flex; align-items:center; justify-content:center;
+}
+/* میکروفون فقط در حالت صندوق دیده می‌شود (برای همه‌کردن: این دو خط را حذف کنید) */
+#micBtn{display:none}
+body.seller-mode #micBtn{display:flex}
+.voice-hint{
+  display:none; margin:0 0 14px; padding:8px 12px;
+  border:1px solid #f59e0b; border-radius:var(--r-sm);
+  background:rgba(245,158,11,.12); color:var(--text);
+  font-size:12.5px; font-weight:600; line-height:1.7; text-align:center;
+}
 </style>
 </head>
 <body>
@@ -389,8 +413,12 @@ body.searching .sort-row{display:flex}
       </button>
     </div>
 
+    <button class="icon-btn" id="micBtn" onclick="toggleVoice()" aria-label="ثبت سفارش صوتی" title="ثبت سفارش صوتی">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+    </button>
     <button class="icon-btn" id="themeBtn" onclick="cycleTheme()" aria-label="تغییر تم"></button>
   </div>
+  <div class="voice-bar" id="voiceBar" role="status" aria-live="polite"><span id="voiceText"></span><button onclick="closeVoiceBar()" aria-label="بستن">✕</button></div>
 
   <div class="sort-row" id="sortRow">
     <span class="sort-label">مرتب‌سازی:</span>
@@ -431,6 +459,7 @@ body.searching .sort-row{display:flex}
     <div class="sheet-body">
       <span class="meta-pill" id="modalItemPrice">قیمت واحد: 0 تومان</span>
       <div class="incart-note" id="incartNote"></div>
+      <div class="voice-hint" id="voiceHint"></div>
       <div class="qty">
         <button onclick="changeQty(1)" aria-label="افزایش">+</button>
         <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="تعداد" id="modalQty" value="1"
@@ -1069,6 +1098,7 @@ function debouncedSearch(){
   if(inp && inp.value.trim().toLowerCase() === CASHIER_WORD){
     inp.value = ''; setCashier(!CASHIER); toggleClearBtn(); showItems(allItems); return;
   }
+  if(pendingQty != null) closeVoiceBar();   // کاربر خودش دوباره جستجو کرد: عدد گفته‌شده منتفی است
   toggleClearBtn();
   clearTimeout(searchTimeout);
   searchPending = true;
@@ -1292,6 +1322,23 @@ function openOrderModal(item){
   var existing = cart.find(function(c){ return c.code === item.code; });
   currentItemDefaultQty = existing ? existing.qty : qtyFloor();
 
+  /* ورودی صوتی: عدد گفته‌شده یک بار مصرف می‌شود. حالت صندوق همان عدد را می‌پذیرد؛ غیر صندوق مثل تایپ دستی گرد می‌شود */
+  var spoken = (typeof pendingQty !== 'undefined') ? pendingQty : null;
+  var voiceHintText = '';
+  if(spoken != null){
+    pendingQty = null;
+    var ruled = roundUpQty(spoken, currentItemStep, currentItemMinOrder);
+    currentItemDefaultQty = CASHIER ? spoken : ruled;
+    if(ruled !== spoken){
+      var rule = [];
+      if(currentItemMinOrder > 0) rule.push('حداقل سفارش ' + currentItemMinOrder);
+      if(currentItemStep > 0)     rule.push('بستهٔ ' + currentItemStep + 'تایی');
+      voiceHintText = CASHIER
+        ? '🎙 گفتی ' + spoken + ' عدد؛ در حالت صندوق همان ' + spoken + ' ثبت می‌شود (' + rule.join('، ') + ')'
+        : '🎙 گفتی ' + spoken + ' عدد ← ' + ruled + ' ثبت شد (' + rule.join('، ') + ')';
+    }
+  }
+
   var extra = "";
   if(currentItemStep > 0 && currentItemMinOrder > 0) extra = " | حداقل سفارش: " + currentItemMinOrder + " عدد، سپس هر بار " + currentItemStep + " عدد";
   else if(currentItemStep > 0)                       extra = " | فروش بسته‌ای: هر بار " + currentItemStep + " عدد";
@@ -1309,6 +1356,9 @@ function openOrderModal(item){
     noteEl.style.display = "none";
     addBtn.textContent = "افزودن به سبد سفارش";
   }
+  var vhEl = document.getElementById("voiceHint");
+  vhEl.textContent = voiceHintText;
+  vhEl.style.display = voiceHintText ? "block" : "none";
   calcTotal();
   openModal("orderModal");
   haptic('light');
@@ -1363,6 +1413,7 @@ function addToCart(){
   saveCart();
   updateCartUI();
   closeModal('orderModal');
+  closeVoiceBar();
   haptic('medium');
   if(kbdMode) focusSearch(true);   // دسکتاپ: برگشت به جستجو با متن انتخاب‌شده، آمادهٔ کالای بعدی
 }
@@ -1706,6 +1757,224 @@ setTimeout(syncTopbarH, 80);
 
 /* دسکتاپ: صفحه که باز شد مستقیم داخل جستجو باشیم (روی موبایل نه، چون کیبورد بی‌دلیل باز می‌شود) */
 if(kbdMode) setTimeout(function(){ if(!openModals.length) focusSearch(false); }, 120);
+
+/* ============================================================
+   ۹) ثبت سفارش صوتی (فارسی، سرویس تشخیص گفتار مرورگر/گوگل)
+   مثال: «۵۰ تا خودکار کیان» ← تعداد ۵۰ + جستجوی «خودکار کیان»
+   ============================================================ */
+var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+var pendingQty = null;
+var recog = null, listening = false, voiceFinal = '', voiceErr = '', voiceTimer = null;
+
+var NUM_WORDS = {
+  'صفر':0,'یک':1,'دو':2,'سه':3,'چهار':4,'پنج':5,'شش':6,'شیش':6,'هفت':7,'هشت':8,'نه':9,'ده':10,
+  'یازده':11,'دوازده':12,'سیزده':13,'چهارده':14,'پانزده':15,'پونزده':15,'شانزده':16,'شونزده':16,
+  'هفده':17,'هجده':18,'نوزده':19,'بیست':20,'سی':30,'چهل':40,'پنجاه':50,'شصت':60,'هفتاد':70,'هشتاد':80,'نود':90,
+  'صد':100,'یکصد':100,'دویست':200,'سیصد':300,'چهارصد':400,'پانصد':500,'پونصد':500,'ششصد':600,'هفتصد':700,'هشتصد':800,'نهصد':900,
+  'هزار':1000
+};
+var QTY_MARKERS = { 'تا':1, 'عدد':1, 'دانه':1, 'تایی':1 };
+var STOP_WORDS  = { 'لطفا':1,'ثبت':1,'بزن':1,'بزنید':1,'اضافه':1,'بده':1,'بذار':1,'بگذار':1,'میخوام':1,'میخواهم':1,'رو':1,'را':1 };
+
+function isNumTok(t){ return /^\d+$/.test(t) || Object.prototype.hasOwnProperty.call(NUM_WORDS, t); }
+function runValue(toks){
+  var cur = 0, total = 0;
+  for(var i=0;i<toks.length;i++){
+    var t = toks[i];
+    if(t === 'و') continue;
+    if(/^\d+$/.test(t)){ cur += parseInt(t,10); continue; }
+    var v = NUM_WORDS[t];
+    if(v === 1000){ total += (cur || 1) * 1000; cur = 0; }
+    else cur += v;
+  }
+  return total + cur;
+}
+/* پیدا کردن دنباله‌های عددی (رقم یا حروف) در آرایهٔ کلمه‌ها؛ هر دنباله: {s, e, val} با e انحصاری */
+function findNumberRuns(tokens){
+  var runs = [], i = 0;
+  while(i < tokens.length){
+    if(isNumTok(tokens[i])){
+      var j = i + 1;
+      while(j < tokens.length){
+        if(isNumTok(tokens[j])) j++;
+        else if(tokens[j] === 'و' && j+1 < tokens.length && isNumTok(tokens[j+1])) j += 2;
+        else break;
+      }
+      /* اعداد حرفی و رقمی را قاطی نکن؛ دنبالهٔ رقمی تکی بماند */
+      runs.push({ s:i, e:j, val:runValue(tokens.slice(i, j)) });
+      i = j;
+    }else i++;
+  }
+  return runs;
+}
+
+/* متن گفته‌شده ← { qty, words } */
+function parseSpoken(raw){
+  var t = normalize(raw)
+    .replace(/(\d)[,٬،](?=\d{3}\b)/g, '$1')
+    .replace(/[.,،؟?!؛:;"“”«»()\-–—]/g, ' ')
+    .replace(/(\d)(تایی|تا|عدد|دانه)(?=\s|$)/g, '$1 $2')     // 50تا
+    .trim();
+  var tokens = t.split(/\s+/).filter(Boolean);
+  /* «دوتا» «پنجتا» «سه‌تا» (بعد از نرمال‌سازی «سهتا») */
+  var exp = [];
+  tokens.forEach(function(tk){
+    var m = tk.match(/^(.+?)(تایی|تا)$/);
+    if(m && !Object.prototype.hasOwnProperty.call(QTY_MARKERS, tk) && Object.prototype.hasOwnProperty.call(NUM_WORDS, m[1])){ exp.push(m[1], m[2]); }
+    else exp.push(tk);
+  });
+  tokens = exp.filter(function(tk, i){
+    if(STOP_WORDS[tk]) return false;
+    if((tk === 'کن' || tk === 'کنید') && i > 0 && (exp[i-1] === 'ثبت' || exp[i-1] === 'اضافه')) return false;
+    return true;
+  });
+
+  var runs = findNumberRuns(tokens), qtyRun = null, markerAt = -1;
+  for(var r=0;r<runs.length;r++){                       // ۱) عددی که بلافاصله بعدش «تا/عدد/دانه» آمده
+    var nx = tokens[runs[r].e];
+    if(nx && QTY_MARKERS[nx]){ qtyRun = runs[r]; markerAt = runs[r].e; break; }
+  }
+  if(!qtyRun && runs.length && runs[0].s === 0 && /^\d+$/.test(tokens[0])) qtyRun = runs[0];   // ۲) عدد رقمی اول جمله («۵۰ خودکار کیان»)؛ برای عدد حرفی حتماً «تا» لازم است چون «سی کلاس» نام برند است
+  var qty = null;
+  if(qtyRun && qtyRun.val >= 1 && qtyRun.val <= 99999) qty = qtyRun.val; else qtyRun = null;
+
+  var words = [];
+  for(var k=0;k<tokens.length;k++){
+    if(qtyRun && k >= qtyRun.s && k < qtyRun.e) continue;
+    if(qtyRun && k === markerAt) continue;
+    words.push(tokens[k]);
+  }
+  var rawWords = words.slice();
+  /* عددهای حرفی باقی‌مانده در نام کالا («دوازده رنگ») ← رقم، چون در لیست رقمی نوشته شده‌اند */
+  var out = [], rr = findNumberRuns(words), p = 0;
+  for(var q=0;q<words.length;){
+    var run = null;
+    for(var z=0;z<rr.length;z++) if(rr[z].s === q){ run = rr[z]; break; }
+    if(run){ out.push(String(run.val)); q = run.e; } else { out.push(words[q]); q++; }
+  }
+  return { qty: qty, words: out, rawWords: rawWords };
+}
+
+/* ---------- نوار پیام ---------- */
+function showVoiceMsg(text, isErr, autoHideMs){
+  var bar = document.getElementById('voiceBar');
+  document.getElementById('voiceText').textContent = text;
+  bar.classList.toggle('err', !!isErr);
+  bar.style.display = 'flex';
+  clearTimeout(voiceTimer);
+  if(autoHideMs) voiceTimer = setTimeout(closeVoiceBar, autoHideMs);
+  syncTopbarH();
+}
+function closeVoiceBar(){
+  pendingQty = null;
+  clearTimeout(voiceTimer);
+  var bar = document.getElementById('voiceBar');
+  if(bar && bar.style.display !== 'none'){ bar.style.display = 'none'; syncTopbarH(); }
+}
+
+/* ---------- پردازش نتیجه ---------- */
+function processVoice(text){
+  var res = parseSpoken(text);
+  var input = document.getElementById('myInput');
+  if(!res.words.length){
+    showVoiceMsg('«' + text + '» ← اسم کالا تشخیص داده نشد، دوباره بگو', true, 5000);
+    return;
+  }
+  function matchAll(ws){ return allItems.filter(function(it){ return ws.every(function(w){ return it.sn.indexOf(w) > -1; }); }); }
+  /* اول کلمه‌ها همان‌طور که گفته شد (مثل برند «سی کلاس»)، بعد با تبدیل عدد حرفی به رقم («دوازده رنگ» ← 12) */
+  var words = res.rawWords, exact = matchAll(words);
+  if(!exact.length && res.words.join(' ') !== words.join(' ')){
+    var ex2 = matchAll(res.words);
+    if(ex2.length){ words = res.words; exact = ex2; }
+  }
+  if(!exact.length) words = res.words;
+  input.value = words.join(' ');
+  toggleClearBtn();
+  updateSortUI();
+  doSearch();
+  var qtyTxt = res.qty ? 'تعداد ' + res.qty : 'بدون تعداد';
+  pendingQty = res.qty;
+
+  if(!exact.length){
+    /* نزدیک‌ترین‌ها: بیشترین تعداد کلمهٔ منطبق */
+    var best = 0, scored = allItems.map(function(it){
+      var sc = words.filter(function(w){ return it.sn.indexOf(w) > -1; }).length;
+      if(sc > best) best = sc; return { it: it, sc: sc };
+    });
+    if(best >= 1 && words.length >= 2){
+      showItems(scored.filter(function(x){ return x.sc === best; }).map(function(x){ return x.it; }));
+      showVoiceMsg('«' + text + '» ← نتیجهٔ دقیق نبود، نزدیک‌ترین‌ها نمایش داده شد · ' + qtyTxt + ' · کالای درست را انتخاب کن', false);
+    }else{
+      showVoiceMsg('«' + text + '» ← کالایی پیدا نشد', true, 6000);
+      pendingQty = null;
+    }
+    return;
+  }
+  if(exact.length === 1){
+    showVoiceMsg('«' + text + '» ← ' + qtyTxt + ' · ' + exact[0].n, false);
+    openOrderModalByIndex(exact[0].id);   // عدد گفته‌شده داخل openOrderModal مصرف می‌شود
+  }else{
+    showVoiceMsg('«' + text + '» ← ' + qtyTxt + ' · ' + exact.length + ' کالا پیدا شد، کالای مورد نظر را انتخاب کن', false);
+    if(kbdMode) setActive(0, true);
+  }
+}
+
+/* ---------- ضبط ---------- */
+var VOICE_ERRORS = {
+  'not-allowed':'اجازهٔ میکروفون داده نشده است',
+  'service-not-allowed':'اجازهٔ میکروفون یا سرویس تشخیص گفتار در این برنامه فعال نیست',
+  'audio-capture':'میکروفون پیدا نشد',
+  'network':'اتصال به سرویس تشخیص گفتار (گوگل) برقرار نشد؛ اینترنت یا فیلتر را بررسی کن',
+  'no-speech':'صدایی شنیده نشد، دوباره امتحان کن',
+  'language-not-supported':'زبان فارسی در این دستگاه پشتیبانی نمی‌شود'
+};
+function toggleVoice(){
+  if(!SpeechRec){
+    showVoiceMsg('ورودی صوتی در این برنامه/مرورگر پشتیبانی نمی‌شود. می‌توانی از میکروفون کیبورد گوشی داخل کادر جستجو استفاده کنی.', true, 7000);
+    focusSearch(false);
+    return;
+  }
+  if(listening){ try{ recog.stop(); }catch(e){} return; }
+  startVoice();
+}
+function startVoice(){
+  var mic = document.getElementById('micBtn');
+  voiceFinal = ''; voiceErr = '';
+  closeVoiceBar();
+  try{
+    recog = new SpeechRec();
+    recog.lang = 'fa-IR';
+    recog.interimResults = true;
+    recog.continuous = false;
+    recog.maxAlternatives = 1;
+  }catch(e){ showVoiceMsg('شروع ورودی صوتی ممکن نشد', true, 5000); return; }
+
+  recog.onstart = function(){
+    listening = true; mic.classList.add('listening'); haptic('light');
+    showVoiceMsg('🎙 در حال شنیدن... مثلاً «۵۰ تا خودکار کیان»', false);
+  };
+  recog.onresult = function(ev){
+    var interim = '';
+    for(var i=ev.resultIndex;i<ev.results.length;i++){
+      var r = ev.results[i];
+      if(r.isFinal) voiceFinal += ' ' + r[0].transcript; else interim += r[0].transcript;
+    }
+    showVoiceMsg('🎙 ' + (voiceFinal + ' ' + interim).trim(), false);
+  };
+  recog.onerror = function(ev){ voiceErr = ev && ev.error ? ev.error : 'error'; };
+  recog.onend = function(){
+    listening = false; mic.classList.remove('listening'); recog = null;
+    var txt = voiceFinal.trim();
+    if(voiceErr && voiceErr !== 'aborted'){
+      showVoiceMsg(VOICE_ERRORS[voiceErr] || ('خطا در ورودی صوتی (' + voiceErr + ')'), true, 7000);
+      return;
+    }
+    if(!txt){ showVoiceMsg('صدایی شنیده نشد، دوباره امتحان کن', true, 4000); return; }
+    processVoice(txt);
+  };
+  try{ recog.start(); }
+  catch(e){ listening = false; mic.classList.remove('listening'); showVoiceMsg('شروع ورودی صوتی ممکن نشد', true, 5000); }
+}
 </script>
 </body>
 </html>
