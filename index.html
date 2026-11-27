@@ -1125,7 +1125,10 @@ var SYN_RULES = {
   words: {
     'فسفری': ['هایلایتر'],
     'باتری': ['باطری'],
-    'مارکر': ['ماژیک']
+    'مارکر': ['ماژیک'],
+    'کلیربوک': ['کلربوک'],
+    'اکریلیک': ['اکرولیک'],
+    'اکرویلیک': ['اکرولیک']
   },
   /* گروه معادل: هر کدام را بزنند، همهٔ آن‌ها جستجو می‌شوند */
   groups: [
@@ -1134,12 +1137,35 @@ var SYN_RULES = {
   /* عبارت ← عبارت (چند املا برای یک عبارت مجاز است) */
   phrases: [
     { from: ['ماژیک پرمننت', 'ماژیک پرمنت', 'ماژیک پرمانت'], to: 'ماژیک معمولی' },
-    { from: ['مداد نوکی', 'مدادنوکی'], to: 'اتود' }
+    { from: ['مداد نوکی', 'مدادنوکی'], to: 'اتود' },
+    { from: ['کلیر بوک'], to: 'کلربوک' }
+  ],
+  /* یکی هستند: جدا یا سرهم فرقی ندارد و نتیجه‌ها با اولویت برابر می‌آیند */
+  same: [
+    ['وایت برد', 'وایتبرد'],
+    ['ماشین حساب', 'ماشینحساب'],
+    ['روان نویس', 'رواننویس'],
+    ['غلط گیر', 'غلطگیر'],
+    ['خط کش', 'خطکش'],
+    ['سی دی', 'سیدی']
+  ],
+  /* شبیه هم: هر کدام را بزنند اول نتیجه‌های خودش می‌آید، بعد نتیجه‌های آن یکی (با حفظ اولویت) */
+  similar: [
+    [ ['خودکار'], ['روان نویس', 'رواننویس'] ]
   ],
   /* اگر کلمه جایگزین دارد، خودِ کلمهٔ تایپ‌شده کمی پایین‌تر از جایگزین بنشیند */
   preferAlias: ['فسفری']
 };
 var ALIAS = {}, ALIAS_PH = [], ALIAS_PREFER = {}, aliasReady = false;
+var SIMILAR_TIER = 1000;     // نتیجه‌های «شبیه» همیشه بعد از نتیجه‌های خودِ کلمهٔ تایپ‌شده می‌آیند
+function addPhrase(fromForms, toForms, tier){
+  fromForms.forEach(function(f){
+    toForms.forEach(function(t){
+      var fw = prepText(f).split(' '), tw = prepText(t).split(' ');
+      if(fw.join(' ') !== tw.join(' ')) ALIAS_PH.push({ from: fw, to: tw, tier: tier });
+    });
+  });
+}
 function initAliases(){
   if(aliasReady) return; aliasReady = true;
   var k;
@@ -1148,9 +1174,9 @@ function initAliases(){
     var pg = g.map(prepText);
     pg.forEach(function(w){ ALIAS[w] = (ALIAS[w] || []).concat(pg.filter(function(x){ return x !== w; })); });
   });
-  SYN_RULES.phrases.forEach(function(ph){
-    ALIAS_PH.push({ from: ph.from.map(function(f){ return prepText(f).split(' '); }), to: prepText(ph.to).split(' ') });
-  });
+  SYN_RULES.phrases.forEach(function(ph){ addPhrase(ph.from, [ph.to], 0); });
+  SYN_RULES.same.forEach(function(set){ addPhrase(set, set, 0); });
+  SYN_RULES.similar.forEach(function(pair){ addPhrase(pair[0], pair[1], SIMILAR_TIER); addPhrase(pair[1], pair[0], SIMILAR_TIER); });
   SYN_RULES.preferAlias.forEach(function(w){ ALIAS_PREFER[prepText(w)] = 1; });
 }
 
@@ -1204,17 +1230,20 @@ function scoreItem(it, groups, relaxed, phrase){
   return total + Math.max(0, 12 - it.tk.length);                        // نام کوتاه‌تر کمی جلوتر
 }
 
-/* variants: چند حالت از یک جستجو (اصلی + جایگزین‌های عبارتی)؛ بهترین امتیاز هر کالا ملاک است */
+/* variants: چند حالت از یک جستجو (اصلی + جایگزین‌ها)؛ بهترین امتیاز هر کالا ملاک است.
+   variant.tier عددی است که از امتیاز کم می‌شود تا نتیجه‌های آن حالت همیشه بعد از حالت‌های دیگر بیایند */
 function searchItems(variants, relaxed){
-  var meta = variants.map(function(g){ return { g: g, ph: g.map(function(x){ return x[0]; }).join(' ') }; });
+  var meta = variants.map(function(g){ return { g: g, tier: g.tier || 0, ph: g.map(function(x){ return x[0]; }).join(' ') }; });
   var out = [], i, v, sc, best;
   for(i=0;i<allItems.length;i++){
-    best = -1;
+    best = null;
     for(v=0;v<meta.length;v++){
       sc = scoreItem(allItems[i], meta[v].g, relaxed, meta[v].ph);
-      if(sc > best) best = sc;
+      if(sc < 0) continue;
+      sc -= meta[v].tier;
+      if(best === null || sc > best) best = sc;
     }
-    if(best >= 0) out.push({ it: allItems[i], s: best });
+    if(best !== null) out.push({ it: allItems[i], s: best });
   }
   out.sort(function(a, b){ return (b.s - a.s) || (a.it.id - b.it.id); });
   return out.map(function(x){ return x.it; });
@@ -1242,14 +1271,14 @@ function buildVariants(words){
   var canon = words.map(function(w){ return ALIAS[w] && SYN_RULES.words[w] !== undefined ? ALIAS[w][0] : w; });
   ALIAS_PH.forEach(function(ph){
     [words, canon].forEach(function(arr){
-      ph.from.forEach(function(f){
-        var at = indexOfSeq(arr, f);
-        if(at < 0) return;
-        var nw = arr.slice(0, at).concat(ph.to, arr.slice(at + f.length));
-        var key = nw.join(' ');
-        if(seen[key]) return; seen[key] = 1;
-        variants.push(nw.map(wordGroup));
-      });
+      var at = indexOfSeq(arr, ph.from);
+      if(at < 0) return;
+      var nw = arr.slice(0, at).concat(ph.to, arr.slice(at + ph.from.length));
+      var key = nw.join(' ') + '|' + ph.tier;
+      if(seen[key]) return; seen[key] = 1;
+      var v = nw.map(wordGroup);
+      v.tier = ph.tier;
+      variants.push(v);
     });
   });
   return variants;
@@ -1307,6 +1336,7 @@ function nearTokens(w){
     if(d <= max) found.push({ t: vocab[i].t, d: d, c: vocab[i].c });
   }
   found.sort(function(a, b){ return (a.d - b.d) || (b.c - a.c); });
+  if(found.length){ var d0 = found[0].d; found = found.filter(function(x){ return x.d === d0; }); }   // فقط نزدیک‌ترین‌ها
   return found.slice(0, 3).map(function(x){ return x.t; });
 }
 /* فقط کلمه‌های ناشناخته اصلاح می‌شوند؛ اگر هیچ کلمه‌ای قابل اصلاح نبود null */
