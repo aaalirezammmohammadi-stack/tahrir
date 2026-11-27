@@ -1116,16 +1116,50 @@ var searchPending = false;
 function flushSearch(){ if(searchPending) doSearch(); }
 /* ============================================================
    موتور جستجوی پیشرفته
-   ۱) مرتب‌سازی بر اساس ارتباط  ۲) بی‌اهمیت بودن فاصله/نیم‌فاصله
-   ۴) تحمل غلط املایی (فقط وقتی نتیجه‌ای نیست)  ۵) مراقبت از عدد و کلمهٔ خیلی کوتاه
-   ۷) هایلایت کلمه‌های جستجوشده
+   ارتباط‌سنجی، عدد و کلمهٔ کوتاه، غلط املایی، مترادف‌ها، اعشار (0/7 = 0.7)، هایلایت
    ============================================================ */
 
-/* متن را برای مقایسه آماده می‌کند: نرمال، حذف علامت‌ها، جدا کردن عدد از حروف (5سانت ← 5 سانت) */
+/* ---------- مترادف‌ها: اینجا ویرایش کن ---------- */
+var SYN_RULES = {
+  /* یک‌طرفه: کلمهٔ تایپ‌شده ← کلمه‌هایی که هم‌زمان جستجو می‌شوند (خود کلمه هم جستجو می‌شود) */
+  words: {
+    'فسفری': ['هایلایتر'],
+    'باتری': ['باطری'],
+    'مارکر': ['ماژیک']
+  },
+  /* گروه معادل: هر کدام را بزنند، همهٔ آن‌ها جستجو می‌شوند */
+  groups: [
+    ['برچسب', 'اتیکت', 'استیکر']
+  ],
+  /* عبارت ← عبارت (چند املا برای یک عبارت مجاز است) */
+  phrases: [
+    { from: ['ماژیک پرمننت', 'ماژیک پرمنت', 'ماژیک پرمانت'], to: 'ماژیک معمولی' },
+    { from: ['مداد نوکی', 'مدادنوکی'], to: 'اتود' }
+  ],
+  /* اگر کلمه جایگزین دارد، خودِ کلمهٔ تایپ‌شده کمی پایین‌تر از جایگزین بنشیند */
+  preferAlias: ['فسفری']
+};
+var ALIAS = {}, ALIAS_PH = [], ALIAS_PREFER = {}, aliasReady = false;
+function initAliases(){
+  if(aliasReady) return; aliasReady = true;
+  var k;
+  for(k in SYN_RULES.words) ALIAS[prepText(k)] = SYN_RULES.words[k].map(prepText);
+  SYN_RULES.groups.forEach(function(g){
+    var pg = g.map(prepText);
+    pg.forEach(function(w){ ALIAS[w] = (ALIAS[w] || []).concat(pg.filter(function(x){ return x !== w; })); });
+  });
+  SYN_RULES.phrases.forEach(function(ph){
+    ALIAS_PH.push({ from: ph.from.map(function(f){ return prepText(f).split(' '); }), to: prepText(ph.to).split(' ') });
+  });
+  SYN_RULES.preferAlias.forEach(function(w){ ALIAS_PREFER[prepText(w)] = 1; });
+}
+
+/* متن را برای مقایسه آماده می‌کند: نرمال، حذف علامت‌ها، جدا کردن عدد از حروف (5سانت ← 5 سانت)،
+   و یکسان کردن اعشار: 0/7 و 0.7 و 0,7 همه می‌شوند 0.7 */
 function prepText(t){
   return normalize(t)
     .replace(/[\u0640\u064b-\u065f]/g, '')                       // کشیده و اعراب
-    .replace(/(\d)\.(?=\d)/g, '$1\u0001')                        // نقطهٔ اعشار (0.7) حفظ شود
+    .replace(/(\d)[.\/,\u066b](?=\d)/g, '$1\u0001')              // اعشار با نقطه، اسلش یا ویرگول
     .replace(/[^a-z0-9\u0001\u0621-\u063a\u0641-\u064a\u066e-\u06d3]+/g, ' ')
     .replace(/\u0001/g, '.')
     .replace(/(\d)(?=[^\d\s.])/g, '$1 ')
@@ -1134,7 +1168,7 @@ function prepText(t){
 }
 
 /* امتیاز یک کلمه برای یک کالا؛ ۰ یعنی پیدا نشد.
-   حالت دقیق: عدد فقط با عدد کامل، کلمهٔ ۱-۲ حرفی فقط با کلمهٔ کامل. حالت آزاد: مثل جستجوی قدیمی (هر تکه‌ای). */
+   حالت دقیق: عدد فقط با عدد کامل، کلمهٔ ۱-۲ حرفی فقط با کلمهٔ کامل. حالت آزاد: هر تکه‌ای از کلمه. */
 function wordScore(it, w, relaxed){
   var tk = it.tk, n = tk.length, best = 0, i, t, sc;
   var num  = /^[\d.]+$/.test(w);
@@ -1152,44 +1186,84 @@ function wordScore(it, w, relaxed){
   return best;
 }
 
-/* groups: آرایه‌ای از گروه‌های جایگزین، مثلاً [['خودکار'],['کیان','کیانی']] ؛ نتیجه -1 یعنی تطبیق ندارد */
-function scoreItem(it, groups, relaxed, phrase, joined){
+/* groups: برای هر کلمه فهرست جایگزین‌ها، مثلاً [['باتری','باطری'],['قلمی']] ؛ نتیجه -1 یعنی تطبیق ندارد */
+function scoreItem(it, groups, relaxed, phrase){
   var total = 0, i, a, sc, bs;
   for(i=0;i<groups.length;i++){
     bs = 0;
-    for(a=0;a<groups[i].length;a++){ sc = wordScore(it, groups[i][a], relaxed); if(sc > bs) bs = sc; }
-    if(!bs){ total = -1; break; }
+    for(a=0;a<groups[i].length;a++){
+      sc = wordScore(it, groups[i][a], relaxed);
+      if(sc && a === 0 && groups[i].pen) sc = Math.max(1, sc - groups[i].pen);
+      if(sc > bs) bs = sc;
+    }
+    if(!bs) return -1;
     total += bs;
   }
-  if(total >= 0){
-    var at = it.sp.indexOf(phrase);
-    if(groups.length > 1 && at > -1) total += 30 + (at === 0 ? 20 : 0);   // عبارت پشت‌سرهم و درست
-    total += Math.max(0, 12 - it.tk.length);                             // نام کوتاه‌تر کمی جلوتر
-    return total;
-  }
-  /* بدون توجه به فاصله: «دفترچه» ↔ «دفتر چه»، «غلطگیر» ↔ «غلط گیر» */
-  if(joined.length >= 4 && !/\d/.test(joined)){   // اگر عدد در عبارت باشد این مسیر غیرفعال است تا «12» داخل «120» نشیند
-    var j = it.sk.indexOf(joined);
-    if(j > -1) return 25 + (j === 0 ? 15 : 0);
-  }
-  return -1;
+  var at = it.sp.indexOf(phrase);
+  if(groups.length > 1 && at > -1) total += 30 + (at === 0 ? 20 : 0);   // عبارت پشت‌سرهم و درست
+  return total + Math.max(0, 12 - it.tk.length);                        // نام کوتاه‌تر کمی جلوتر
 }
 
-function searchItems(groups, relaxed){
-  var firsts = groups.map(function(g){ return g[0]; });
-  var phrase = firsts.join(' '), joined = firsts.join('');
-  var out = [], i, sc;
+/* variants: چند حالت از یک جستجو (اصلی + جایگزین‌های عبارتی)؛ بهترین امتیاز هر کالا ملاک است */
+function searchItems(variants, relaxed){
+  var meta = variants.map(function(g){ return { g: g, ph: g.map(function(x){ return x[0]; }).join(' ') }; });
+  var out = [], i, v, sc, best;
   for(i=0;i<allItems.length;i++){
-    sc = scoreItem(allItems[i], groups, relaxed, phrase, joined);
-    if(sc >= 0) out.push({ it: allItems[i], s: sc });
+    best = -1;
+    for(v=0;v<meta.length;v++){
+      sc = scoreItem(allItems[i], meta[v].g, relaxed, meta[v].ph);
+      if(sc > best) best = sc;
+    }
+    if(best >= 0) out.push({ it: allItems[i], s: best });
   }
   out.sort(function(a, b){ return (b.s - a.s) || (a.it.id - b.it.id); });
   return out.map(function(x){ return x.it; });
 }
 
+/* ---------- ساخت حالت‌های جستجو (مترادف و اعشار) ---------- */
+function wordGroup(w){
+  var g = [w].concat(ALIAS[w] || []);
+  var m = /^([1-9])\.0$/.exec(w);          // 7.0 (که مشتری به‌جای 0.7 می‌نویسد) ← 0.7 هم جستجو شود
+  if(m) g.push('0.' + m[1]);
+  if(ALIAS_PREFER[w] && g.length > 1) g.pen = 30;
+  return g;
+}
+function indexOfSeq(arr, seq){
+  var i, j;
+  for(i=0;i+seq.length<=arr.length;i++){
+    for(j=0;j<seq.length && arr[i+j] === seq[j];j++){}
+    if(j === seq.length) return i;
+  }
+  return -1;
+}
+function buildVariants(words){
+  initAliases();
+  var variants = [ words.map(wordGroup) ], seen = {};
+  var canon = words.map(function(w){ return ALIAS[w] && SYN_RULES.words[w] !== undefined ? ALIAS[w][0] : w; });
+  ALIAS_PH.forEach(function(ph){
+    [words, canon].forEach(function(arr){
+      ph.from.forEach(function(f){
+        var at = indexOfSeq(arr, f);
+        if(at < 0) return;
+        var nw = arr.slice(0, at).concat(ph.to, arr.slice(at + f.length));
+        var key = nw.join(' ');
+        if(seen[key]) return; seen[key] = 1;
+        variants.push(nw.map(wordGroup));
+      });
+    });
+  });
+  return variants;
+}
+function collectWords(variants){
+  var set = {}, out = [];
+  variants.forEach(function(v){ v.forEach(function(g){ g.forEach(function(w){ if(!set[w]){ set[w] = 1; out.push(w); } }); }); });
+  return out;
+}
+
 /* ---------- غلط املایی ---------- */
 var vocab = [];
 function buildVocab(){
+  initAliases();
   var m = {}, i, j, t, tk;
   for(i=0;i<allItems.length;i++){
     tk = allItems[i].tk;
@@ -1198,6 +1272,7 @@ function buildVocab(){
       if(t.length >= 3 && !/^[\d.]+$/.test(t)) m[t] = (m[t] || 0) + 1;
     }
   }
+  Object.keys(ALIAS).forEach(function(k){ if(k.length >= 3 && !m[k]) m[k] = 1; });   // کلمه‌های مترادف هم قابل اصلاح باشند
   vocab = Object.keys(m).map(function(k){ return { t: k, c: m[k] }; });
 }
 /* فاصلهٔ ویرایش (جابه‌جایی دو حرف کنار هم هم یک اشتباه حساب می‌شود) */
@@ -1221,6 +1296,7 @@ function editDist(a, b, max){
   return prev[lb];
 }
 function wordKnown(w){
+  if(ALIAS[w]) return true;
   for(var i=0;i<allItems.length;i++) if(wordScore(allItems[i], w, true)) return true;
   return false;
 }
@@ -1235,15 +1311,17 @@ function nearTokens(w){
 }
 /* فقط کلمه‌های ناشناخته اصلاح می‌شوند؛ اگر هیچ کلمه‌ای قابل اصلاح نبود null */
 function typoFix(words){
-  var groups = [], fixed = [], changed = false, i, w, c;
+  var groups = [], fixed = [], changed = false, i, w, c, g;
   for(i=0;i<words.length;i++){
     w = words[i];
-    if(/^[\d.]+$/.test(w) || w.length < 3 || wordKnown(w)){ groups.push([w]); fixed.push(w); continue; }
+    if(/^[\d.]+$/.test(w) || w.length < 3 || wordKnown(w)){ groups.push(wordGroup(w)); fixed.push(w); continue; }
     c = nearTokens(w);
     if(!c.length) return null;
-    groups.push(c); fixed.push(c[0]); changed = true;
+    g = [];
+    c.forEach(function(x){ wordGroup(x).forEach(function(y){ if(g.indexOf(y) < 0) g.push(y); }); });
+    groups.push(g); fixed.push(c[0]); changed = true;
   }
-  return changed ? { groups: groups, text: fixed.join(' ') } : null;
+  return changed ? { variants: [groups].concat(buildVariants(fixed).slice(1)), text: fixed.join(' ') } : null;
 }
 function applySuggest(el){
   var input = document.getElementById("myInput");
@@ -1265,8 +1343,11 @@ function highlightName(n, words){
     c = normalize(ch);
     chars.push(c.length === 1 ? c : ch); map.push(i);
   }
-  var str = chars.join(''), marks = [], any = false;
-  function mark(from, to){ for(var k=map[from]; k<=map[to]; k++){ marks[k] = 1; } any = true; }
+  for(i=1;i<chars.length-1;i++){      // اعشار: 0/7 مثل 0.7 دیده شود
+    if(/[\/,\u066b]/.test(chars[i]) && isD(chars[i-1]) && isD(chars[i+1])) chars[i] = '.';
+  }
+  var str = chars.join(''), marks = [];
+  function mark(from, to){ for(var k=map[from]; k<=map[to]; k++){ marks[k] = 1; } }
   words.forEach(function(w){
     if(!w) return;
     var num = /^[\d.]+$/.test(w), tiny = !num && w.length <= 2;
@@ -1280,12 +1361,6 @@ function highlightName(n, words){
       pos = str.indexOf(w, pos + 1);
     }
   });
-  if(!any){   /* تطبیق بدون فاصله: جستجوی «دفترچه» در «دفتر چه» */
-    var s2 = '', m2 = [], j;
-    for(j=0;j<chars.length;j++) if(/[a-z0-9.\u0621-\u063a\u0641-\u064a\u066e-\u06d3]/.test(chars[j])){ s2 += chars[j]; m2.push(map[j]); }
-    var jw = words.join(''), p2 = jw.length >= 4 ? s2.indexOf(jw) : -1;
-    if(p2 > -1) for(var k=m2[p2]; k<=m2[p2 + jw.length - 1]; k++) marks[k] = 1;
-  }
   var html = '', open = false;
   for(i=0;i<n.length;i++){
     if(marks[i] && !open){ html += '<mark>'; open = true; }
@@ -1302,18 +1377,19 @@ function doSearch(){
   if(!normalize(raw).trim()){ updateSortUI(); showItems(allItems); return; }
   var q = prepText(raw);
   if(!q){ showItems([]); return; }
-  var words  = q.split(' ');
-  var groups = words.map(function(w){ return [w]; });
-  var note = '', hl = words;
+  var words = q.split(' ');
+  var variants = buildVariants(words);
+  var note = '';
 
-  var res = searchItems(groups, false);                 // ۱) دقیق
-  if(!res.length) res = searchItems(groups, true);      // ۲) آزاد (مثل قبل: هر تکه‌ای از کلمه)
-  if(!res.length){                                      // ۳) غلط املایی
+  var res = searchItems(variants, false);                 // ۱) دقیق
+  if(!res.length) res = searchItems(variants, true);      // ۲) آزاد (هر تکه‌ای از کلمه)
+  var hl = collectWords(variants);
+  if(!res.length){                                        // ۳) غلط املایی
     var fx = typoFix(words);
     if(fx){
-      res = searchItems(fx.groups, true);
+      res = searchItems(fx.variants, true);
       if(res.length){
-        hl = [].concat.apply([], fx.groups);
+        hl = collectWords(fx.variants);
         note = '<div class="didyou" data-q="' + escapeHTML(fx.text) + '" onclick="applySuggest(this)">' +
                'نتیجه‌ای برای «' + escapeHTML(q) + '» نبود؛ نزدیک‌ترین‌ها نمایش داده شد. منظورت <b>' + escapeHTML(fx.text) + '</b> بود؟</div>';
       }
@@ -1356,7 +1432,7 @@ function processData(text){
     if(!isNaN(p) && n && code){
       var spn = prepText(n);
       tempItems.push({ id: originalIndex++, code: code, p: p, n: n, step: step, minOrder: minOrder, sn: normalize(n),
-                       sp: spn, tk: spn.split(' '), sk: spn.replace(/ /g,'') });
+                       sp: spn, tk: spn.split(' ') });
     }
   }
   allItems = tempItems;
@@ -2090,8 +2166,9 @@ function processVoice(text){
   function matchAll(ws){
     var pw = prepText(ws.join(' ')).split(' ').filter(Boolean);
     if(!pw.length) return [];
-    var g = pw.map(function(w){ return [w]; });
-    return searchItems(g, false).length ? searchItems(g, false) : searchItems(g, true);
+    var v = buildVariants(pw);
+    var r = searchItems(v, false);
+    return r.length ? r : searchItems(v, true);
   }
   /* اول کلمه‌ها همان‌طور که گفته شد (مثل برند «سی کلاس»)، بعد با تبدیل عدد حرفی به رقم («دوازده رنگ» ← 12) */
   var words = res.rawWords, exact = matchAll(words);
